@@ -5,63 +5,49 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel) {
+fun LoginScreen(authViewModel: AuthViewModel = viewModel()) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
+
+    val state by authViewModel.uiState.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.padding(16.dp)
     ) {
-        Text("Zaloguj się", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
+        TextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Email") }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
+        TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Hasło") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Password") }
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if(email.isNotBlank() && password.isNotBlank()) {
-                    viewModel.email = email
-                    viewModel.password = password
-                    viewModel.login()
-                } else {
-                    error = "Wypełnij wszystkie pola"
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+                authViewModel.login(email, password)
+            }
         ) {
-            Text("Zaloguj")
+            Text("Login")
         }
 
-        if(error.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = error, color = MaterialTheme.colorScheme.error)
+        when (state) {
+            is AuthState.Loading -> Text("Loading...")
+            is AuthState.Success -> Text((state as AuthState.Success).message)
+            is AuthState.Error -> Text((state as AuthState.Error).message)
+            else -> {}
         }
     }
 }
+

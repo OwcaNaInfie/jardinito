@@ -1,52 +1,40 @@
 package pl.edu.pb.jardinito.viewmodel
 
+import AuthRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import pl.edu.pb.jardinito.data.model.LoginRequest
-import pl.edu.pb.jardinito.data.model.LoginResponse
-import pl.edu.pb.jardinito.data.model.RegisterRequest
-import pl.edu.pb.jardinito.data.model.RegisterResponse
-import pl.edu.pb.jardinito.data.remote.ApiService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class AuthViewModel(private val apiService: ApiService) : ViewModel() {
+class AuthViewModel : ViewModel() {
 
-    // --- pola logowania ---
-    var email: String = ""
-    var password: String = ""
-    // tymczasowy callback lub LiveData/StateFlow do obserwowania stanu logowania
-    var loginResult: LoginResponse? = null
-    // --- pola rejestracji ---
-    var registerUsername: String = ""
-    var registerEmail: String = ""
-    var registerPassword: String = ""
-    // wynik rejestracji (tymczasowy, można później LiveData/StateFlow)
-    var registerResult: RegisterResponse? = null
+    private val repository = AuthRepository()
 
-    fun register() {
+    private val _uiState = MutableStateFlow<AuthState>(AuthState.Idle)
+    val uiState: StateFlow<AuthState> = _uiState
+
+    fun login(email: String, password: String) {
         viewModelScope.launch {
+            _uiState.value = AuthState.Loading
             try {
-                val request = RegisterRequest(
-                    email = registerEmail,
-                    password = registerPassword,
-                    username = registerUsername
-                )
-                registerResult = apiService.register(request)
+                val response = repository.login(email, password)
+                _uiState.value = AuthState.Success(response.message)
             } catch (e: Exception) {
-                e.printStackTrace()
-                registerResult = null
+                _uiState.value = AuthState.Error("Login failed")
             }
         }
     }
 
-    fun login() {
+    fun register(username: String, email: String, password: String) {
         viewModelScope.launch {
+            _uiState.value = AuthState.Loading
             try {
-                val request = LoginRequest(email, password)
-                loginResult = apiService.login(request)
+                val response = repository.register(username, email, password)
+                _uiState.value = AuthState.Success(response.message)
             } catch (e: Exception) {
                 e.printStackTrace()
-                loginResult = null
+                _uiState.value = AuthState.Error(e.message ?: "Unknown error")
             }
         }
     }

@@ -5,74 +5,71 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun RegisterScreen(viewModel: AuthViewModel) {
+fun RegisterScreen(
+    authViewModel: AuthViewModel = viewModel()
+) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf("") }
+
+    val state by authViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+            .padding(16.dp)
     ) {
-        Text("Rejestracja", style = MaterialTheme.typography.headlineMedium)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
+        TextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Nazwa użytkownika") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Username") }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
+        TextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Email") }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
+        TextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Hasło") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Password") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if(username.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
-                    viewModel.registerUsername = username
-                    viewModel.registerEmail = email
-                    viewModel.registerPassword = password
-                    viewModel.register()
-                } else {
-                    error = "Wypełnij wszystkie pola"
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+                println("REGISTER CLICKED: $username $email $password")
+
+                authViewModel.register(
+                    username = username,
+                    email = email,
+                    password = password
+                )
+            }
         ) {
-            Text("Zarejestruj")
+            Text("Register")
         }
 
-        if(error.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = error, color = MaterialTheme.colorScheme.error)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        when (state) {
+            is AuthState.Loading -> Text("Loading...")
+            is AuthState.Success -> Text((state as AuthState.Success).message)
+            is AuthState.Error -> Text((state as AuthState.Error).message)
+            else -> {}
         }
     }
 }
