@@ -5,9 +5,10 @@ const bcrypt = require('bcryptjs');
 
 // Registration
 router.post('/register', async (req, res) => {
+    console.log("REGISTER BODY:", req.body);
     const { username, email, password } = req.body;
 
-    if(!email || !password || !username) {
+    if(!username || !password || !email) {
         return res.status(400).json({ message: 'Jardin: Username, email and password are required' });
     }
 

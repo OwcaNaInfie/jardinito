@@ -82,3 +82,44 @@ Kompilator wie, że stan może być TYLKO:
 26.12.25
 UI (Compose) → ViewModel → Retrofit → Express → MongoDB Atlas → odpowiedź → UI
 Rejestracja i Logowanie
+
+29.12.25
+29.12.25
+```agsl
+LaunchedEffect(state) {
+    if (state is AuthState.Success) {
+        onLoginSuccess()
+    }
+}
+```
+Compose reaguje na zmianę stanu.
+Gdy backend zwróci sukces → zmienia się uiState i UI automatycznie przechodzi dalej.
+
+To się nazywa: **state-driven navigation**
+
+### Folder "navigation"
+Zasada: „Group by feature, not by type”
+
+nie
+```agsl
+ui
+ ├── objects
+ ├── composables
+ ├── utils
+```
+tylko
+```agsl
+ui
+ ├── login
+ ├── register
+ ├── navigation
+
+```
+
+# Do zrobienia:
+- moduł tłumaczeń
+- walidacja inputów
+- informacja zwrotna przy wypełnianiu formularza
+- edytowalne konto uzytkownika
+- potwierdzenie rejestracji na email
+- rejestracja i logowanie przez gmail

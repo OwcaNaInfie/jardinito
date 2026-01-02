@@ -1,0 +1,25 @@
+<resources>
+
+    <string name="app_name">Jardinito</string>
+
+    <!-- Auth -->
+    <string name="login">Zaloguj się</string>
+    <string name="register">Zarejestruj się</string>
+    <string name="email">Email</string>
+    <string name="password">Hasło</string>
+    <string name="username">Nazwa użytkownika</string>
+
+    <string name="no_account">Nie masz konta? </string>
+    <string name="go_to_register">Zarejestruj się</string>
+    <string name="have_account">Masz już konto? </string>
+    <string name="go_to_login">Zaloguj się</string>
+
+    <!-- States -->
+    <string name="loading">Ładowanie…</string>
+    <string name="login_success">Logowanie udane</string>
+    <string name="register_success">Rejestracja udana</string>
+
+    <!-- Home Screen -->
+    <string name="welcome_message">Witaj w Jardinito 🌱</string>
+
+</resources>

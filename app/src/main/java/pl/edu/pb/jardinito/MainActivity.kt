@@ -2,9 +2,10 @@ package pl.edu.pb.jardinito
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import pl.edu.pb.jardinito.ui.screens.LoginScreen
-import pl.edu.pb.jardinito.ui.screens.RegisterScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import pl.edu.pb.jardinito.ui.navigation.AppNavGraph
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
+import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -12,9 +13,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JardinitoTheme {
-                LoginScreen()
-//                RegisterScreen()
+                val authViewModel: AuthViewModel = viewModel()
+                AppNavGraph(authViewModel)
             }
         }
+
     }
 }
