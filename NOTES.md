@@ -123,3 +123,7 @@ ui
 - edytowalne konto uzytkownika
 - potwierdzenie rejestracji na email
 - rejestracja i logowanie przez gmail
+
+484586685422-jtqr2pc4g8q4sbrg8higek83h7d4g6qf.apps.googleusercontent.com
+
+co to authrepository i api service

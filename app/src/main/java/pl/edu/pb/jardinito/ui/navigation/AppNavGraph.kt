@@ -3,6 +3,7 @@ package pl.edu.pb.jardinito.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,7 +18,8 @@ import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable
 fun AppNavGraph(
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    onGoogleSignInClick: () -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -54,7 +56,8 @@ fun AppNavGraph(
                     },
                     onRegisterClick = {
                         navController.navigate(Routes.REGISTER)
-                    }
+                    },
+                    onGoogleSignInClick = onGoogleSignInClick
                 )
             }
 
@@ -81,8 +84,20 @@ fun AppNavGraph(
             }
 
             composable(Routes.PROFILE) {
-                ProfileScreen()
+                val user by authViewModel.currentUser.collectAsState(initial = null)
+
+                ProfileScreen(
+                    user = user,
+                    onLogout = {
+                        authViewModel.logout()
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.HOME) { inclusive = true }
+                        }
+                    }
+                )
             }
+
+
         }
     }
 }

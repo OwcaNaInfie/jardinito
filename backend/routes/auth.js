@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const { OAuth2Client } = require('google-auth-library');
 
 // Registration
 router.post('/register', async (req, res) => {
@@ -52,9 +53,58 @@ router.post('/login', async (req, res) => {
       message: 'Jardin: Login successful',
       userId: user._id,
       email: user.email,
+      username: user.username,
     });
   } catch (error) {
     res.status(500).json({ message: 'Jardin: Server error' });
+  }
+});
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+router.post('/google', async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ message: 'Missing idToken' });
+  }
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const email = payload.email;
+    const username = payload.name;
+    const googleId = payload.sub;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        username,
+        email,
+        password: null,
+        provider: 'google',
+        googleId,
+      });
+
+      await user.save();
+    }
+
+    res.status(200).json({
+      message: 'Jardin: Google login successful',
+      email: user.email,
+      username: user.username,
+      userId: user._id,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(401).json({ message: 'Invalid Google token' });
   }
 });
 

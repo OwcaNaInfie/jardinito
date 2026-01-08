@@ -10,6 +10,11 @@ class AuthRepository {
         )
     }
 
+    suspend fun loginWithGoogle(idToken: String): AuthResponse {
+        return RetrofitInstance.api.loginWithGoogle(mapOf("idToken" to idToken))
+    }
+
+
     suspend fun register(username: String, email: String, password: String): AuthResponse {
         return RetrofitInstance.api.register(
             RegisterRequest(username, email, password)
