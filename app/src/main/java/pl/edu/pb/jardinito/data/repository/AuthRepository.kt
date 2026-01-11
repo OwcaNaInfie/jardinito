@@ -1,4 +1,5 @@
 import pl.edu.pb.jardinito.data.model.AuthResponse
+import pl.edu.pb.jardinito.data.model.GoogleLoginRequest
 import pl.edu.pb.jardinito.data.model.LoginRequest
 import pl.edu.pb.jardinito.data.model.RegisterRequest
 
@@ -10,10 +11,11 @@ class AuthRepository {
         )
     }
 
-    suspend fun loginWithGoogle(idToken: String): AuthResponse {
-        return RetrofitInstance.api.loginWithGoogle(mapOf("idToken" to idToken))
+    suspend fun googleLogin(idToken: String): AuthResponse {
+        return RetrofitInstance.api.googleLogin(
+            GoogleLoginRequest(idToken)
+        )
     }
-
 
     suspend fun register(username: String, email: String, password: String): AuthResponse {
         return RetrofitInstance.api.register(

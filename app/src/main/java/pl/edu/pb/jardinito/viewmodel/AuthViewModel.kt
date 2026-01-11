@@ -46,15 +46,28 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = AuthState.Loading
             try {
-                val response = repository.loginWithGoogle(idToken)
-                _currentUser.value = User(username = response.username!!, email = response.email!!)
+                val response = repository.googleLogin(idToken)
+
+                val email = response.email
+                val username = response.username
+
+                if (email == null || username == null) {
+                    _uiState.value = AuthState.Error("Invalid Google response")
+                    return@launch
+                }
+
+                _currentUser.value = User(
+                    email = email,
+                    username = username
+                )
+
                 _uiState.value = AuthState.Success(response.message)
+
             } catch (e: Exception) {
                 _uiState.value = AuthState.Error("Google login failed")
             }
         }
     }
-
 
     fun register(username: String, email: String, password: String) {
         viewModelScope.launch {

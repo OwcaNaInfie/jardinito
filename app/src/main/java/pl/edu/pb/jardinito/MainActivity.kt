@@ -23,21 +23,19 @@ class MainActivity : ComponentActivity() {
         // Tworzymy ViewModel przez ViewModelProvider
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
-        // Launcher dla Google Sign-In
         val googleSignInLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)
-                    val idToken = account?.idToken
+                    val idToken = account.idToken
+
                     if (idToken != null) {
-                        // Przekazujemy token do ViewModelu, który wywoła backend
                         authViewModel.loginWithGoogle(idToken)
-                    } else {
-                        Log.e("JARDINITO", "Google ID Token is null")
                     }
                 } catch (e: ApiException) {
-                    Log.e("JARDINITO", "Google sign in failed", e)
+                    Log.e("JARDINITO", "Google sign-in failed", e)
                 }
             }
 
@@ -48,7 +46,7 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel,
                     onGoogleSignInClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_id)) // Twój client ID Androida
+                            .requestIdToken(getString(R.string.default_web_client_id)) // client ID Androida
                             .requestEmail()
                             .build()
 

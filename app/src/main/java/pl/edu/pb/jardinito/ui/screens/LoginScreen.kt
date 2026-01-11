@@ -70,7 +70,6 @@ fun LoginScreen(
             Text("Sign in with Google")
         }
 
-
         when (state) {
             is AuthState.Loading -> Text(text = stringResource(R.string.loading))
             is AuthState.Error ->
