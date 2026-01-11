@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Jardinito</string>
+
+    <string name="default_web_client_id" translatable="false">484586685422-of3ru5lnn9hprfmp9sbo7mpk78f5n6g8.apps.googleusercontent.com</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="email">Email</string>

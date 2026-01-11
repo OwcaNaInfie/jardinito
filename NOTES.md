@@ -116,10 +116,21 @@ ui
 
 ```
 
+## Gmail Login
+- LoginScreen.kt - wyświetla przycisk „Sign in with Google”, wywołuje callback przekazany z NavGraph
+- AppNavGraph.kt – przekazanie akcji w dół, zero logiki, tylko routing zdarzeń, przekazuje onGoogleSignInClick do LoginScreen
+- MainActivity.kt – Google Sign-In (Android), konfiguruje Google Sign-In odpala popup Google odbiera ID TOKEN
+- AuthViewModel.kt – logika aplikacji: przyjmuje idToken woła backend ustawia AuthState
+- AuthRepository.kt – komunikacja z backendem, wysyła idToken do backendu (Retrofit)
+- Backend /auth/google – prawdziwe logowanie weryfikuje idToken u Google sprawdza sub (unikalne ID użytkownika)tworzy użytkownika (jeśli nowy)zwraca użytkownika + JWT JEDYNE miejsce, które ufa Google
+
 # Do zrobienia:
 - moduł tłumaczeń
 - walidacja inputów
 - informacja zwrotna przy wypełnianiu formularza
 - edytowalne konto uzytkownika
 - potwierdzenie rejestracji na email
-- rejestracja i logowanie przez gmail
+
+484586685422-jtqr2pc4g8q4sbrg8higek83h7d4g6qf.apps.googleusercontent.com
+
+co to authrepository i api service

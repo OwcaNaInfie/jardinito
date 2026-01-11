@@ -20,7 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun LoginScreen(
     authViewModel: AuthViewModel,
     onLoginSuccess: () -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -62,6 +63,12 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { onGoogleSignInClick() }
+        ) {
+            Text("Sign in with Google")
+        }
 
         when (state) {
             is AuthState.Loading -> Text(text = stringResource(R.string.loading))
