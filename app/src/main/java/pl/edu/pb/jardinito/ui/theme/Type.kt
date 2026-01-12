@@ -8,27 +8,92 @@ import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+
+    // B1 Bottom (48)
+    displayLarge = TextStyle(
+        fontFamily = ComingSoon,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 48.sp,
+        lineHeight = 48.sp
+    ),
+
+    // T1 Timer (36)
+    displaySmall = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 36.sp,
+        lineHeight = 36.sp
+    ),
+
+    // H1 Heading (32)
+    headlineLarge = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 32.sp
+    ),
+
+    // H2 Heading (20)
+    headlineMedium = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        lineHeight = 20.sp
+    ),
+
+    // L1 Label (24)
+    titleLarge = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 24.sp,
+        lineHeight = 24.sp
+    ),
+
+    // Body1 (15)
+    bodyLarge = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+        lineHeight = 15.sp
+    ),
+
+    // Body2 (12)
+    bodyMedium = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+    ),
+
+    // C1 / C2 Calendar
+    bodySmall = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 18.sp
+    ),
+
+    // B1 Button
+    labelLarge = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+        lineHeight = 15.sp
+    ),
+
+    // B2 Button
+    labelMedium = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+        lineHeight = 15.sp
+    ),
+
+    // B3 Button
+    labelSmall = TextStyle(
+        fontFamily = ComingSoon,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp,
+        lineHeight = 13.sp
     )
-    */
 )
