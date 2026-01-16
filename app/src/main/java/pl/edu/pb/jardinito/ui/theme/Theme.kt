@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = AppColors.Primary300,
+    primary = AppColors.SecondaryYellow,
     secondary = AppColors.SecondaryBlue,
     background = AppColors.NeutralDark,
     surface = AppColors.NeutralDark,
@@ -22,7 +22,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = AppColors.Primary300,
+    primary = AppColors.SecondaryYellow,
     secondary = AppColors.SecondaryBlue,
     background = AppColors.NeutralLight,
     surface = AppColors.NeutralWhite,
@@ -39,7 +39,7 @@ private val LightColorScheme = lightColorScheme(
 fun JardinitoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

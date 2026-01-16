@@ -1,13 +1,26 @@
 package pl.edu.pb.jardinito.ui.screens
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import pl.edu.pb.jardinito.R
 
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 
 @Composable
 fun HomeScreen() {
@@ -22,49 +35,49 @@ fun HomeScreen() {
         // ===== TYPOGRAPHY =====
 
         Text(
-            text = "Display Large – Lorem ipsum dolor sit amet",
+            text = "Display",
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.primary
         )
 
         Text(
-            text = "Headline Large – Lorem ipsum dolor sit amet",
+            text = "Headline Large",
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.secondary
         )
 
         Text(
-            text = "Headline Medium – Lorem ipsum dolor sit amet",
+            text = "Headline Medium",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "Title Large – Lorem ipsum dolor sit amet",
+            text = "Title Large",
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary
         )
 
         Text(
-            text = "Body Large – Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            text = "Body Large",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "Body Medium – Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            text = "Body Medium",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "Label Large – Lorem ipsum",
+            text = "Label Large",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.secondary
         )
 
         Text(
-            text = "Label Medium – Lorem ipsum",
+            text = "Label Medium",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.error
         )
@@ -116,3 +129,13 @@ fun ColorPreview(
     }
 }
 
+@Preview(
+    showBackground = true,
+    apiLevel = 34
+)
+@Composable
+fun HomeScreenPreview() {
+    JardinitoTheme {
+        HomeScreen()
+    }
+}
