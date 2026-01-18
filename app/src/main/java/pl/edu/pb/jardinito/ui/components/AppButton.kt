@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.R
@@ -79,6 +80,7 @@ fun AppButton(
     iconVector: ImageVector? = null,
     size: ButtonSize = ButtonSize.Medium,
     variant: ButtonVariant = ButtonVariant.Primary,
+    enabled: Boolean = true,
 
     // ===== CIRCLE =====
     circle: Boolean = false,
@@ -90,18 +92,36 @@ fun AppButton(
     val sizeTokens = buttonSizeTokens(size)
 
     // ===== KOLORY =====
-    val buttonColors = ButtonDefaults.buttonColors(
-        containerColor = buttonColor ?: when (variant) {
-            ButtonVariant.Primary -> colors.primary100
-            ButtonVariant.Secondary -> colors.primary300
-            ButtonVariant.Tertiary -> colors.primary900
-        },
-        contentColor = iconColor ?: when (variant) {
-            ButtonVariant.Primary -> colors.primary300
-            ButtonVariant.Secondary -> colors.primary50
-            ButtonVariant.Tertiary -> colors.neutralDark
+    @Composable
+    fun buttonColors(
+        variant: ButtonVariant,
+        enabled: Boolean,
+        buttonColor: Color?,
+        iconColor: Color?
+    ): ButtonColors {
+        return if (enabled) {
+            ButtonDefaults.buttonColors(
+                containerColor = buttonColor ?: when (variant) {
+                    ButtonVariant.Primary -> colors.primary100
+                    ButtonVariant.Secondary -> colors.primary300
+                    ButtonVariant.Tertiary -> colors.primary900
+                },
+                contentColor = iconColor ?: when (variant) {
+                    ButtonVariant.Primary -> colors.primary300
+                    ButtonVariant.Secondary -> colors.primary50
+                    ButtonVariant.Tertiary -> colors.neutralDark
+                }
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = colors.primary50,
+                contentColor = colors.primary100,
+                disabledContainerColor = colors.primary50,
+                disabledContentColor = colors.primary100
+            )
         }
-    )
+    }
+
 
     // ===== MODIFIER =====
     val buttonModifier = modifier
@@ -116,7 +136,13 @@ fun AppButton(
 
     Button(
         onClick = onClick,
-        colors = buttonColors,
+        enabled = enabled,
+        colors = buttonColors(
+            variant = variant,
+            enabled = enabled,
+            buttonColor = buttonColor,
+            iconColor = iconColor
+        ),
         shape = sizeTokens.shape,
         contentPadding = if (circle) PaddingValues(0.dp) else sizeTokens.padding,
         modifier = buttonModifier
@@ -177,6 +203,13 @@ fun AppButtonPreviews() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AppButton(
+                text = "Continue",
+                size = ButtonSize.Medium,
+                variant = ButtonVariant.Primary,
+                enabled = false,
+                onClick = {}
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AppButton(
@@ -230,13 +263,6 @@ fun AppButtonPreviews() {
                     onClick = {}
                 )
 
-                AppButton(
-                    iconVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    size = ButtonSize.Medium,
-                    variant = ButtonVariant.Secondary,
-                    onClick = {}
-                )
-
                 // ===== CIRCLE =====
                 AppButton(
                     iconRes = R.drawable.arrow_left,
@@ -249,16 +275,24 @@ fun AppButtonPreviews() {
                     iconRes = R.drawable.arrow_left,
                     size = ButtonSize.Medium,
                     circle = true,
-                    buttonColor = Color.Magenta,
-                    iconColor = Color.White,
+                    buttonColor = colors.primary100,
+                    iconColor = Color.Unspecified,
                     onClick = {}
                 )
 
                 AppButton(
                     iconVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    size = ButtonSize.Medium,
+                    size = ButtonSize.Large,
                     circle = true,
-                    buttonColor = Color.Magenta,
+                    buttonColor = colors.primary500,
+                    iconColor = Color.White,
+                    onClick = {}
+                )
+                AppButton(
+                    iconVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    size = ButtonSize.Max,
+                    circle = true,
+                    buttonColor = colors.primary500,
                     iconColor = Color.White,
                     onClick = {}
                 )
