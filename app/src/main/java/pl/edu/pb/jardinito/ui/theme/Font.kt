@@ -35,3 +35,14 @@ val ComicNeue = FontFamily(
         style = FontStyle.Italic
     )
 )
+
+val MountainsOfChristmas = FontFamily(
+    Font(
+        resId = R.font.mountains_of_christmas_regular,
+        weight = FontWeight.Normal
+    ),
+    Font(
+        resId = R.font.mountains_of_christmas_bold,
+        weight = FontWeight.Bold
+    )
+)

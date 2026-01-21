@@ -5,10 +5,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import pl.edu.pb.jardinito.ui.screens.OnboardingScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
 import pl.edu.pb.jardinito.ui.screens.LoginScreen
 import pl.edu.pb.jardinito.ui.screens.RegisterScreen
@@ -22,7 +24,7 @@ fun AppNavGraph(
     onGoogleSignInClick: () -> Unit
 ) {
     val navController = rememberNavController()
-
+    val actions = remember(navController) { NavActions(navController) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -42,21 +44,21 @@ fun AppNavGraph(
 
         NavHost(
             navController = navController,
-            startDestination = Routes.LOGIN,
+            startDestination = Routes.ONBOARDING,
             modifier = androidx.compose.ui.Modifier.padding(paddingValues)
         ) {
+            composable(Routes.ONBOARDING) {
+                OnboardingScreen(
+                    onLoginClick = actions.toLogin,
+                    onRegisterClick = actions.toRegister
+                )
+            }
 
             composable(Routes.LOGIN) {
                 LoginScreen(
                     authViewModel = authViewModel,
-                    onLoginSuccess = {
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
-                    },
-                    onRegisterClick = {
-                        navController.navigate(Routes.REGISTER)
-                    },
+                    onLoginSuccess = actions.toHomeFromLogin,
+                    onRegisterClick = actions.toRegister,
                     onGoogleSignInClick = onGoogleSignInClick
                 )
             }
@@ -64,14 +66,8 @@ fun AppNavGraph(
             composable(Routes.REGISTER) {
                 RegisterScreen(
                     authViewModel = authViewModel,
-                    onRegisterSuccess = {
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(Routes.REGISTER) { inclusive = true }
-                        }
-                    },
-                    onLoginClick = {
-                        navController.navigate(Routes.LOGIN)
-                    }
+                    onRegisterSuccess = actions.toHomeFromRegister,
+                    onLoginClick = actions.toLogin,
                 )
             }
 
@@ -96,8 +92,6 @@ fun AppNavGraph(
                     }
                 )
             }
-
-
         }
     }
 }

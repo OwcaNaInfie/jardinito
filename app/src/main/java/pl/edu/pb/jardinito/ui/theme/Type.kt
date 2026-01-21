@@ -10,10 +10,10 @@ val Typography = Typography(
 
     // B1 Bottom (48)
     displayLarge = TextStyle(
-        fontFamily = ComicNeue,
-        fontWeight = FontWeight.Normal,
-        fontSize = 48.sp,
-        lineHeight = 48.sp
+        fontFamily = MountainsOfChristmas,
+        fontWeight = FontWeight.Bold,
+        fontSize = 80.sp,
+        lineHeight = 80.sp
     ),
 
     // T1 Timer (36)
@@ -83,7 +83,7 @@ val Typography = Typography(
     // B2 Button
     labelMedium = TextStyle(
         fontFamily = ComicNeue,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 20.sp
     ),

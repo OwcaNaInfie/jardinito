@@ -289,11 +289,11 @@ fun AppButtonPreviews() {
                     onClick = {}
                 )
                 AppButton(
-                    iconVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    iconRes = R.drawable.google,
                     size = ButtonSize.Max,
                     circle = true,
                     buttonColor = colors.primary500,
-                    iconColor = Color.White,
+                    iconColor = Color.Unspecified,
                     onClick = {}
                 )
             }
