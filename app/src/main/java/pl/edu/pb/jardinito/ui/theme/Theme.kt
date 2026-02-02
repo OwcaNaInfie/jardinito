@@ -53,6 +53,9 @@ fun JardinitoTheme(
         secondaryCream  = AppColors.SecondaryCream,
         secondaryYellow = AppColors.SecondaryYellow,
         neutralDark  = AppColors.NeutralDark,
+        neutralBlack = AppColors.NeutralGray,
+        neutralGray = AppColors.NeutralGray,
+        neutralLightGray = AppColors.NeutralLightGray,
         neutralLight = AppColors.NeutralLight,
         neutralWhite = AppColors.NeutralWhite,
         error = AppColors.Error

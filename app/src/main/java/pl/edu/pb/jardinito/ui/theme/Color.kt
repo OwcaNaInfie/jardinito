@@ -24,14 +24,14 @@ object AppColors {
        Neutral colours
        ====================== */
     val NeutralDark  = Color(0xFF29351F)
+    val NeutralBlack = Color(0xFF010101)
+    val NeutralGray = Color(0xFF232227)
+    val NeutralLightGray = Color(0xFF3B3B3F)
     val NeutralLight = Color(0xFFF8F8F8)
     val NeutralWhite = Color(0xFFFFFFFF)
+
     /* ======================
        Semantic colours
        ====================== */
     val Error = Color(0xFFFF5B29)
 }
-
-//#010101
-//#232227
-//#3b3b3f

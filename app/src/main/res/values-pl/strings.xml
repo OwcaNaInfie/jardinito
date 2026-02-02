@@ -8,6 +8,7 @@
     <string name="email">Email</string>
     <string name="password">Hasło</string>
     <string name="username">Nazwa użytkownika</string>
+    <string name="or">lub</string>
 
     <string name="no_account">Nie masz konta? </string>
     <string name="go_to_register">Zarejestruj się</string>

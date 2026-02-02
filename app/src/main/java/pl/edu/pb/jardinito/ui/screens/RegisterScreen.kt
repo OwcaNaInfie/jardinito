@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import pl.edu.pb.jardinito.ui.theme.colors
 
 @Composable
 fun RegisterScreen(
@@ -91,14 +92,13 @@ fun RegisterScreen(
         ) {
             Text(text = stringResource(R.string.have_account))
 
-            Text(
-                text = stringResource(R.string.go_to_login),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    onLoginClick()
-                }
-            )
+            TextButton(onClick = onLoginClick) {
+                Text(
+                    text = stringResource(R.string.go_to_login),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))

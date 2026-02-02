@@ -107,7 +107,7 @@ private fun OnboardingScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = screenHeight * 0.6f)
+                .offset(y = screenHeight * 0.45f)
                 .graphicsLayer { alpha = buttonsAlpha },
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -153,7 +153,7 @@ private fun rememberOnboardingAnimations(
     )
 
     val titleOffsetY by animateFloatAsState(
-        targetValue = if (moveTitle) screenHeight.value * 0.2f else screenHeight.value * 0.5f,
+        targetValue = if (moveTitle) screenHeight.value * 0.27f else screenHeight.value * 0.5f,
         animationSpec = tween(durationMillis = 2000),
         label = "titleOffset"
     )
@@ -223,17 +223,17 @@ private fun rememberOnboardingAnimations(
 //    }
 //}
 //
-//@Preview(showBackground = true, apiLevel = 34)
-//@Composable
-//fun OnboardingPreviewFinal() {
-//    JardinitoTheme {
-//        OnboardingScreenContent(
-//            showTitle = true,
-//            moveTitle = true,
-//            showBackground = true,
-//            showButtons = true,
-//            onLoginClick = {},
-//            onRegisterClick = {}
-//        )
-//    }
-//}
+@Preview(showBackground = true, apiLevel = 34)
+@Composable
+fun OnboardingPreviewFinal() {
+    JardinitoTheme {
+        OnboardingScreenContent(
+            showTitle = true,
+            moveTitle = true,
+            showBackground = true,
+            showButtons = true,
+            onLoginClick = {},
+            onRegisterClick = {}
+        )
+    }
+}
