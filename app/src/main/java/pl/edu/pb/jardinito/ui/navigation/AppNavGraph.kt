@@ -68,6 +68,7 @@ fun AppNavGraph(
                     authViewModel = authViewModel,
                     onRegisterSuccess = actions.toHomeFromRegister,
                     onLoginClick = actions.toLogin,
+                    onGoogleSignInClick = onGoogleSignInClick
                 )
             }
 

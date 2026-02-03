@@ -33,6 +33,7 @@ data class AppColorPalette(
        Semantic colours
        ====================== */
     val error : Color,
+    val transparent : Color
 )
 
 val LocalAppColors = staticCompositionLocalOf {
@@ -54,5 +55,6 @@ val LocalAppColors = staticCompositionLocalOf {
         neutralLight = Color.Unspecified,
         neutralWhite = Color.Unspecified,
         error = Color.Unspecified,
+        transparent = Color.Unspecified
     )
 }

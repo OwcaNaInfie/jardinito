@@ -5,7 +5,6 @@ import pl.edu.pb.jardinito.R
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -20,7 +19,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.sp
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.ui.components.AppButton
@@ -72,9 +70,7 @@ fun LoginScreenContent(
     val emailError = if (showErrors) validateEmail(email) else null
     val passwordError = if (showErrors) validatePassword(password) else null
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val containerHeight = maxHeight * 3 / 5
-
+    Box(modifier = Modifier.fillMaxSize()) {
         // TŁO
         Image(
             painter = painterResource(R.drawable.onboarding_bg),
@@ -86,7 +82,6 @@ fun LoginScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(containerHeight)
                 .align(Alignment.BottomCenter)
                 .background(
                     color = colors.primary100,
@@ -99,10 +94,10 @@ fun LoginScreenContent(
             // =====================
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
@@ -122,7 +117,7 @@ fun LoginScreenContent(
                     required = true,
                     validator = ::validatePassword,
                     keyboardType = KeyboardType.Password,
-                    visualTransformation = PasswordVisualTransformation()
+                    isPassword = true
                 )
 
                 AppButton(
@@ -174,14 +169,16 @@ fun LoginScreenContent(
             ) {
                 Text(
                     text = stringResource(R.string.no_account),
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                TextButton(onClick = onRegisterClick) {
+                TextButton(
+                    onClick = onRegisterClick,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
                     Text(
                         text = stringResource(R.string.go_to_register),
                         color = colors.secondaryBlue,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
@@ -189,21 +186,21 @@ fun LoginScreenContent(
     }
 }
 
-//@Preview(
-//    showBackground = true,
-//    apiLevel = 34
-//)
-//@Composable
-//fun LoginScreenPreview() {
-//    JardinitoTheme {
-//        LoginScreenContent(
-//            state = AuthState.Idle,
-//            onLoginClick = { _, _ -> },
-//            onRegisterClick = {},
-//            onGoogleSignInClick = {}
-//        )
-//    }
-//}
+@Preview(
+    showBackground = true,
+    apiLevel = 34
+)
+@Composable
+fun LoginScreenPreview() {
+    JardinitoTheme {
+        LoginScreenContent(
+            state = AuthState.Idle,
+            onLoginClick = { _, _ -> },
+            onRegisterClick = {},
+            onGoogleSignInClick = {}
+        )
+    }
+}
 
 //@Preview(
 //    name = "Loading",

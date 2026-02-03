@@ -58,7 +58,8 @@ fun JardinitoTheme(
         neutralLightGray = AppColors.NeutralLightGray,
         neutralLight = AppColors.NeutralLight,
         neutralWhite = AppColors.NeutralWhite,
-        error = AppColors.Error
+        error = AppColors.Error,
+        transparent = AppColors.Transparent
     )
 
     val colorScheme = when {

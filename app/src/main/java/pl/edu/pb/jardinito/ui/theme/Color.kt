@@ -34,4 +34,6 @@ object AppColors {
        Semantic colours
        ====================== */
     val Error = Color(0xFFFF5B29)
+    val Transparent = Color(0x00000000)
+
 }

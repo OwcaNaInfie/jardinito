@@ -10,10 +10,10 @@
     <string name="username">Nazwa użytkownika</string>
     <string name="or">lub</string>
 
-    <string name="no_account">Nie masz konta? </string>
-    <string name="go_to_register">Zarejestruj się</string>
-    <string name="have_account">Masz już konto? </string>
-    <string name="go_to_login">Zaloguj się</string>
+    <string name="no_account">Nie masz konta?</string>
+    <string name="go_to_register"> Zarejestruj się</string>
+    <string name="have_account">Masz już konto?</string>
+    <string name="go_to_login"> Zaloguj się</string>
 
     <!-- States -->
     <string name="loading">Ładowanie…</string>
@@ -22,5 +22,12 @@
 
     <!-- Home Screen -->
     <string name="welcome_message">Witaj w Jardinito 🌱</string>
+
+    <!-- Validators -->
+    <string name="validator_email_blank">Email jest wymagany.</string>
+    <string name="validator_email_invalid">Niepoprawny adres email.</string>
+    <string name="validator_password_blank">Password jest wymagane.</string>
+    <string name="validator_password_regex">Musi zawierać wielką literę, cyfrę i znak specjalny.</string>
+    <string name="validator_password_lenght">Hasło musi mieć długość min 8 znaków.</string>
 
 </resources>

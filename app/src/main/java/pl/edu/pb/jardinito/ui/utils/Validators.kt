@@ -1,15 +1,29 @@
 package pl.edu.pb.jardinito.ui.utils
 
-fun validateEmail(email: String): String? {
-    if (email.isBlank()) return "Email is required"
-    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
-        return "Invalid email address"
+import android.util.Patterns
+import androidx.annotation.StringRes
+import pl.edu.pb.jardinito.R
+
+private val PASSWORD_REGEX =
+    Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$")
+
+@StringRes
+fun validateEmail(email: String): Int? {
+    if (email.isBlank()) return R.string.validator_email_blank
+    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())
+        return R.string.validator_email_invalid
     return null
 }
 
-fun validatePassword(password: String): String? {
-    if (password.isBlank()) return "Password is required"
+@StringRes
+fun validatePassword(password: String): Int? {
+    if (password.isBlank())
+        return R.string.validator_password_blank
+
+    if (!PASSWORD_REGEX.matches(password))
+        return R.string.validator_password_regex
+
     if (password.length < 8)
-        return "Password must be at least 8 characters"
+        return R.string.validator_password_lenght
     return null
 }
