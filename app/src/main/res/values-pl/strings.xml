@@ -28,6 +28,9 @@
     <string name="validator_email_invalid">Niepoprawny adres email.</string>
     <string name="validator_password_blank">Password jest wymagane.</string>
     <string name="validator_password_regex">Musi zawierać wielką literę, cyfrę i znak specjalny.</string>
-    <string name="validator_password_lenght">Hasło musi mieć długość min 8 znaków.</string>
+    <string name="validator_password_length">Hasło musi mieć długość min 8 znaków.</string>
+    <string name="repeat_password">Powtórz hasło</string>
+    <string name="validator_repeated_password_invalid">Hasła nie są takie same</string>
+    <string name="validator_repeated_password_blank">Powtórz hasło</string>
 
 </resources>

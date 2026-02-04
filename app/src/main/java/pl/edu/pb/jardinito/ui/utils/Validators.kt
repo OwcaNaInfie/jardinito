@@ -19,11 +19,18 @@ fun validateEmail(email: String): Int? {
 fun validatePassword(password: String): Int? {
     if (password.isBlank())
         return R.string.validator_password_blank
-
+    if (password.length < 8)
+        return R.string.validator_password_length
     if (!PASSWORD_REGEX.matches(password))
         return R.string.validator_password_regex
+    return null
+}
 
-    if (password.length < 8)
-        return R.string.validator_password_lenght
+@StringRes
+fun validateRepeatedPassword(password: String, repeatedPassword: String): Int? {
+    if (repeatedPassword.isBlank())
+        return R.string.validator_repeated_password_blank
+    if (repeatedPassword != password)
+        return R.string.validator_repeated_password_invalid
     return null
 }

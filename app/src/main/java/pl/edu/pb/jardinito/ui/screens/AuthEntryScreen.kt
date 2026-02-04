@@ -13,6 +13,7 @@ import pl.edu.pb.jardinito.ui.components.AuthBottomSheet
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import androidx.compose.material3.rememberModalBottomSheetState
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthEntryScreen(
     authViewModel: AuthViewModel,
@@ -23,14 +24,26 @@ fun AuthEntryScreen(
     var sheetContent by remember { mutableStateOf<AuthSheetState?>(null) }
     val scope = rememberCoroutineScope()
 
-    fun switchSheet(target: AuthSheetState) {
-        scope.launch {
-            sheetContent =
-                null
-            delay(300)
-            sheetContent = target
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+//    fun switchSheet(target: AuthSheetState) {
+//        scope.launch {
+//            sheetContent =
+//                null
+//            delay(300)
+//            sheetContent = target
+//        }
+//    }
+fun switchSheet(target: AuthSheetState) {
+    scope.launch {
+        if (sheetContent != null) {
+            sheetState.hide()   // animacja zamknięcia
+            delay(300)          // poczekaj, aż animacja się skończy
         }
+        sheetContent = target
+        sheetState.show()      // animacja otwarcia
     }
+}
 
     Box(modifier = Modifier.fillMaxSize()) {
         // =====================

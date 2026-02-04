@@ -36,6 +36,7 @@ import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validatePassword
+import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
@@ -74,6 +75,8 @@ fun RegisterScreenContent(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var repeatedPassword by remember { mutableStateOf("") }
+
     var showErrors by remember { mutableStateOf(false) }
 
     val emailError = if (showErrors) validateEmail(email) else null
@@ -110,6 +113,16 @@ fun RegisterScreenContent(
             required = true,
             validator = ::validatePassword,
             isPassword = true
+        )
+
+        FormTextField(
+            label = stringResource(R.string.repeat_password),
+            value = repeatedPassword,
+            onValueChange = { repeatedPassword = it },
+            required = true,
+            isPassword = true,
+            valueEnteredPassword = password,
+            validatorRepeatedPassword = ::validateRepeatedPassword
         )
 
         AppButton(

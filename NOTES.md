@@ -153,4 +153,4 @@ AuthEntryScreen → decyduje co pokazać
 AuthBottomSheet → tylko kontener
 Login/Register → jedyne miejsca użycia ViewModelu
 
-
+Disabled button jeśli inputy są złe
