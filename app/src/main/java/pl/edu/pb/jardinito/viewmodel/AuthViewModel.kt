@@ -19,12 +19,17 @@ class AuthViewModel : ViewModel() {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
 
+    // =====================
+    // AUTH ACTIONS
+    // =====================
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthState.Loading
             try {
                 val response = repository.login(email, password)
                 Log.d("JARDINITO", "DEBUG login response: $response")
+
                 val username = response.username
                 val userEmail = response.email
 
@@ -33,9 +38,13 @@ class AuthViewModel : ViewModel() {
                     return@launch
                 }
 
-                _currentUser.value = User(username = username, email = userEmail)
+                _currentUser.value = User(
+                    username = username,
+                    email = userEmail
+                )
 
                 _uiState.value = AuthState.Success(response.message)
+
             } catch (e: Exception) {
                 _uiState.value = AuthState.Error("Login failed")
             }
@@ -83,9 +92,13 @@ class AuthViewModel : ViewModel() {
                     return@launch
                 }
 
-                _currentUser.value = User(username = usernameResp, email = userEmail)
+                _currentUser.value = User(
+                    username = usernameResp,
+                    email = userEmail
+                )
 
                 _uiState.value = AuthState.Success(response.message)
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.value = AuthState.Error(e.message ?: "Unknown error")

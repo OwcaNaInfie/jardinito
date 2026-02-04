@@ -1,35 +1,41 @@
 package pl.edu.pb.jardinito.ui.screens
-import androidx.compose.foundation.background
-import pl.edu.pb.jardinito.R
-
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import pl.edu.pb.jardinito.viewmodel.AuthState
-import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.AppButton
 import pl.edu.pb.jardinito.ui.components.ButtonSize
 import pl.edu.pb.jardinito.ui.components.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
-import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validatePassword
-
+import pl.edu.pb.jardinito.viewmodel.AuthState
+import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
@@ -48,9 +54,7 @@ fun LoginScreen(
 
     LoginScreenContent(
         state = state,
-        onLoginClick = { email, password ->
-            authViewModel.login(email, password)
-        },
+        onLoginClick = { email, password -> authViewModel.login(email, password) },
         onRegisterClick = onRegisterClick,
         onGoogleSignInClick = onGoogleSignInClick
     )
@@ -70,135 +74,90 @@ fun LoginScreenContent(
     val emailError = if (showErrors) validateEmail(email) else null
     val passwordError = if (showErrors) validatePassword(password) else null
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // TŁO
-        Image(
-            painter = painterResource(R.drawable.onboarding_bg),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        FormTextField(
+            label = stringResource(R.string.email),
+            value = email,
+            onValueChange = { email = it },
+            required = true,
+            validator = ::validateEmail,
+            keyboardType = KeyboardType.Email
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .background(
-                    color = colors.primary100,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                )
-        ) {
+        FormTextField(
+            label = stringResource(R.string.password),
+            value = password,
+            onValueChange = { password = it },
+            required = true,
+            validator = ::validatePassword,
+            isPassword = true
+        )
 
-            // =====================
-            // SCROLLOWANA TREŚĆ
-            // =====================
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                FormTextField(
-                    label = stringResource(R.string.email),
-                    value = email,
-                    onValueChange = { email = it },
-                    required = true,
-                    validator = ::validateEmail,
-                    keyboardType = KeyboardType.Email
-                )
-
-                FormTextField(
-                    label = stringResource(R.string.password),
-                    value = password,
-                    onValueChange = { password = it },
-                    required = true,
-                    validator = ::validatePassword,
-                    keyboardType = KeyboardType.Password,
-                    isPassword = true
-                )
-
-                AppButton(
-                    text = stringResource(R.string.login),
-                    size = ButtonSize.Max,
-                    variant = ButtonVariant.Tertiary,
-                    onClick = {
-                        showErrors = true
-                        if (emailError == null && passwordError == null) {
-                            onLoginClick(email, password)
-                        }
-                    }
-                )
-
-                Text(
-                    text = stringResource(R.string.or),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.neutralBlack
-                )
-
-                AppButton(
-                    iconRes = R.drawable.google,
-                    size = ButtonSize.Large,
-                    circle = true,
-                    buttonColor = colors.primary50,
-                    iconColor = Color.Unspecified,
-                    onClick = onGoogleSignInClick
-                )
-
-                when (state) {
-                    is AuthState.Loading -> CircularProgressIndicator()
-                    is AuthState.Error -> Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    else -> {}
+        AppButton(
+            text = stringResource(R.string.login),
+            size = ButtonSize.Max,
+            variant = ButtonVariant.Tertiary,
+            onClick = {
+                showErrors = true
+                if (emailError == null && passwordError == null) {
+                    onLoginClick(email, password)
                 }
             }
+        )
 
-            // =====================
-            // STOPKA (BEZ SCROLLA)
-            // =====================
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+        Text(
+            text = stringResource(R.string.or),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.neutralBlack
+        )
+
+        AppButton(
+            iconRes = R.drawable.google,
+            size = ButtonSize.Large,
+            circle = true,
+            buttonColor = colors.primary50,
+            iconColor = Color.Unspecified,
+            onClick = onGoogleSignInClick
+        )
+
+        when (state) {
+            is AuthState.Loading -> CircularProgressIndicator()
+            is AuthState.Error -> Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error
+            )
+            else -> {}
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.no_account),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(
+                onClick = onRegisterClick,
+                contentPadding = PaddingValues(2.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.no_account),
+                    text = stringResource(R.string.go_to_register),
+                    color = colors.secondaryBlue,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                TextButton(
-                    onClick = onRegisterClick,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.go_to_register),
-                        color = colors.secondaryBlue,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
             }
         }
-    }
-}
-
-@Preview(
-    showBackground = true,
-    apiLevel = 34
-)
-@Composable
-fun LoginScreenPreview() {
-    JardinitoTheme {
-        LoginScreenContent(
-            state = AuthState.Idle,
-            onLoginClick = { _, _ -> },
-            onRegisterClick = {},
-            onGoogleSignInClick = {}
-        )
     }
 }
 

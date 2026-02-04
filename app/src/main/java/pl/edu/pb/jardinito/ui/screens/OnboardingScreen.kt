@@ -20,18 +20,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.data.model.AuthSheetState
 import pl.edu.pb.jardinito.ui.components.AppButton
 import pl.edu.pb.jardinito.ui.components.ButtonSize
 import pl.edu.pb.jardinito.ui.components.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
-// PUBLIC SCREEN
 @Composable
 fun OnboardingScreen(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
-) {
+    ) {
     var showTitle by remember { mutableStateOf(false) }
     var moveTitle by remember { mutableStateOf(false) }
     var showBackground by remember { mutableStateOf(false) }
@@ -65,6 +66,7 @@ private fun OnboardingScreenContent(
     showButtons: Boolean,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
+
 ) {
     BoxWithConstraints(
         modifier = Modifier

@@ -143,3 +143,14 @@ Na jutro:
 
 Jeżeli ekran kończy „flow” (login, register, onboarding),
 to NAWIGACJA POWINNA CZYŚCIĆ BACKSTACK
+
+input hasła w logowaniu nie powinien przechodzić weryfikacji regexem tylko zgodności z BE
+klikanie na napis na dole powinno trigerrować zamykanie i otwieranie szuflady na nowo
+
+
+Onboarding → tylko UI + eventy
+AuthEntryScreen → decyduje co pokazać
+AuthBottomSheet → tylko kontener
+Login/Register → jedyne miejsca użycia ViewModelu
+
+

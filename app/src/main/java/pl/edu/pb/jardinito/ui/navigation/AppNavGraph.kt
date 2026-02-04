@@ -10,10 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import pl.edu.pb.jardinito.ui.screens.OnboardingScreen
+import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
-import pl.edu.pb.jardinito.ui.screens.LoginScreen
-import pl.edu.pb.jardinito.ui.screens.RegisterScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
@@ -44,30 +42,14 @@ fun AppNavGraph(
 
         NavHost(
             navController = navController,
-            startDestination = Routes.ONBOARDING,
+            startDestination = Routes.ENTRY,
             modifier = androidx.compose.ui.Modifier.padding(paddingValues)
         ) {
-            composable(Routes.ONBOARDING) {
-                OnboardingScreen(
-                    onLoginClick = actions.toLogin,
-                    onRegisterClick = actions.toRegister
-                )
-            }
-
-            composable(Routes.LOGIN) {
-                LoginScreen(
-                    authViewModel = authViewModel,
-                    onLoginSuccess = actions.toHomeFromLogin,
-                    onRegisterClick = actions.toRegister,
-                    onGoogleSignInClick = onGoogleSignInClick
-                )
-            }
-
-            composable(Routes.REGISTER) {
-                RegisterScreen(
+            composable(Routes.ENTRY) {
+                AuthEntryScreen(
                     authViewModel = authViewModel,
                     onRegisterSuccess = actions.toHomeFromRegister,
-                    onLoginClick = actions.toLogin,
+                    onLoginSuccess = actions.toHomeFromLogin,
                     onGoogleSignInClick = onGoogleSignInClick
                 )
             }
@@ -87,7 +69,7 @@ fun AppNavGraph(
                     user = user,
                     onLogout = {
                         authViewModel.logout()
-                        navController.navigate(Routes.LOGIN) {
+                        navController.navigate(Routes.ENTRY) {
                             popUpTo(Routes.HOME) { inclusive = true }
                         }
                     }
