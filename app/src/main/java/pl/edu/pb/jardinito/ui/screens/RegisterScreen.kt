@@ -1,29 +1,46 @@
 package pl.edu.pb.jardinito.ui.screens
-import pl.edu.pb.jardinito.R
 
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.FormTextField
+import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
+import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RegisterScreen(
-    authViewModel: AuthViewModel = viewModel(),
+    authViewModel: AuthViewModel,
     onRegisterSuccess: () -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     val state by authViewModel.uiState.collectAsState()
 
     LaunchedEffect(state) {
@@ -32,90 +49,155 @@ fun RegisterScreen(
         }
     }
 
+    RegisterScreenContent(
+        authViewModel = authViewModel,
+        state = state,
+        onRegisterClick = { username, email, password ->
+            authViewModel.register(username, email, password)
+        },
+        onLoginClick = onLoginClick,
+        onGoogleSignInClick = onGoogleSignInClick
+    )
+}
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+fun RegisterScreenContent(
+    authViewModel: AuthViewModel,
+    state: AuthState,
+    onRegisterClick: (String, String, String) -> Unit,
+    onLoginClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit
+) {
+    val form by authViewModel.formState.collectAsState()
+
+    // Form validation – do włączania submit button
+    val formValid = listOf(
+        form.usernameError,
+        form.emailError,
+        form.passwordError,
+        form.repeatedPasswordError
+    ).all { it == null }
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text(text = stringResource(R.string.username)) }
+        FormTextField(
+            label = stringResource(R.string.username),
+            value = form.username,
+            onValueChange = { authViewModel.onUsernameChanged(it) },
+            required = true,
+            errorRes = form.usernameError,
+            isValid = form.usernameIsValid
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text(text = stringResource(R.string.email) ) }
+        FormTextField(
+            label = stringResource(R.string.email),
+            value = form.email,
+            onValueChange = { authViewModel.onEmailChanged(it) },
+            required = true,
+            errorRes = form.emailError,
+            isValid = form.emailIsValid
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(text = stringResource(R.string.password)) }
+        FormTextField(
+            label = stringResource(R.string.password),
+            value = form.password,
+            onValueChange = { authViewModel.onPasswordChanged(it) },
+            required = true,
+            errorRes = form.passwordError,
+            isPassword = true,
+            isValid = form.passwordIsValid
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        FormTextField(
+            label = stringResource(R.string.repeat_password),
+            value = form.repeatedPassword,
+            onValueChange = { authViewModel.onRepeatedPasswordChanged(it) },
+            required = true,
+            errorRes = form.repeatedPasswordError,
+            isPassword = true,
+            isValid = form.repeatedPasswordIsValid
+        )
 
-        Button(
+
+
+        AppButton(
+            text = stringResource(R.string.register),
+            size = ButtonSize.Max,
+            variant = ButtonVariant.Tertiary,
+            enabled = formValid,
             onClick = {
-                println("REGISTER CLICKED: $username $email $password")
-
-                authViewModel.register(
-                    username = username,
-                    email = email,
-                    password = password
-                )
+                    onRegisterClick(form.username, form.email, form.password)
             }
-        ) {
-            Text(text = stringResource(R.string.register))
-        }
+        )
+//        AppButton(
+//            text = "TEST 400",
+//            onClick = { authViewModel.testRegister400() }
+//        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.or),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.neutralBlack
+        )
+
+        AppButton(
+            iconRes = R.drawable.google,
+            size = ButtonSize.Large,
+            circle = true,
+            buttonColor = colors.primary50,
+            iconColor = Color.Unspecified,
+            onClick = onGoogleSignInClick
+        )
 
         when (state) {
-            is AuthState.Loading -> Text(text = stringResource(R.string.loading) )
-            is AuthState.Success -> Text((state as AuthState.Success).message)
-            is AuthState.Error -> Text((state as AuthState.Error).message)
+            is AuthState.Loading -> CircularProgressIndicator()
+            is AuthState.Error -> Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error
+            )
             else -> {}
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(R.string.have_account))
-
             Text(
-                text = stringResource(R.string.go_to_login),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    onLoginClick()
-                }
+                text = stringResource(R.string.have_account),
+                style = MaterialTheme.typography.bodyMedium
             )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (state) {
-            is AuthState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-            is AuthState.Error -> {
+            TextButton(
+                onClick = onLoginClick,
+                contentPadding = PaddingValues(2.dp)
+            ) {
                 Text(
-                    text = (state as AuthState.Error).message,
-                    color = MaterialTheme.colorScheme.error
+                    text = stringResource(R.string.go_to_login),
+                    color = colors.secondaryBlue,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
-            else -> {}
         }
     }
 }
+
+//@Preview(showBackground = true, apiLevel = 34)
+//@Composable
+//fun RegisterScreenPreview() {
+//    JardinitoTheme {
+//        RegisterScreenContent(
+//            state = AuthState.Idle,
+//            onRegisterClick = { _, _, _ -> },
+//            onLoginClick = {},
+//            onGoogleSignInClick = {}
+//        )
+//    }
+//}

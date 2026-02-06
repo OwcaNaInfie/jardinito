@@ -1,20 +1,41 @@
 package pl.edu.pb.jardinito.ui.screens
-import pl.edu.pb.jardinito.R
-
-import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import pl.edu.pb.jardinito.ui.navigation.Routes
+import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.FormTextField
+import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.ui.utils.validateEmail
+import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(
@@ -23,9 +44,6 @@ fun LoginScreen(
     onRegisterClick: () -> Unit,
     onGoogleSignInClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     val state by authViewModel.uiState.collectAsState()
 
     LaunchedEffect(state) {
@@ -34,80 +52,143 @@ fun LoginScreen(
         }
     }
 
+    LoginScreenContent(
+        state = state,
+        onLoginClick = { email, password -> authViewModel.login(email, password) },
+        onRegisterClick = onRegisterClick,
+        onGoogleSignInClick = onGoogleSignInClick
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    state: AuthState,
+    onLoginClick: (String, String) -> Unit,
+    onRegisterClick: () -> Unit,
+    onGoogleSignInClick: () -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var showErrors by remember { mutableStateOf(false) }
+
+    val emailError = if (showErrors) validateEmail(email) else null
+    val passwordError = if (showErrors) validatePassword(password) else null
+
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        TextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text(text = stringResource(R.string.email)) }
-        )
+//        FormTextField(
+//            label = stringResource(R.string.email),
+//            value = email,
+//            onValueChange = { email = it },
+//            required = true,
+//            validator = ::validateEmail,
+//            keyboardType = KeyboardType.Email
+//        )
+//
+//        FormTextField(
+//            label = stringResource(R.string.password),
+//            value = password,
+//            onValueChange = { password = it },
+//            required = true,
+//            validator = ::validatePassword,
+//            isPassword = true
+//        )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text(text = stringResource(R.string.password)) }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
+        AppButton(
+            text = stringResource(R.string.login),
+            size = ButtonSize.Max,
+            variant = ButtonVariant.Tertiary,
             onClick = {
-                authViewModel.login(email, password)
+                showErrors = true
+                if (emailError == null && passwordError == null) {
+                    onLoginClick(email, password)
+                }
             }
-        ) {
-            Text(text = stringResource(R.string.login))
-        }
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.or),
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.neutralBlack
+        )
 
-        Button(
-            onClick = { onGoogleSignInClick() }
-        ) {
-            Text("Sign in with Google")
-        }
+        AppButton(
+            iconRes = R.drawable.google,
+            size = ButtonSize.Large,
+            circle = true,
+            buttonColor = colors.primary50,
+            iconColor = Color.Unspecified,
+            onClick = onGoogleSignInClick
+        )
 
         when (state) {
-            is AuthState.Loading -> Text(text = stringResource(R.string.loading))
-            is AuthState.Error ->
-                Text((state as AuthState.Error).message)
+            is AuthState.Loading -> CircularProgressIndicator()
+            is AuthState.Error -> Text(
+                text = state.message,
+                color = MaterialTheme.colorScheme.error
+            )
             else -> {}
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = stringResource(R.string.no_account))
-
             Text(
-                text = stringResource(R.string.go_to_register),
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable {
-                    onRegisterClick()
-                }
+                text = stringResource(R.string.no_account),
+                style = MaterialTheme.typography.bodyMedium
             )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (state) {
-            is AuthState.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-            is AuthState.Error -> {
+            TextButton(
+                onClick = onRegisterClick,
+                contentPadding = PaddingValues(2.dp)
+            ) {
                 Text(
-                    text = (state as AuthState.Error).message,
-                    color = MaterialTheme.colorScheme.error
+                    text = stringResource(R.string.go_to_register),
+                    color = colors.secondaryBlue,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
-            else -> {}
         }
     }
 }
+
+//@Preview(
+//    name = "Loading",
+//    showBackground = true,
+//    apiLevel = 34)
+//@Composable
+//fun LoginLoadingPreview() {
+//    JardinitoTheme {
+//        LoginScreenContent(
+//            state = AuthState.Loading,
+//            onLoginClick = { _, _ -> },
+//            onRegisterClick = {},
+//            onGoogleSignInClick = {}
+//        )
+//    }
+//}
+//
+//@Preview(
+//    showBackground = true,
+//    apiLevel = 34,
+//    name = "Error")
+//@Composable
+//fun LoginErrorPreview() {
+//    JardinitoTheme {
+//        LoginScreenContent(
+//            state = AuthState.Error("Invalid credentials"),
+//            onLoginClick = { _, _ -> },
+//            onRegisterClick = {},
+//            onGoogleSignInClick = {}
+//        )
+//    }
+//}

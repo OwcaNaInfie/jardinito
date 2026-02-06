@@ -134,3 +134,25 @@ ui
 484586685422-jtqr2pc4g8q4sbrg8higek83h7d4g6qf.apps.googleusercontent.com
 
 co to authrepository i api service
+
+Na jutro:
+- inputy i informacje pod nimi
+- ekran onboardingu
+- ostylować logowanie i rejestrację
+- upewnić się że zostaję zalogowana na urządzeniu
+
+Jeżeli ekran kończy „flow” (login, register, onboarding),
+to NAWIGACJA POWINNA CZYŚCIĆ BACKSTACK
+
+
+Onboarding → tylko UI + eventy
+AuthEntryScreen → decyduje co pokazać
+AuthBottomSheet → tylko kontener
+Login/Register → jedyne miejsca użycia ViewModelu
+
+
+# TODO
+input hasła w logowaniu nie powinien przechodzić weryfikacji regexem tylko zgodności z BE
+weryfikacja poprawności danych przez backend przed rejestracją.
+Wyczyszczenie formularza po przejściu do ekranu głównego
+sprawdzenie formularza bez frontendowej walidacji

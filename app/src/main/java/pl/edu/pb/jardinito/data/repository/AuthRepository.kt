@@ -5,6 +5,25 @@ import pl.edu.pb.jardinito.data.model.RegisterRequest
 
 class AuthRepository {
 
+    //    Register Form Validation
+    suspend fun isUsernameAvailable(username: String): Boolean {
+        return try {
+            RetrofitInstance.api.checkUsername(username).usernameAvailable
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun isEmailAvailable(email: String): Boolean {
+        return try {
+            RetrofitInstance.api.checkEmail(email).emailAvailable
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     suspend fun login(email: String, password: String): AuthResponse {
         return RetrofitInstance.api.login(
             LoginRequest(email, password)
