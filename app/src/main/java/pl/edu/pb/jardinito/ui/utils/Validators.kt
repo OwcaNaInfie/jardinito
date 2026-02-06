@@ -8,6 +8,12 @@ private val PASSWORD_REGEX =
     Regex("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$")
 
 @StringRes
+fun validateUsername(username: String): Int? {
+    if (username.isBlank()) return R.string.validator_blank
+    return null
+}
+
+@StringRes
 fun validateEmail(email: String): Int? {
     if (email.isBlank()) return R.string.validator_email_blank
     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches())

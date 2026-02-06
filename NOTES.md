@@ -152,6 +152,7 @@ Login/Register → jedyne miejsca użycia ViewModelu
 
 
 # TODO
-Disabled button jeśli inputy są złe
 input hasła w logowaniu nie powinien przechodzić weryfikacji regexem tylko zgodności z BE
-zapisywanie stanu formularza w sytuacji przełączania między logowaniem a rejestracją
+weryfikacja poprawności danych przez backend przed rejestracją.
+Wyczyszczenie formularza po przejściu do ekranu głównego
+sprawdzenie formularza bez frontendowej walidacji

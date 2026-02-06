@@ -83,23 +83,23 @@ fun LoginScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        FormTextField(
-            label = stringResource(R.string.email),
-            value = email,
-            onValueChange = { email = it },
-            required = true,
-            validator = ::validateEmail,
-            keyboardType = KeyboardType.Email
-        )
-
-        FormTextField(
-            label = stringResource(R.string.password),
-            value = password,
-            onValueChange = { password = it },
-            required = true,
-            validator = ::validatePassword,
-            isPassword = true
-        )
+//        FormTextField(
+//            label = stringResource(R.string.email),
+//            value = email,
+//            onValueChange = { email = it },
+//            required = true,
+//            validator = ::validateEmail,
+//            keyboardType = KeyboardType.Email
+//        )
+//
+//        FormTextField(
+//            label = stringResource(R.string.password),
+//            value = password,
+//            onValueChange = { password = it },
+//            required = true,
+//            validator = ::validatePassword,
+//            isPassword = true
+//        )
 
         AppButton(
             text = stringResource(R.string.login),

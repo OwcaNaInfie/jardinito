@@ -32,5 +32,8 @@
     <string name="repeat_password">Powtórz hasło</string>
     <string name="validator_repeated_password_invalid">Hasła nie są takie same</string>
     <string name="validator_repeated_password_blank">Powtórz hasło</string>
+    <string name="username_taken">Username zajęty</string>
+    <string name="email_taken">Email jest już w uzyciu</string>
+    <string name="validator_blank">Pole nie może być puste</string>
 
 </resources>

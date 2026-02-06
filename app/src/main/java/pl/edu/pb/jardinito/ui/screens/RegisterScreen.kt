@@ -1,5 +1,6 @@
 package pl.edu.pb.jardinito.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,14 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -34,9 +31,6 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.ui.utils.validateEmail
-import pl.edu.pb.jardinito.ui.utils.validatePassword
-import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
@@ -56,6 +50,7 @@ fun RegisterScreen(
     }
 
     RegisterScreenContent(
+        authViewModel = authViewModel,
         state = state,
         onRegisterClick = { username, email, password ->
             authViewModel.register(username, email, password)
@@ -65,33 +60,24 @@ fun RegisterScreen(
     )
 }
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun RegisterScreenContent(
+    authViewModel: AuthViewModel,
     state: AuthState,
     onRegisterClick: (String, String, String) -> Unit,
     onLoginClick: () -> Unit,
     onGoogleSignInClick: () -> Unit
 ) {
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var repeatedPassword by remember { mutableStateOf("") }
+    val form by authViewModel.formState.collectAsState()
 
-    val emailError = validateEmail(email)
-    val passwordError = validatePassword(password)
-
-//    val isUsernameValid = usernameError == null
-    val isEmailValid = emailError == null
-    val isPasswordValid = passwordError == null
-//    val isRepeatPasswordValid = repeatPasswordError == null
-
+    // Form validation – do włączania submit button
     val formValid = listOf(
-//        usernameError,
-        emailError,
-        passwordError,
-//        repeatPasswordError
+        form.usernameError,
+        form.emailError,
+        form.passwordError,
+        form.repeatedPasswordError
     ).all { it == null }
-
 
     Column(
         modifier = Modifier
@@ -101,40 +87,45 @@ fun RegisterScreenContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         FormTextField(
             label = stringResource(R.string.username),
-            value = username,
-            onValueChange = { username = it },
-            required = true
+            value = form.username,
+            onValueChange = { authViewModel.onUsernameChanged(it) },
+            required = true,
+            errorRes = form.usernameError,
+            isValid = form.usernameIsValid
         )
 
         FormTextField(
             label = stringResource(R.string.email),
-            value = email,
-            onValueChange = { email = it },
+            value = form.email,
+            onValueChange = { authViewModel.onEmailChanged(it) },
             required = true,
-            validator = ::validateEmail
+            errorRes = form.emailError,
+            isValid = form.emailIsValid
         )
 
         FormTextField(
             label = stringResource(R.string.password),
-            value = password,
-            onValueChange = { password = it },
+            value = form.password,
+            onValueChange = { authViewModel.onPasswordChanged(it) },
             required = true,
-            validator = ::validatePassword,
-            isPassword = true
+            errorRes = form.passwordError,
+            isPassword = true,
+            isValid = form.passwordIsValid
         )
 
         FormTextField(
             label = stringResource(R.string.repeat_password),
-            value = repeatedPassword,
-            onValueChange = { repeatedPassword = it },
+            value = form.repeatedPassword,
+            onValueChange = { authViewModel.onRepeatedPasswordChanged(it) },
             required = true,
+            errorRes = form.repeatedPasswordError,
             isPassword = true,
-            valueEnteredPassword = password,
-            validatorRepeatedPassword = ::validateRepeatedPassword
+            isValid = form.repeatedPasswordIsValid
         )
+
+
 
         AppButton(
             text = stringResource(R.string.register),
@@ -142,11 +133,13 @@ fun RegisterScreenContent(
             variant = ButtonVariant.Tertiary,
             enabled = formValid,
             onClick = {
-                if (emailError == null && passwordError == null) {
-                    onRegisterClick(username, email, password)
-                }
+                    onRegisterClick(form.username, form.email, form.password)
             }
         )
+//        AppButton(
+//            text = "TEST 400",
+//            onClick = { authViewModel.testRegister400() }
+//        )
 
         Text(
             text = stringResource(R.string.or),
@@ -196,15 +189,15 @@ fun RegisterScreenContent(
     }
 }
 
-@Preview(showBackground = true, apiLevel = 34)
-@Composable
-fun RegisterScreenPreview() {
-    JardinitoTheme {
-        RegisterScreenContent(
-            state = AuthState.Idle,
-            onRegisterClick = { _, _, _ -> },
-            onLoginClick = {},
-            onGoogleSignInClick = {}
-        )
-    }
-}
+//@Preview(showBackground = true, apiLevel = 34)
+//@Composable
+//fun RegisterScreenPreview() {
+//    JardinitoTheme {
+//        RegisterScreenContent(
+//            state = AuthState.Idle,
+//            onRegisterClick = { _, _, _ -> },
+//            onLoginClick = {},
+//            onGoogleSignInClick = {}
+//        )
+//    }
+//}

@@ -6,6 +6,47 @@ const { OAuth2Client } = require('google-auth-library');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Register form Validation
+// Check if username is available
+router.get('/check-username', async (req, res) => {
+  try {
+    const { username } = req.query;
+    console.log("CHECK USERNAME RAW:", username);
+
+    if (!username) {
+      return res.status(400).json({ message: 'Username query param is required' });
+    }
+
+    const user = await User.findOne({ username });
+    console.log("USER FOUND:", user ? user.username : null);
+    const usernameAvailable = !user;
+
+    res.status(200).json({ usernameAvailable });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Check if email is available
+router.get('/check-email', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email query param is required' });
+    }
+
+    const user = await User.findOne({ email });
+    const emailAvailable = !user;
+
+    res.status(200).json({ emailAvailable });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Registration
 router.post('/register', async (req, res) => {
     console.log("REGISTER BODY:", req.body);
@@ -26,7 +67,12 @@ router.post('/register', async (req, res) => {
         const newUser = new User({ username, email, password: hashedPassword });
         await newUser.save();
 
-        res.status(201).json({ message: 'Jardin: User created' });
+        res.status(201).json({
+            message: 'Jardin: User created',
+            email: newUser.email,
+            username: newUser.username,
+            userId: newUser._id,
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Jardin: Server error' });
