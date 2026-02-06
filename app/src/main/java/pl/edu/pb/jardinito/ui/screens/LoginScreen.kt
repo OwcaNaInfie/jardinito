@@ -27,9 +27,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.ui.components.AppButton
-import pl.edu.pb.jardinito.ui.components.ButtonSize
-import pl.edu.pb.jardinito.ui.components.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.validateEmail

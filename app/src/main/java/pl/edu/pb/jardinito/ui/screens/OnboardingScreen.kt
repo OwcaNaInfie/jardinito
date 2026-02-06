@@ -20,13 +20,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.AuthSheetState
-import pl.edu.pb.jardinito.ui.components.AppButton
-import pl.edu.pb.jardinito.ui.components.ButtonSize
-import pl.edu.pb.jardinito.ui.components.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable
 fun OnboardingScreen(

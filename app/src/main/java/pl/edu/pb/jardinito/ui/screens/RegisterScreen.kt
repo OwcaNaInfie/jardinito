@@ -28,9 +28,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.ui.components.AppButton
-import pl.edu.pb.jardinito.ui.components.ButtonSize
-import pl.edu.pb.jardinito.ui.components.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
@@ -77,10 +77,21 @@ fun RegisterScreenContent(
     var password by remember { mutableStateOf("") }
     var repeatedPassword by remember { mutableStateOf("") }
 
-    var showErrors by remember { mutableStateOf(false) }
+    val emailError = validateEmail(email)
+    val passwordError = validatePassword(password)
 
-    val emailError = if (showErrors) validateEmail(email) else null
-    val passwordError = if (showErrors) validatePassword(password) else null
+//    val isUsernameValid = usernameError == null
+    val isEmailValid = emailError == null
+    val isPasswordValid = passwordError == null
+//    val isRepeatPasswordValid = repeatPasswordError == null
+
+    val formValid = listOf(
+//        usernameError,
+        emailError,
+        passwordError,
+//        repeatPasswordError
+    ).all { it == null }
+
 
     Column(
         modifier = Modifier
@@ -129,8 +140,8 @@ fun RegisterScreenContent(
             text = stringResource(R.string.register),
             size = ButtonSize.Max,
             variant = ButtonVariant.Tertiary,
+            enabled = formValid,
             onClick = {
-                showErrors = true
                 if (emailError == null && passwordError == null) {
                     onRegisterClick(username, email, password)
                 }

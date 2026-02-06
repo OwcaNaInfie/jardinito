@@ -1,76 +1,31 @@
-package pl.edu.pb.jardinito.ui.components
+package pl.edu.pb.jardinito.ui.components.appButton
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.R
 
-// ===== ENUMY =====
-enum class ButtonSize { Small, Medium, Large, Max }
-enum class ButtonVariant { Primary, Secondary, Tertiary }
-
-// ===== TOKENY ROZMIARU =====
-data class ButtonSizeTokens(
-    val padding: PaddingValues,
-    val textStyle: TextStyle,
-    val shape: RoundedCornerShape,
-    val iconSize: Dp,
-    val height: Dp,
-    val fullWidth: Boolean = false
-)
-
-@Composable
-fun buttonSizeTokens(size: ButtonSize): ButtonSizeTokens {
-    return when (size) {
-        ButtonSize.Small -> ButtonSizeTokens(
-            padding = PaddingValues(horizontal = 16.dp),
-            textStyle = MaterialTheme.typography.labelSmall,
-            shape = RoundedCornerShape(50.dp),
-            iconSize = 16.dp,
-            height = 30.dp
-        )
-
-        ButtonSize.Medium -> ButtonSizeTokens(
-            padding = PaddingValues(horizontal = 56.dp),
-            textStyle = MaterialTheme.typography.labelMedium,
-            shape = RoundedCornerShape(50.dp),
-            iconSize = 24.dp,
-            height = 48.dp
-        )
-
-        ButtonSize.Large -> ButtonSizeTokens(
-            padding = PaddingValues(horizontal = 80.dp),
-            textStyle = MaterialTheme.typography.labelLarge,
-            shape = RoundedCornerShape(16.dp),
-            iconSize = 24.dp,
-            height = 56.dp
-        )
-
-        ButtonSize.Max -> ButtonSizeTokens(
-            padding = PaddingValues(horizontal = 16.dp),
-            textStyle = MaterialTheme.typography.labelLarge,
-            shape = RoundedCornerShape(6.dp),
-            iconSize = 24.dp,
-            height = 48.dp,
-            fullWidth = true
-        )
-    }
-}
-
-// ===== KOMPONENT =====
 @Composable
 fun AppButton(
     modifier: Modifier = Modifier,
@@ -90,38 +45,6 @@ fun AppButton(
 ) {
     val sizeTokens = buttonSizeTokens(size)
 
-    // ===== KOLORY =====
-    @Composable
-    fun buttonColors(
-        variant: ButtonVariant,
-        enabled: Boolean,
-        buttonColor: Color?,
-        iconColor: Color?
-    ): ButtonColors {
-        return if (enabled) {
-            ButtonDefaults.buttonColors(
-                containerColor = buttonColor ?: when (variant) {
-                    ButtonVariant.Primary -> colors.primary100
-                    ButtonVariant.Secondary -> colors.primary300
-                    ButtonVariant.Tertiary -> colors.primary900
-                },
-                contentColor = iconColor ?: when (variant) {
-                    ButtonVariant.Primary -> colors.primary300
-                    ButtonVariant.Secondary -> colors.primary50
-                    ButtonVariant.Tertiary -> colors.neutralDark
-                }
-            )
-        } else {
-            ButtonDefaults.buttonColors(
-                containerColor = colors.primary50,
-                contentColor = colors.primary100,
-                disabledContainerColor = colors.primary50,
-                disabledContentColor = colors.primary100
-            )
-        }
-    }
-
-
     // ===== MODIFIER =====
     val buttonModifier = modifier
         .height(sizeTokens.height)
@@ -138,7 +61,6 @@ fun AppButton(
         enabled = enabled,
         colors = buttonColors(
             variant = variant,
-            enabled = enabled,
             buttonColor = buttonColor,
             iconColor = iconColor
         ),
