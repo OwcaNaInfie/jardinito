@@ -35,5 +35,7 @@
     <string name="username_taken">Username zajęty</string>
     <string name="email_taken">Email jest już w uzyciu</string>
     <string name="validator_blank">Pole nie może być puste</string>
+    <string name="email_or_username">Email lub username</string>
+    <string name="validator_username_email_pattern">Username nie może być w formie email</string>
 
 </resources>

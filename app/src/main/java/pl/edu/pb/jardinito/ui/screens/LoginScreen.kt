@@ -17,14 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -32,8 +28,6 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.ui.utils.validateEmail
-import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.viewmodel.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
@@ -56,23 +50,21 @@ fun LoginScreen(
         state = state,
         onLoginClick = { email, password -> authViewModel.login(email, password) },
         onRegisterClick = onRegisterClick,
-        onGoogleSignInClick = onGoogleSignInClick
+        onGoogleSignInClick = onGoogleSignInClick,
+        authViewModel = authViewModel
     )
 }
 
 @Composable
 fun LoginScreenContent(
+    authViewModel: AuthViewModel,
     state: AuthState,
     onLoginClick: (String, String) -> Unit,
     onRegisterClick: () -> Unit,
     onGoogleSignInClick: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var showErrors by remember { mutableStateOf(false) }
 
-    val emailError = if (showErrors) validateEmail(email) else null
-    val passwordError = if (showErrors) validatePassword(password) else null
+    val form by authViewModel.loginFormState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -83,34 +75,28 @@ fun LoginScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-//        FormTextField(
-//            label = stringResource(R.string.email),
-//            value = email,
-//            onValueChange = { email = it },
-//            required = true,
-//            validator = ::validateEmail,
-//            keyboardType = KeyboardType.Email
-//        )
-//
-//        FormTextField(
-//            label = stringResource(R.string.password),
-//            value = password,
-//            onValueChange = { password = it },
-//            required = true,
-//            validator = ::validatePassword,
-//            isPassword = true
-//        )
+        FormTextField(
+            label = stringResource(R.string.email_or_username),
+            value = form.loginIdentifier,
+            required = true,
+            onValueChange = { authViewModel.onLoginIdentifierChanged(it) },
+            errorRes = form.loginIdentifierError
+        )
+
+        FormTextField(
+            label = stringResource(R.string.password),
+            value = form.loginPassword,
+            required = true,
+            onValueChange = { authViewModel.onLoginPasswordChanged(it) },
+            errorRes = form.loginPasswordError,
+            isPassword = true,
+        )
 
         AppButton(
             text = stringResource(R.string.login),
             size = ButtonSize.Max,
             variant = ButtonVariant.Tertiary,
-            onClick = {
-                showErrors = true
-                if (emailError == null && passwordError == null) {
-                    onLoginClick(email, password)
-                }
-            }
+            onClick = { authViewModel.submitLogin() }
         )
 
         Text(

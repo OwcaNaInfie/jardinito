@@ -69,7 +69,7 @@ fun RegisterScreenContent(
     onLoginClick: () -> Unit,
     onGoogleSignInClick: () -> Unit
 ) {
-    val form by authViewModel.formState.collectAsState()
+    val form by authViewModel.registerFormState.collectAsState()
 
     // Form validation – do włączania submit button
     val formValid = listOf(
@@ -124,8 +124,6 @@ fun RegisterScreenContent(
             isPassword = true,
             isValid = form.repeatedPasswordIsValid
         )
-
-
 
         AppButton(
             text = stringResource(R.string.register),

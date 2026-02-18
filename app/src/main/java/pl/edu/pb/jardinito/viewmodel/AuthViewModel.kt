@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.data.model.LoginFormState
 import pl.edu.pb.jardinito.model.User
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.data.model.RegisterFormState
+import pl.edu.pb.jardinito.ui.utils.validateIsBlank
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
-import pl.edu.pb.jardinito.ui.utils.validateUsername
 import retrofit2.HttpException
 
 class AuthViewModel : ViewModel() {
@@ -29,18 +30,27 @@ class AuthViewModel : ViewModel() {
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser
 
-    private val _formState = MutableStateFlow(RegisterFormState())
-    val formState: StateFlow<RegisterFormState> = _formState
+    private val _registerFormState = MutableStateFlow(RegisterFormState())
+    val registerFormState: StateFlow<RegisterFormState> = _registerFormState
+
+    private val _loginFormState = MutableStateFlow(LoginFormState())
+    val loginFormState: StateFlow<LoginFormState> = _loginFormState
 
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
     private var passwordJob: Job? = null
     private var repeatedPasswordJob: Job? = null
 
-    private inline fun updateForm(
+    private inline fun updateRegisterForm(
         block: RegisterFormState.() -> RegisterFormState
     ) {
-        _formState.update { it.block() }
+        _registerFormState.update { it.block() }
+    }
+
+    private inline fun updateLoginForm(
+        block: LoginFormState.() -> LoginFormState
+    ) {
+        _loginFormState.update { it.block() }
     }
 
     fun testRegister400() {
@@ -60,14 +70,14 @@ class AuthViewModel : ViewModel() {
 
 
     fun onUsernameChanged(username: String) {
-        updateForm { copy(username = username, usernameTouched = true) }
+        updateRegisterForm { copy(username = username, usernameTouched = true) }
 
         usernameJob?.cancel()
         usernameJob = viewModelScope.launch {
             delay(500)
-            val frontendError = validateUsername(username)
+            val frontendError = validateIsBlank(username)
 
-            updateForm {
+            updateRegisterForm {
                 copy(
                     username = username,
                     usernameError = frontendError,
@@ -82,14 +92,14 @@ class AuthViewModel : ViewModel() {
     }
 
     fun onEmailChanged(email: String) {
-        updateForm { copy(email = email, emailTouched = true) }
+        updateRegisterForm { copy(email = email, emailTouched = true) }
 
         emailJob?.cancel()
         emailJob = viewModelScope.launch {
             delay(500)
             val frontendError = validateEmail(email)
 
-            updateForm {
+            updateRegisterForm {
                 copy(
                     email = email,
                     emailError = frontendError,
@@ -104,14 +114,14 @@ class AuthViewModel : ViewModel() {
     }
 
     fun onPasswordChanged(password: String) {
-        updateForm { copy(password = password, passwordTouched = true) }
+        updateRegisterForm { copy(password = password, passwordTouched = true) }
 
         passwordJob?.cancel()
         passwordJob = viewModelScope.launch {
             delay(500)
             val frontendError = validatePassword(password)
 
-            updateForm {
+            updateRegisterForm {
                 copy(
                     password = password,
                     passwordTouched = true,
@@ -123,15 +133,15 @@ class AuthViewModel : ViewModel() {
     }
 
     fun onRepeatedPasswordChanged(repeated: String) {
-        updateForm { copy(repeatedPassword = repeated, repeatedPasswordTouched = true) }
+        updateRegisterForm { copy(repeatedPassword = repeated, repeatedPasswordTouched = true) }
 
         repeatedPasswordJob?.cancel()
         repeatedPasswordJob = viewModelScope.launch {
             delay(500)
-        val password = _formState.value.password
+        val password = _registerFormState.value.password
         val frontendError = validateRepeatedPassword(password, repeated)
 
-        updateForm {
+        updateRegisterForm {
             copy(
                 repeatedPassword = repeated,
                 repeatedPasswordError = frontendError,
@@ -147,13 +157,13 @@ class AuthViewModel : ViewModel() {
             val available = repository.isUsernameAvailable(username)
 
             if (!available) {
-                updateForm {
+                updateRegisterForm {
                     copy(
                         usernameError = R.string.username_taken,
                     )
                 }
             } else {
-                updateForm {
+                updateRegisterForm {
                     copy(usernameIsValid = true)
                 }
             }
@@ -166,28 +176,68 @@ class AuthViewModel : ViewModel() {
             val available = repository.isEmailAvailable(email)
 
             if (!available) {
-                updateForm {
+                updateRegisterForm {
                     copy(
                         emailError = R.string.email_taken
                     )
                 }
             } else {
-                updateForm {
+                updateRegisterForm {
                     copy(emailIsValid = true)
                 }
             }
         }
     }
 
+    fun onLoginIdentifierChanged(value: String) {
+        updateLoginForm {
+            copy(
+                loginIdentifier = value,
+                loginIdentifierError = null
+            )
+        }
+    }
+
+    fun onLoginPasswordChanged(value: String) {
+        updateLoginForm {
+            copy(
+                loginPassword = value,
+                loginPasswordError = null
+            )
+        }
+    }
+
+    fun submitLogin() {
+
+        val identifier = loginFormState.value.loginIdentifier.trim()
+        val password = loginFormState.value.loginPassword
+
+        val loginIdentifierBlankError = validateIsBlank(identifier)
+        val loginPasswordBlankError = validateIsBlank(password)
+
+        if (loginIdentifierBlankError != null || loginPasswordBlankError != null) {
+            updateLoginForm {
+                copy(
+                    loginIdentifierError = loginIdentifierBlankError,
+                    loginPasswordError = loginPasswordBlankError
+                )
+            }
+            return
+        }
+
+        login(identifier, password)
+    }
+
+
     // =====================
     // AUTH ACTIONS
     // =====================
 
-    fun login(email: String, password: String) {
+    fun login(identifier: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthState.Loading
             try {
-                val response = repository.login(email, password)
+                val response = repository.login(identifier, password)
                 Log.d("JARDINITO", "DEBUG login response: $response")
 
                 val username = response.username

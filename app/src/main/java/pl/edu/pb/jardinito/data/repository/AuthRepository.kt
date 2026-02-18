@@ -24,9 +24,9 @@ class AuthRepository {
         }
     }
 
-    suspend fun login(email: String, password: String): AuthResponse {
+    suspend fun login(identifier: String, password: String): AuthResponse {
         return RetrofitInstance.api.login(
-            LoginRequest(email, password)
+            LoginRequest(identifier, password)
         )
     }
 

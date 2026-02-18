@@ -79,34 +79,51 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    console.log("=== LOGIN REQUEST ===");
+    console.log("BODY:", req.body);
 
-    // 1. Check if user exists
-    const user = await User.findOne({ email });
+    const { identifier, password } = req.body;
+
+    const identifierClean = identifier?.trim();
+
+    console.log("Identifier:", identifierClean);
+
+    const user = await User.findOne({
+      $or: [
+        { email: identifierClean },
+        { username: identifierClean }
+      ]
+    });
+
+    console.log("User found:", user);
+
     if (!user) {
-      return res.status(401).json({ message: 'Jardin: Invalid email or password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 2. Password comparision
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("Password match:", isMatch);
+
     if (!isMatch) {
-      return res.status(401).json({ message: 'Jardin: Invalid email or password' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // 3. Success
     res.status(200).json({
-      message: 'Jardin: Login successful',
+      message: 'Login successful',
       userId: user._id,
       email: user.email,
       username: user.username,
     });
+
   } catch (error) {
-    res.status(500).json({ message: 'Jardin: Server error' });
+    console.error("LOGIN ERROR:", error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
+
+
 
 router.post('/google', async (req, res) => {
   try {

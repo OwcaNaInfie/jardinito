@@ -1,6 +1,6 @@
 package pl.edu.pb.jardinito.data.model
 
 data class LoginRequest(
-    val email: String,
+    val identifier: String,
     val password: String
 )
