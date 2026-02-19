@@ -14,6 +14,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
+app.use('/avatars', express.static('public/avatars'));
+
 // Log every incoming request
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - body:`, req.body);

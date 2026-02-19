@@ -240,17 +240,22 @@ class AuthViewModel : ViewModel() {
                 val response = repository.login(identifier, password)
                 Log.d("JARDINITO", "DEBUG login response: $response")
 
+                val userId = response.userId
                 val username = response.username
                 val userEmail = response.email
+                val avatar = response.avatar
 
-                if (username == null || userEmail == null) {
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid server response")
                     return@launch
                 }
 
                 _currentUser.value = User(
+                    userId = userId,
                     username = username,
-                    email = userEmail
+                    email = userEmail,
+                    avatar = avatar
+
                 )
 
                 _uiState.value = AuthState.Success(response.message)
@@ -267,17 +272,21 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = repository.googleLogin(idToken)
 
-                val email = response.email
+                val userId = response.userId
                 val username = response.username
+                val userEmail = response.email
+                val avatar = response.avatar
 
-                if (email == null || username == null) {
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid Google response")
                     return@launch
                 }
 
                 _currentUser.value = User(
-                    email = email,
-                    username = username
+                    userId = userId,
+                    username = username,
+                    email = userEmail,
+                    avatar = avatar
                 )
 
                 _uiState.value = AuthState.Success(response.message)
@@ -294,17 +303,22 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = repository.register(username, email, password)
                 Log.d("REGISTER_RESPONSE", response.toString())
-                val usernameResp = response.username
-                val userEmail = response.email
 
-                if (usernameResp == null || userEmail == null) {
+                val userId = response.userId
+                val username = response.username
+                val userEmail = response.email
+                val avatar = response.avatar
+
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid server response")
                     return@launch
                 }
 
                 _currentUser.value = User(
-                    username = usernameResp,
-                    email = userEmail
+                    userId = userId,
+                    username = username,
+                    email = userEmail,
+                    avatar = avatar
                 )
 
                 _uiState.value = AuthState.Success(response.message)

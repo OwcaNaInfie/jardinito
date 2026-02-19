@@ -1,10 +1,11 @@
-import pl.edu.pb.jardinito.data.remote.ApiService
+package  pl.edu.pb.jardinito.data.remote
+
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://10.0.2.2:5000/"
+    const val BASE_URL = "http://10.0.2.2:5000/"
 
     val api: ApiService by lazy {
         Retrofit.Builder()
