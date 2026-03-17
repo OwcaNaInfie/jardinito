@@ -7,6 +7,16 @@ const { getRandomDefaultAvatar } = require('../utils/avatarService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
+
 // Register form Validation
 // Check if username is available
 router.get('/check-username', async (req, res) => {
@@ -187,6 +197,43 @@ router.post('/google', async (req, res) => {
     console.error(err);
     res.status(401).json({ message: 'Google authentication failed' });
   }
+});
+
+router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
+    try {
+        const userId = req.body.userId;
+
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+        if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+        const filename = `custom_${uuidv4()}.jpg`;
+        const outputPath = path.join(__dirname, '../public/avatars', filename);
+
+        // Save the file
+        fs.writeFileSync(outputPath, req.file.buffer);
+
+        // Delete old custom avatar if exists
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (user.avatar?.type === 'custom') {
+            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.value);
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        // Update user in DB
+        user.avatar = { type: 'custom', value: filename };
+        await user.save();
+
+        res.json({
+            type: 'custom',
+            value: filename
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Avatar upload failed' });
+    }
 });
 
 module.exports = router;

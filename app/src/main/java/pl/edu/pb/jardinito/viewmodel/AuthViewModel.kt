@@ -19,6 +19,9 @@ import pl.edu.pb.jardinito.data.model.RegisterFormState
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import retrofit2.HttpException
+import android.content.Context
+import android.net.Uri
+import pl.edu.pb.jardinito.model.Avatar
 
 class AuthViewModel : ViewModel() {
 
@@ -35,6 +38,9 @@ class AuthViewModel : ViewModel() {
 
     private val _loginFormState = MutableStateFlow(LoginFormState())
     val loginFormState: StateFlow<LoginFormState> = _loginFormState
+
+    private val _avatarUploadState = MutableStateFlow<AvatarUploadState>(AvatarUploadState.Idle)
+    val avatarUploadState: StateFlow<AvatarUploadState> = _avatarUploadState
 
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
@@ -333,5 +339,35 @@ class AuthViewModel : ViewModel() {
     fun logout() {
         _currentUser.value = null
         _uiState.value = AuthState.Idle
+    }
+
+    fun uploadAvatar(imageUri: Uri, context: Context) {
+        val userId = _currentUser.value?.userId ?: return
+
+        viewModelScope.launch {
+            _avatarUploadState.value = AvatarUploadState.Loading
+            try {
+                val response = repository.uploadAvatar(userId, imageUri, context)
+
+                // Update the avatar in the current user state
+                _currentUser.update { currentUser ->
+                    currentUser?.copy(
+                        avatar = Avatar(
+                            type = response.type,
+                            value = response.value
+                        )
+                    )
+                }
+
+                _avatarUploadState.value = AvatarUploadState.Success
+
+            } catch (e: Exception) {
+                _avatarUploadState.value = AvatarUploadState.Error(e.message ?: "Upload failed")
+            }
+        }
+    }
+
+    fun resetAvatarUploadState() {
+        _avatarUploadState.value = AvatarUploadState.Idle
     }
 }

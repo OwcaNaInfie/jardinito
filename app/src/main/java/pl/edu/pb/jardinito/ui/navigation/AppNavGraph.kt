@@ -72,7 +72,8 @@ fun AppNavGraph(
                         navController.navigate(Routes.ENTRY) {
                             popUpTo(Routes.HOME) { inclusive = true }
                         }
-                    }
+                    },
+                    viewModel = authViewModel
                 )
             }
         }

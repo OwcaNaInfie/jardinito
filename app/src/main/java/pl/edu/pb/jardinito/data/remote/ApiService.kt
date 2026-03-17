@@ -8,6 +8,10 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface ApiService {
     @POST("api/auth/login")
@@ -25,6 +29,13 @@ interface ApiService {
         @Body request: RegisterRequest
     ): AuthResponse
 
+    @Multipart
+    @POST("api/auth/upload-avatar")
+    suspend fun uploadAvatar(
+        @Part avatar: MultipartBody.Part,
+        @Part("userId") userId: RequestBody
+    ): AvatarUploadResponse
+
 //    Register Form Validation
 @GET("api/auth/check-username")
     suspend fun checkUsername(@Query("username") username: String): UsernameAvailabilityResponse
@@ -39,5 +50,10 @@ data class UsernameAvailabilityResponse(
 
 data class EmailAvailabilityResponse(
     val emailAvailable: Boolean
+)
+
+data class AvatarUploadResponse(
+    val type: String,
+    val value: String
 )
 

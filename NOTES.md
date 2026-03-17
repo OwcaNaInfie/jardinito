@@ -152,7 +152,16 @@ Login/Register → jedyne miejsca użycia ViewModelu
 
 
 # TODO
-input hasła w logowaniu nie powinien przechodzić weryfikacji regexem tylko zgodności z BE
 weryfikacja poprawności danych przez backend przed rejestracją.
 Wyczyszczenie formularza po przejściu do ekranu głównego
-sprawdzenie formularza bez frontendowej walidacji
+
+Avatar - możliwość edycji avatara, usuwania, ładowania zdjęcia z telefonu.
+Klikam edycje avatara -> wybieram zdjecie z telefonu -> przycinam zdjęcie -> zapisuję zdjęcie w bazie -> odświeżam ProfileScreen
+Kilkam edycję avatara -> usuwam obecne zdjęcie -> baza przywraca default avatar -> odświeżam ProfileScreen
+
+Obiekt w bazie:
+avatar {
+  default: "default_8.png"
+  custom: "adres_customowego_zdjęcia.png"
+  google: ""
+}

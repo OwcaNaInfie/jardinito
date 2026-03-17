@@ -1,30 +1,98 @@
 package pl.edu.pb.jardinito.ui.screens
 
+import android.app.Activity
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.yalantis.ucrop.UCrop
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.model.Avatar
 import pl.edu.pb.jardinito.model.User
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
+import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.AvatarUploadState
+import java.io.File
 
 @Composable
 fun ProfileScreen(
     user: User?,
     onLogout: () -> Unit,
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    viewModel: AuthViewModel
 ) {
+    val context = LocalContext.current
+    val avatarUploadState by viewModel.avatarUploadState.collectAsState()
+
+// 1. Receives the cropped image result
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            val croppedUri = UCrop.getOutput(result.data!!)
+            if (croppedUri != null) {
+                viewModel.uploadAvatar(croppedUri, context)
+            }
+        }
+    }
+
+// 2. Picks image from gallery, then launches UCrop
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val destFile = File(context.cacheDir, "avatar_crop_temp.jpg")
+            val destUri = Uri.fromFile(destFile)
+
+            val cropIntent = UCrop.of(uri, destUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(400, 400)
+                .getIntent(context)
+
+            cropLauncher.launch(cropIntent)
+        }
+    }
 
     val avatarUrl = when (user?.avatar?.type) {
-        "default" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.value}"
+        "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.value}"
         "google" -> user.avatar.value
-        "custom" -> user.avatar.value
         else -> null
+    }
+
+    LaunchedEffect(avatarUploadState) {
+        when (avatarUploadState) {
+            is AvatarUploadState.Success -> {
+                Log.d("ProfileScreen", "Avatar uploaded successfully")
+                viewModel.resetAvatarUploadState()
+            }
+            is AvatarUploadState.Error -> {
+                Log.d("ProfileScreen", (avatarUploadState as AvatarUploadState.Error).message)
+                viewModel.resetAvatarUploadState()
+            }
+            else -> {}
+        }
     }
 
     if (user != null) {
@@ -32,7 +100,8 @@ fun ProfileScreen(
             user = user,
             avatarUrl = avatarUrl,
             onLogout = onLogout,
-            onSettingsClick = onSettingsClick
+            onSettingsClick = onSettingsClick,
+            galleryLauncher = galleryLauncher
         )
     } else {
         Box(
@@ -49,6 +118,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenContent(
     user: User,
+    galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     avatarUrl: String?,
     onLogout: () -> Unit,
     onSettingsClick: () -> Unit
@@ -57,6 +127,7 @@ fun ProfileScreenContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.primary50)
             .padding(
                 top = 72.dp,
                 bottom = 16.dp,
@@ -85,13 +156,24 @@ fun ProfileScreenContent(
             ) {
 
                 Box(
-                    modifier = Modifier.size(80.dp)
+                    modifier = Modifier.size(120.dp)
                 ) {
                     AsyncImage(
                         model = avatarUrl,
                         contentDescription = "User avatar",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
+                    )
+                    AppButton(
+                        iconVector = Icons.Filled.Edit,
+                        size = ButtonSize.Small,
+                        circle = true,
+                        onClick = { galleryLauncher.launch("image/*") },
+                        iconColor = Color.White,
+                        buttonColor = colors.primary300,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 2.dp, y = 2.dp)
                     )
                 }
 
@@ -119,5 +201,27 @@ fun ProfileScreenContent(
     }
 }
 
-
-
+//@Preview(
+//    showBackground = true,
+//    apiLevel = 34
+//)
+//@Composable
+//fun ProfileScreenPreview() {
+//    JardinitoTheme {
+//        ProfileScreenContent(
+//            user = User(
+//                username = "test_user",
+//                email = "test@gmail.com",
+//                userId = "2",
+//                avatar = Avatar(
+//                    type = "default",
+//                    value = "default_3.png"
+//                )
+//            ),
+//            avatarUrl = "http://10.0.2.2:5000/avatars/default_3.png",
+//            onLogout = {},
+//            onSettingsClick = {},
+//            galleryLauncher: {}
+//        )
+//    }
+//}
