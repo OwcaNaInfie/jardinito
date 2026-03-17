@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 
 const avatarSchema = new mongoose.Schema({
-  type: {
+  default: {
     type: String,
-    enum: ['default', 'google', 'custom'],
     required: true
   },
-  value: {
+  custom: {
     type: String,
-    required: true
+    default: null
+  },
+  google: {
+    type: String,
+    default: null
   }
 }, { _id: false });
 

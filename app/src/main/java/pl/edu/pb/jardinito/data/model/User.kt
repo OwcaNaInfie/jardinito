@@ -1,9 +1,4 @@
-package pl.edu.pb.jardinito.model
-
-data class Avatar(
-    val type: String,
-    val value: String
-)
+package pl.edu.pb.jardinito.data.model
 
 data class User(
     val userId: String,

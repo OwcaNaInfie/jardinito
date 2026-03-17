@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.LoginFormState
-import pl.edu.pb.jardinito.model.User
+import pl.edu.pb.jardinito.data.model.User
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.data.model.RegisterFormState
@@ -21,7 +21,7 @@ import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import retrofit2.HttpException
 import android.content.Context
 import android.net.Uri
-import pl.edu.pb.jardinito.model.Avatar
+import pl.edu.pb.jardinito.data.model.Avatar
 
 class AuthViewModel : ViewModel() {
 
@@ -353,8 +353,9 @@ class AuthViewModel : ViewModel() {
                 _currentUser.update { currentUser ->
                     currentUser?.copy(
                         avatar = Avatar(
-                            type = response.type,
-                            value = response.value
+                            default = response.avatar.default,
+                            custom = response.avatar.custom,
+                            google = response.avatar.google
                         )
                     )
                 }
@@ -369,5 +370,31 @@ class AuthViewModel : ViewModel() {
 
     fun resetAvatarUploadState() {
         _avatarUploadState.value = AvatarUploadState.Idle
+    }
+
+    fun deleteAvatar() {
+        val userId = _currentUser.value?.userId ?: return
+
+        viewModelScope.launch {
+            _avatarUploadState.value = AvatarUploadState.Loading
+            try {
+                val response = repository.deleteAvatar(userId)
+
+                _currentUser.update { currentUser ->
+                    currentUser?.copy(
+                        avatar = Avatar(
+                            default = response.avatar.default,
+                            custom = response.avatar.custom,
+                            google = response.avatar.google
+                        )
+                    )
+                }
+
+                _avatarUploadState.value = AvatarUploadState.Success
+
+            } catch (e: Exception) {
+                _avatarUploadState.value = AvatarUploadState.Error(e.message ?: "Delete failed")
+            }
+        }
     }
 }

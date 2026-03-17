@@ -36,6 +36,11 @@ interface ApiService {
         @Part("userId") userId: RequestBody
     ): AvatarUploadResponse
 
+    @POST("api/auth/delete-avatar")
+    suspend fun deleteAvatar(
+        @Body request: DeleteAvatarRequest
+    ): AvatarUploadResponse
+
 //    Register Form Validation
 @GET("api/auth/check-username")
     suspend fun checkUsername(@Query("username") username: String): UsernameAvailabilityResponse
@@ -53,7 +58,16 @@ data class EmailAvailabilityResponse(
 )
 
 data class AvatarUploadResponse(
-    val type: String,
-    val value: String
+    val avatar: AvatarDto
+)
+
+data class AvatarDto(
+    val default: String,
+    val custom: String? = null,
+    val google: String? = null
+)
+
+data class DeleteAvatarRequest(
+    val userId: String
 )
 

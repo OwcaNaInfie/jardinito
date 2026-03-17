@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import pl.edu.pb.jardinito.data.remote.AvatarUploadResponse
+import pl.edu.pb.jardinito.data.remote.DeleteAvatarRequest
 
 class AuthRepository {
 
@@ -67,6 +68,10 @@ class AuthRepository {
         val userIdPart = userId.toRequestBody("text/plain".toMediaType())
 
         return RetrofitInstance.api.uploadAvatar(imagePart, userIdPart)
+    }
+
+    suspend fun deleteAvatar(userId: String): AvatarUploadResponse {
+        return RetrofitInstance.api.deleteAvatar(DeleteAvatarRequest(userId))
     }
 }
 

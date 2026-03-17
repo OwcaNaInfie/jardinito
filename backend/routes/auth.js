@@ -83,8 +83,9 @@ router.post('/register', async (req, res) => {
           password: hashedPassword,
           provider: 'local',
           avatar: {
-            type: 'default',
-            value: randomAvatar
+              default: randomAvatar,
+              custom: null,
+              google: null
           }
         });
 
@@ -177,8 +178,9 @@ router.post('/google', async (req, res) => {
         provider: 'google',
         googleId: payload.sub,
         avatar: {
-          type: 'google',
-          value: payload.picture
+            default: getRandomDefaultAvatar(),
+            custom: null,
+            google: payload.picture
         }
       });
 
@@ -209,30 +211,48 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
         const filename = `custom_${uuidv4()}.jpg`;
         const outputPath = path.join(__dirname, '../public/avatars', filename);
 
-        // Save the file
         fs.writeFileSync(outputPath, req.file.buffer);
 
-        // Delete old custom avatar if exists
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        if (user.avatar?.type === 'custom') {
-            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.value);
+        // Delete old custom avatar file if exists
+        if (user.avatar?.custom) {
+            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.custom);
             if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
         }
 
-        // Update user in DB
-        user.avatar = { type: 'custom', value: filename };
+        user.avatar.custom = filename;
         await user.save();
 
-        res.json({
-            type: 'custom',
-            value: filename
-        });
+        res.json({ avatar: user.avatar });
 
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Avatar upload failed' });
+    }
+});
+
+router.post('/delete-avatar', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (user.avatar?.custom) {
+            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.custom);
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            user.avatar.custom = null;
+            await user.save();
+        }
+
+        res.json({ avatar: user.avatar });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Delete avatar failed' });
     }
 });
 

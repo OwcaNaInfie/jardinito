@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.model.Avatar
-import pl.edu.pb.jardinito.model.User
+import pl.edu.pb.jardinito.data.model.Avatar
+import pl.edu.pb.jardinito.data.model.User
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
@@ -75,9 +75,9 @@ fun ProfileScreen(
         }
     }
 
-    val avatarUrl = when (user?.avatar?.type) {
-        "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.value}"
-        "google" -> user.avatar.value
+    val avatarUrl = when (user?.avatar?.activeType()) {
+        "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.activeValue()}"
+        "google" -> user.avatar.activeValue()
         else -> null
     }
 
@@ -101,7 +101,8 @@ fun ProfileScreen(
             avatarUrl = avatarUrl,
             onLogout = onLogout,
             onSettingsClick = onSettingsClick,
-            galleryLauncher = galleryLauncher
+            galleryLauncher = galleryLauncher,
+            onDeleteAvatar = { viewModel.deleteAvatar() }
         )
     } else {
         Box(
@@ -121,7 +122,8 @@ fun ProfileScreenContent(
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     avatarUrl: String?,
     onLogout: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onDeleteAvatar: () -> Unit
 ) {
 
     Column(
@@ -175,6 +177,14 @@ fun ProfileScreenContent(
                             .align(Alignment.BottomEnd)
                             .offset(x = 2.dp, y = 2.dp)
                     )
+                    // Only show if user has a custom avatar
+                    if (user.avatar.custom != null) {
+                        Button(
+                            onClick = onDeleteAvatar
+                        ) {
+                            Text("Usuń zdjęcie")
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
