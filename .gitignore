@@ -37,3 +37,5 @@ Thumbs.db
 backend/node_modules/
 backend/.env
 
+PROGRESS.md
+node_modules/

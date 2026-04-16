@@ -44,6 +44,68 @@ fun HomeScreen() {
             color = colors.primary900
         )
 
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.displaySmall
+            )
+
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.headlineLarge
+            )
+        }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colors.primary900
+            )
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.labelMedium
+            )
+            Text(
+                text = "Jardinito",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
         IconButton(
             onClick = {},
             modifier = Modifier
