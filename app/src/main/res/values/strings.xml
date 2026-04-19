@@ -40,8 +40,10 @@
     <!-- Profile Screen -->
     <string name="log_out">Log Out</string>
     <string name="delete_account">Delete account</string>
+    Konto zostanie usunięte na zawsze
     <!-- Popups -->
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="delete_account_message">Account will be deleted permamently.</string>
 </resources>

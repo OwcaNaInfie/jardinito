@@ -29,9 +29,8 @@ import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
-import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.viewmodel.AuthState
+import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable

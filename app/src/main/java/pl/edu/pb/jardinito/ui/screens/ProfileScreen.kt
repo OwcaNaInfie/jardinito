@@ -36,38 +36,41 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.data.model.User
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
+import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
-import pl.edu.pb.jardinito.viewmodel.AvatarUploadState
+import pl.edu.pb.jardinito.viewmodel.UserViewModel
+import pl.edu.pb.jardinito.viewmodel.state.UserState
 import java.io.File
 
 @Composable
 fun ProfileScreen(
-    user: User?,
+    user: User,
     onLogout: () -> Unit,
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
-    val avatarUploadState by viewModel.avatarUploadState.collectAsState()
+    val userState by userViewModel.userState.collectAsState()
     var isEditing by remember { mutableStateOf(false) }
-    var showDeleteAvatarDialog by remember { mutableStateOf(false) }
+    var showAccountDeletedDialog by remember { mutableStateOf(false) }
 
-
-// 1. Receives the cropped image result
     val cropLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val croppedUri = UCrop.getOutput(result.data!!)
             if (croppedUri != null) {
-                viewModel.uploadAvatar(croppedUri, context)
+                val userId = user?.userId ?: return@rememberLauncherForActivityResult
+                userViewModel.uploadAvatar(userId, croppedUri, context) { newAvatar ->
+                    authViewModel.updateAvatar(newAvatar)
+                }
             }
         }
     }
 
-// 2. Picks image from gallery, then launches UCrop
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -84,51 +87,89 @@ fun ProfileScreen(
         }
     }
 
-    val avatarUrl = when (user?.avatar?.activeType()) {
+    val avatarUrl = when (user.avatar?.activeType()) {
         "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.activeValue()}"
         "google" -> user.avatar.activeValue()
         else -> null
     }
 
-    LaunchedEffect(avatarUploadState) {
-        when (avatarUploadState) {
-            is AvatarUploadState.Success -> {
-                Log.d("ProfileScreen", "Avatar uploaded successfully")
-                viewModel.resetAvatarUploadState()
+    ProfileScreenContent(
+        user = user,
+        isEditing = isEditing,
+        avatarUrl = avatarUrl,
+        galleryLauncher = galleryLauncher,
+        onSettingsClick = { isEditing = !isEditing },
+        onDeleteAvatar = {
+            val userId = user.userId ?: return@ProfileScreenContent
+            userViewModel.deleteAvatar(userId) { newAvatar ->
+                authViewModel.updateAvatar(newAvatar)
             }
-            is AvatarUploadState.Error -> {
-                Log.d("ProfileScreen", (avatarUploadState as AvatarUploadState.Error).message)
-                viewModel.resetAvatarUploadState()
+        },
+        onLogout = onLogout,
+        onDeleteAccount = {
+            val userId = user.userId ?: return@ProfileScreenContent
+            userViewModel.deleteAccount(userId) {
+                showAccountDeletedDialog = true
             }
-            else -> {}
         }
-    }
+    )
 
-    if (user != null) {
-        ProfileScreenContent(
-            user = user,
-            avatarUrl = avatarUrl,
-            galleryLauncher = galleryLauncher,
-            isEditing = isEditing,
-            onLogout = onLogout,
-            onSettingsClick = { isEditing = !isEditing },
-            onDeleteAvatar = { viewModel.deleteAvatar() },
-            onDeleteAccount = {}
+    if (showAccountDeletedDialog) {
+        ConfirmDialog(
+            title = "Konto usunięte",
+            message = "Twoje konto zostało pomyślnie usunięte. Zostaniesz przekierowany do ekranu startowego.",
+            confirmText = "OK",
+            singleButton = true,
+            variant = DialogVariant.Success,
+            onConfirm = {
+                showAccountDeletedDialog = false
+                authViewModel.clearUserSession()
+                onLogout()
+            },
+            onDismiss = {
+                showAccountDeletedDialog = false
+                authViewModel.clearUserSession()
+                onLogout()
+            }
         )
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Brak danych użytkownika")
-        }
     }
 }
 
 @Composable
-fun ProfileHeader() {}
+fun ProfileHeader(
+    user: User,
+    isEditing: Boolean,
+    avatarUrl: String?,
+    galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    onSettingsClick: () -> Unit,
+    onDeleteAvatar: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        IconButton(
+            onClick = onSettingsClick,
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            AvatarSection(
+                user = user,
+                isEditing = isEditing,
+                avatarUrl = avatarUrl,
+                galleryLauncher = galleryLauncher,
+                onDeleteAvatar = onDeleteAvatar
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            UsernameSection(
+                isEditing = isEditing,
+                user = user
+            )
+        }
+    }
+}
 
 @Composable
 fun AvatarSection(
@@ -194,30 +235,46 @@ fun AvatarSection(
 
 @Composable
 fun UsernameSection(
-    isEditing: Boolean
-) {}
+    isEditing: Boolean,
+    user: User
+) {
+    Column {
+        Text(
+            text = "Gardeners name",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = user.username,
+            style = MaterialTheme.typography.headlineSmall
+        )
+    }
+}
 
 @Composable
 fun ProfileActions(
     user: User,
     onLogout: () -> Unit,
-    onDeleteAccount: () -> Unit,
+    onDeleteAccount: () -> Unit
 ) {
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     Column {
-        Button(onClick = onLogout) {
-            Text(stringResource(R.string.log_out))
+        Button(
+            modifier = Modifier.background(colors.transparent),
+            onClick = onLogout
+        ) {
+            Text(stringResource(R.string.log_out), color = colors.neutralBlack)
         }
-        Button(onClick = {showDeleteAccountDialog = true}) {
+        Button(onClick = { showDeleteAccountDialog = true }) {
             Text(stringResource(R.string.delete_account))
         }
     }
+
     if (showDeleteAccountDialog) {
         ConfirmDialog(
-            title = "Usuń konto",
-            message = "Konto zostanie usunięte na zawsze",
-            confirmText = "Usuń konto",
+            title = stringResource(R.string.delete_account),
+            message = stringResource(R.string.delete_account_message),
+            confirmText = stringResource(R.string.delete_account),
             onConfirm = {
                 showDeleteAccountDialog = false
                 onDeleteAccount()
@@ -230,62 +287,28 @@ fun ProfileActions(
 @Composable
 fun ProfileScreenContent(
     user: User,
+    isEditing: Boolean,
     avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    isEditing: Boolean,
-    onLogout: () -> Unit,
     onSettingsClick: () -> Unit,
     onDeleteAvatar: () -> Unit,
+    onLogout: () -> Unit,
     onDeleteAccount: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.primary50)
-            .padding(
-                top = 72.dp,
-                bottom = 16.dp,
-                start = 16.dp,
-                end = 16.dp
-            )
+            .padding(top = 72.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(
-                onClick = onSettingsClick,
-                modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings"
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                AvatarSection(
-                    user = user,
-                    isEditing = isEditing,
-                    avatarUrl = avatarUrl,
-                    galleryLauncher = galleryLauncher,
-                    onDeleteAvatar = onDeleteAvatar
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Gardeners name",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = user.username,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-            }
-        }
-//        Spacer(modifier = Modifier.height(32.dp))
+        ProfileHeader(
+            user = user,
+            isEditing = isEditing,
+            avatarUrl = avatarUrl,
+            galleryLauncher = galleryLauncher,
+            onDeleteAvatar = onDeleteAvatar,
+            onSettingsClick = onSettingsClick
+        )
         Spacer(modifier = Modifier.weight(1f))
         if (isEditing) {
             ProfileActions(

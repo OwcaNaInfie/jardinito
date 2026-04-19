@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.data.model.Avatar
 import pl.edu.pb.jardinito.data.model.LoginFormState
 import pl.edu.pb.jardinito.data.model.User
 import pl.edu.pb.jardinito.ui.utils.validateEmail
@@ -19,9 +20,8 @@ import pl.edu.pb.jardinito.data.model.RegisterFormState
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import retrofit2.HttpException
-import android.content.Context
-import android.net.Uri
-import pl.edu.pb.jardinito.data.model.Avatar
+import pl.edu.pb.jardinito.viewmodel.state.AuthState
+import pl.edu.pb.jardinito.viewmodel.state.UserState
 
 class AuthViewModel : ViewModel() {
 
@@ -39,8 +39,8 @@ class AuthViewModel : ViewModel() {
     private val _loginFormState = MutableStateFlow(LoginFormState())
     val loginFormState: StateFlow<LoginFormState> = _loginFormState
 
-    private val _avatarUploadState = MutableStateFlow<AvatarUploadState>(AvatarUploadState.Idle)
-    val avatarUploadState: StateFlow<AvatarUploadState> = _avatarUploadState
+    private val _userState = MutableStateFlow<UserState>(UserState.Idle)
+    val userState: StateFlow<UserState> = _userState
 
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
@@ -341,60 +341,13 @@ class AuthViewModel : ViewModel() {
         _uiState.value = AuthState.Idle
     }
 
-    fun uploadAvatar(imageUri: Uri, context: Context) {
-        val userId = _currentUser.value?.userId ?: return
-
-        viewModelScope.launch {
-            _avatarUploadState.value = AvatarUploadState.Loading
-            try {
-                val response = repository.uploadAvatar(userId, imageUri, context)
-
-                // Update the avatar in the current user state
-                _currentUser.update { currentUser ->
-                    currentUser?.copy(
-                        avatar = Avatar(
-                            default = response.avatar.default,
-                            custom = response.avatar.custom,
-                            google = response.avatar.google
-                        )
-                    )
-                }
-
-                _avatarUploadState.value = AvatarUploadState.Success
-
-            } catch (e: Exception) {
-                _avatarUploadState.value = AvatarUploadState.Error(e.message ?: "Upload failed")
-            }
-        }
+    // Callback from UserViewModel
+    fun updateAvatar(avatar: Avatar) {
+        _currentUser.update { it?.copy(avatar = avatar) }
     }
 
-    fun resetAvatarUploadState() {
-        _avatarUploadState.value = AvatarUploadState.Idle
-    }
-
-    fun deleteAvatar() {
-        val userId = _currentUser.value?.userId ?: return
-
-        viewModelScope.launch {
-            _avatarUploadState.value = AvatarUploadState.Loading
-            try {
-                val response = repository.deleteAvatar(userId)
-
-                _currentUser.update { currentUser ->
-                    currentUser?.copy(
-                        avatar = Avatar(
-                            default = response.avatar.default,
-                            custom = response.avatar.custom,
-                            google = response.avatar.google
-                        )
-                    )
-                }
-
-                _avatarUploadState.value = AvatarUploadState.Success
-
-            } catch (e: Exception) {
-                _avatarUploadState.value = AvatarUploadState.Error(e.message ?: "Delete failed")
-            }
-        }
+    fun clearUserSession() {
+        _currentUser.value = null
+        _uiState.value = AuthState.Idle
     }
 }

@@ -46,4 +46,5 @@
     <string name="delete">Usuń</string>
     <string name="confirm">Potwierdź</string>
     <string name="cancel">Anuluj</string>
+    <string name="delete_account_message">Konto zostanie usunięte na zawsze.</string>
 </resources>

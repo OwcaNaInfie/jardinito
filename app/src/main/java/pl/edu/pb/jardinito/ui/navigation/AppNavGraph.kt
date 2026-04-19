@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -15,6 +16,7 @@ import pl.edu.pb.jardinito.ui.screens.HomeScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.UserViewModel
 
 @Composable
 fun AppNavGraph(
@@ -25,6 +27,7 @@ fun AppNavGraph(
     val actions = remember(navController) { NavActions(navController) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val userViewModel: UserViewModel = viewModel()
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
@@ -65,16 +68,19 @@ fun AppNavGraph(
             composable(Routes.PROFILE) {
                 val user by authViewModel.currentUser.collectAsState(initial = null)
 
-                ProfileScreen(
-                    user = user,
-                    onLogout = {
-                        authViewModel.logout()
-                        navController.navigate(Routes.ENTRY) {
-                            popUpTo(Routes.HOME) { inclusive = true }
-                        }
-                    },
-                    viewModel = authViewModel
-                )
+                user?.let {
+                    ProfileScreen(
+                        user = it,
+                        onLogout = {
+                            authViewModel.logout()
+                            navController.navigate(Routes.ENTRY) {
+                                popUpTo(Routes.HOME) { inclusive = true }
+                            }
+                        },
+                        authViewModel = authViewModel,
+                        userViewModel = userViewModel
+                    )
+                }
             }
         }
     }
