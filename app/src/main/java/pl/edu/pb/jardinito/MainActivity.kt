@@ -28,7 +28,6 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
 
-        // Tworzymy ViewModel przez ViewModelProvider
         authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
         val googleSignInLauncher =
@@ -47,7 +46,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-        // Compose content
         setContent {
             JardinitoTheme {
                 AppNavGraph(

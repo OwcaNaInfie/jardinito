@@ -2,21 +2,29 @@ package pl.edu.pb.jardinito.ui.screens
 
 import android.app.Activity
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -42,19 +50,18 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
-import pl.edu.pb.jardinito.viewmodel.state.UserState
 import java.io.File
 
 @Composable
 fun ProfileScreen(
     user: User,
     onLogout: () -> Unit,
+    isEditing: Boolean,
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel
 ) {
     val context = LocalContext.current
     val userState by userViewModel.userState.collectAsState()
-    var isEditing by remember { mutableStateOf(false) }
     var showAccountDeletedDialog by remember { mutableStateOf(false) }
 
     val cropLauncher = rememberLauncherForActivityResult(
@@ -63,7 +70,7 @@ fun ProfileScreen(
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val croppedUri = UCrop.getOutput(result.data!!)
             if (croppedUri != null) {
-                val userId = user?.userId ?: return@rememberLauncherForActivityResult
+                val userId = user.userId ?: return@rememberLauncherForActivityResult
                 userViewModel.uploadAvatar(userId, croppedUri, context) { newAvatar ->
                     authViewModel.updateAvatar(newAvatar)
                 }
@@ -98,7 +105,6 @@ fun ProfileScreen(
         isEditing = isEditing,
         avatarUrl = avatarUrl,
         galleryLauncher = galleryLauncher,
-        onSettingsClick = { isEditing = !isEditing },
         onDeleteAvatar = {
             val userId = user.userId ?: return@ProfileScreenContent
             userViewModel.deleteAvatar(userId) { newAvatar ->
@@ -141,16 +147,9 @@ fun ProfileHeader(
     isEditing: Boolean,
     avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    onSettingsClick: () -> Unit,
     onDeleteAvatar: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        IconButton(
-            onClick = onSettingsClick,
-            modifier = Modifier.align(Alignment.TopEnd)
-        ) {
-            Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
-        }
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -164,7 +163,6 @@ fun ProfileHeader(
             )
             Spacer(modifier = Modifier.width(16.dp))
             UsernameSection(
-                isEditing = isEditing,
                 user = user
             )
         }
@@ -181,7 +179,7 @@ fun AvatarSection(
 ) {
     var showDeleteAvatarDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.size(120.dp)) {
+    Box(modifier = Modifier.size(180.dp)) {
         AsyncImage(
             model = avatarUrl,
             contentDescription = "User avatar",
@@ -224,6 +222,7 @@ fun AvatarSection(
             title = "Usuń zdjęcie profilowe",
             message = "Czy na pewno chcesz usunąć swoje zdjęcie profilowe?",
             confirmText = "Usuń",
+            variant = DialogVariant.Warning,
             onConfirm = {
                 showDeleteAvatarDialog = false
                 onDeleteAvatar()
@@ -235,7 +234,6 @@ fun AvatarSection(
 
 @Composable
 fun UsernameSection(
-    isEditing: Boolean,
     user: User
 ) {
     Column {
@@ -252,22 +250,36 @@ fun UsernameSection(
 
 @Composable
 fun ProfileActions(
-    user: User,
     onLogout: () -> Unit,
     onDeleteAccount: () -> Unit
 ) {
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var showLogOutDialog by remember { mutableStateOf(false) }
 
     Column {
         Button(
             modifier = Modifier.background(colors.transparent),
-            onClick = onLogout
+            onClick = { showLogOutDialog = true }
         ) {
             Text(stringResource(R.string.log_out), color = colors.neutralBlack)
         }
         Button(onClick = { showDeleteAccountDialog = true }) {
             Text(stringResource(R.string.delete_account))
         }
+    }
+
+    if (showLogOutDialog) {
+        ConfirmDialog(
+            title = "Wyloguj",
+            message = "Czy na pewno chcesz się wylogować?",
+            confirmText = "Wyloguj",
+            variant = DialogVariant.Warning,
+            onConfirm = {
+                showLogOutDialog = false
+                onLogout()
+            },
+            onDismiss = { showLogOutDialog = false }
+        )
     }
 
     if (showDeleteAccountDialog) {
@@ -290,7 +302,6 @@ fun ProfileScreenContent(
     isEditing: Boolean,
     avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    onSettingsClick: () -> Unit,
     onDeleteAvatar: () -> Unit,
     onLogout: () -> Unit,
     onDeleteAccount: () -> Unit
@@ -299,7 +310,7 @@ fun ProfileScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.primary50)
-            .padding(top = 72.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 28.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
     ) {
         ProfileHeader(
             user = user,
@@ -307,40 +318,13 @@ fun ProfileScreenContent(
             avatarUrl = avatarUrl,
             galleryLauncher = galleryLauncher,
             onDeleteAvatar = onDeleteAvatar,
-            onSettingsClick = onSettingsClick
         )
         Spacer(modifier = Modifier.weight(1f))
         if (isEditing) {
             ProfileActions(
                 onLogout = onLogout,
                 onDeleteAccount = onDeleteAccount,
-                user = user
             )
         }
     }
 }
-
-//@Preview(
-//    showBackground = true,
-//    apiLevel = 34
-//)
-//@Composable
-//fun ProfileScreenPreview() {
-//    JardinitoTheme {
-//        ProfileScreenContent(
-//            user = User(
-//                username = "test_user",
-//                email = "test@gmail.com",
-//                userId = "2",
-//                avatar = Avatar(
-//                    type = "default",
-//                    value = "default_3.png"
-//                )
-//            ),
-//            avatarUrl = "http://10.0.2.2:5000/avatars/default_3.png",
-//            onLogout = {},
-//            onSettingsClick = {},
-//            galleryLauncher: {}
-//        )
-//    }
-//}

@@ -30,13 +30,13 @@
     <string name="validator_password_regex">Musi zawierać wielką literę, cyfrę i znak specjalny.</string>
     <string name="validator_password_length">Hasło musi mieć długość min 8 znaków.</string>
     <string name="repeat_password">Powtórz hasło</string>
-    <string name="validator_repeated_password_invalid">Hasła nie są takie same</string>
+    <string name="validator_repeated_password_invalid">Hasła nie są takie same.</string>
     <string name="validator_repeated_password_blank">Powtórz hasło</string>
-    <string name="username_taken">Username zajęty</string>
-    <string name="email_taken">Email jest już w uzyciu</string>
-    <string name="validator_blank">Pole nie może być puste</string>
+    <string name="username_taken">Username zajęty.</string>
+    <string name="email_taken">Email jest już w użyciu.</string>
+    <string name="validator_blank">Pole nie może być puste.</string>
     <string name="email_or_username">Email lub username</string>
-    <string name="validator_username_email_pattern">Username nie może być w formie email</string>
+    <string name="validator_username_email_pattern">Username nie może być w formie email.</string>
 
     <!-- Profile Screen -->
     <string name="log_out">Wyloguj</string>

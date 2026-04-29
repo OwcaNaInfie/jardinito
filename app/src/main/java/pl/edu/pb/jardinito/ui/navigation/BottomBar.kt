@@ -39,9 +39,11 @@ fun BottomBar(navController: NavController) {
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(Routes.HOME)
-                        launchSingleTop = true
+                    if (currentRoute != item.route) {
+                        navController.navigate(item.route) {
+                            popUpTo(Routes.HOME)
+                            launchSingleTop = true
+                        }
                     }
                 },
                 icon = { Icon(item.icon, contentDescription = item.label) },
