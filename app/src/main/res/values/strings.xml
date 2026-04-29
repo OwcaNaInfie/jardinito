@@ -1,18 +1,25 @@
 <resources>
     <string name="app_name">Jardinito</string>
-
     <string name="default_web_client_id" translatable="false">484586685422-of3ru5lnn9hprfmp9sbo7mpk78f5n6g8.apps.googleusercontent.com</string>
+
+    <!-- Auth -->
     <string name="login">Login</string>
     <string name="register">Register</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="username">Username</string>
     <string name="or">or</string>
-
     <string name="no_account">Don’t have an account?</string>
     <string name="go_to_register"> Register</string>
     <string name="have_account">Already have an account?</string>
     <string name="go_to_login"> Login</string>
+
+    <!-- Auth errors -->
+    <string name="error_invalid_credentials">Invalid login or password</string>
+    <string name="error_server">Server error, try again later</string>
+    <string name="error_invalid_response">Invalid server response</string>
+    <string name="error_google_login">Google login failed</string>
+    <string name="error_registration">Registration failed, please try again</string>
 
     <!-- States -->
     <string name="loading">Loading…</string>

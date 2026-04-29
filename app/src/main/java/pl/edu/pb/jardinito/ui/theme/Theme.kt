@@ -17,11 +17,14 @@ import androidx.compose.ui.unit.dp
 private val DarkColorScheme = darkColorScheme(
     primary = AppColors.SecondaryYellow,
     secondary = AppColors.SecondaryBlue,
-    background = AppColors.NeutralDark,
-    surface = AppColors.NeutralDark,
+    background = AppColors.NeutralLight,
+    surface = AppColors.NeutralWhite,
+    error = AppColors.Error,
     onPrimary = Color.White,
-    onBackground = AppColors.NeutralLight,
-    error = AppColors.Error
+    onSecondary = Color.White,
+    onBackground = AppColors.NeutralDark,
+    onSurface = AppColors.NeutralDark,
+    onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -39,7 +42,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun JardinitoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

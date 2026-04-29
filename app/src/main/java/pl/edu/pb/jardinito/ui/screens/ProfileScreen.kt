@@ -179,7 +179,7 @@ fun AvatarSection(
 ) {
     var showDeleteAvatarDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.size(180.dp)) {
+    Box(modifier = Modifier.size(130.dp)) {
         AsyncImage(
             model = avatarUrl,
             contentDescription = "User avatar",

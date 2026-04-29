@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -48,7 +49,6 @@ fun LoginScreen(
 
     LoginScreenContent(
         state = state,
-        onLoginClick = { email, password -> authViewModel.login(email, password) },
         onRegisterClick = onRegisterClick,
         onGoogleSignInClick = onGoogleSignInClick,
         authViewModel = authViewModel
@@ -59,7 +59,6 @@ fun LoginScreen(
 fun LoginScreenContent(
     authViewModel: AuthViewModel,
     state: AuthState,
-    onLoginClick: (String, String) -> Unit,
     onRegisterClick: () -> Unit,
     onGoogleSignInClick: () -> Unit
 ) {
@@ -71,28 +70,37 @@ fun LoginScreenContent(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        FormTextField(
-            label = stringResource(R.string.email_or_username),
-            value = form.loginIdentifier,
-            required = true,
-            onValueChange = { authViewModel.onLoginIdentifierChanged(it) },
-            errorRes = form.loginIdentifierError
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        FormTextField(
-            label = stringResource(R.string.password),
-            value = form.loginPassword,
-            required = true,
-            onValueChange = { authViewModel.onLoginPasswordChanged(it) },
-            errorRes = form.loginPasswordError,
-            isPassword = true,
-        )
+            FormTextField(
+                label = stringResource(R.string.email_or_username),
+                value = form.loginIdentifier,
+                required = true,
+                onValueChange = { authViewModel.onLoginIdentifierChanged(it) },
+                errorRes = form.loginIdentifierError,
+                isError = form.serverError != null
+            )
 
+            FormTextField(
+                label = stringResource(R.string.password),
+                value = form.loginPassword,
+                required = true,
+                onValueChange = { authViewModel.onLoginPasswordChanged(it) },
+                isPassword = true,
+                errorRes = form.loginPasswordError,
+                isError = form.serverError != null
+            )
+        }
         AppButton(
             text = stringResource(R.string.login),
             size = ButtonSize.Max,
@@ -115,17 +123,24 @@ fun LoginScreenContent(
             onClick = onGoogleSignInClick
         )
 
-        when (state) {
-            is AuthState.Loading -> CircularProgressIndicator()
-            is AuthState.Error -> Text(
-                text = state.message,
-                color = MaterialTheme.colorScheme.error
-            )
-            else -> {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(24.dp),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            when (state) {
+                is AuthState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                is AuthState.Error -> Text(
+                    text = stringResource(state.messageRes),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                else -> {}
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             horizontalArrangement = Arrangement.Center,
