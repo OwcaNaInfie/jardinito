@@ -199,7 +199,8 @@ class AuthViewModel : ViewModel() {
         updateLoginForm {
             copy(
                 loginIdentifier = value,
-                loginIdentifierError = null
+                loginIdentifierError = null,
+                serverError = null
             )
         }
     }
@@ -208,7 +209,8 @@ class AuthViewModel : ViewModel() {
         updateLoginForm {
             copy(
                 loginPassword = value,
-                loginPasswordError = null
+                loginPasswordError = null,
+                serverError = null
             )
         }
     }
@@ -244,15 +246,13 @@ class AuthViewModel : ViewModel() {
             _uiState.value = AuthState.Loading
             try {
                 val response = repository.login(identifier, password)
-                Log.d("JARDINITO", "DEBUG login response: $response")
-
                 val userId = response.userId
                 val username = response.username
                 val userEmail = response.email
                 val avatar = response.avatar
 
                 if (userId == null || username == null || userEmail == null || avatar == null) {
-                    _uiState.value = AuthState.Error("Invalid server response")
+                    _uiState.value = AuthState.Error(R.string.error_invalid_response)
                     return@launch
                 }
 
@@ -261,13 +261,21 @@ class AuthViewModel : ViewModel() {
                     username = username,
                     email = userEmail,
                     avatar = avatar
-
                 )
 
                 _uiState.value = AuthState.Success(response.message)
 
+            } catch (e: HttpException) {
+                val errorRes = when (e.code()) {
+                    401 -> R.string.error_invalid_credentials
+                    else -> R.string.error_server
+                }
+                _uiState.value = AuthState.Error(errorRes)
+                updateLoginForm { copy(serverError = errorRes) }
             } catch (e: Exception) {
-                _uiState.value = AuthState.Error("Login failed")
+                val errorRes = R.string.error_server
+                _uiState.value = AuthState.Error(errorRes)
+                updateLoginForm { copy(serverError = errorRes) }
             }
         }
     }
@@ -284,7 +292,7 @@ class AuthViewModel : ViewModel() {
                 val avatar = response.avatar
 
                 if (userId == null || username == null || userEmail == null || avatar == null) {
-                    _uiState.value = AuthState.Error("Invalid Google response")
+                    _uiState.value = AuthState.Error(R.string.error_invalid_response)
                     return@launch
                 }
 
@@ -298,7 +306,7 @@ class AuthViewModel : ViewModel() {
                 _uiState.value = AuthState.Success(response.message)
 
             } catch (e: Exception) {
-                _uiState.value = AuthState.Error("Google login failed")
+                _uiState.value = AuthState.Error(R.string.error_google_login)
             }
         }
     }
@@ -316,7 +324,7 @@ class AuthViewModel : ViewModel() {
                 val avatar = response.avatar
 
                 if (userId == null || username == null || userEmail == null || avatar == null) {
-                    _uiState.value = AuthState.Error("Invalid server response")
+                    _uiState.value = AuthState.Error(R.string.error_invalid_response)
                     return@launch
                 }
 
@@ -329,9 +337,13 @@ class AuthViewModel : ViewModel() {
 
                 _uiState.value = AuthState.Success(response.message)
 
+            } catch (e: HttpException) {
+                _uiState.value = when (e.code()) {
+                    409 -> AuthState.Error(R.string.error_invalid_credentials)
+                    else -> AuthState.Error(R.string.error_server)
+                }
             } catch (e: Exception) {
-                e.printStackTrace()
-                _uiState.value = AuthState.Error(e.message ?: "Unknown error")
+                _uiState.value = AuthState.Error(R.string.error_registration)
             }
         }
     }

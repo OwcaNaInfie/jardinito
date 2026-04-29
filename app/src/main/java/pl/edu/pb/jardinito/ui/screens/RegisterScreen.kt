@@ -81,9 +81,16 @@ fun RegisterScreenContent(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(bottom = 24.dp),
+            .padding(bottom = 16.dp),
 
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FormTextField(
@@ -123,7 +130,7 @@ fun RegisterScreenContent(
             isPassword = true,
             isValid = form.repeatedPasswordIsValid
         )
-
+    }
         AppButton(
             text = stringResource(R.string.register),
             size = ButtonSize.Max,
@@ -148,18 +155,6 @@ fun RegisterScreenContent(
             iconColor = Color.Unspecified,
             onClick = onGoogleSignInClick
         )
-
-        when (state) {
-            is AuthState.Loading -> CircularProgressIndicator()
-            is AuthState.Error -> Text(
-                text = state.message,
-                color = MaterialTheme.colorScheme.error
-            )
-            else -> {
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             horizontalArrangement = Arrangement.Center,

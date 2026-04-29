@@ -27,11 +27,12 @@ fun FormTextField(
     errorRes: Int? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false,
-    isValid: Boolean = false
+    isValid: Boolean = false,
+    isError: Boolean = false
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val isError = errorRes != null
+    val hasError = errorRes != null || isError
     val isValid = isValid
     val errorText = errorRes?.let { stringResource(it) }
 
@@ -56,7 +57,7 @@ fun FormTextField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            isError = isError,
+            isError = hasError,
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (isPassword) KeyboardType.Password else keyboardType
             ),
@@ -81,7 +82,7 @@ fun FormTextField(
             colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = when {
                     isValid -> colors.primary500
-                    isError -> MaterialTheme.colorScheme.error
+                    hasError -> MaterialTheme.colorScheme.error
                     else -> colors.neutralBlack
                 },
                 focusedContainerColor = colors.neutralLight,
@@ -91,12 +92,12 @@ fun FormTextField(
 
                 focusedBorderColor = when {
                     isValid -> colors.primary500
-                    isError -> MaterialTheme.colorScheme.error
+                    hasError -> MaterialTheme.colorScheme.error
                     else -> colors.primary300
                 },
                 unfocusedBorderColor = when {
                     isValid -> colors.primary500
-                    isError -> MaterialTheme.colorScheme.error
+                    hasError -> MaterialTheme.colorScheme.error
                     else -> colors.transparent
                 }
             )
@@ -112,8 +113,6 @@ fun FormTextField(
         )
     }
 }
-
-
 
 @Preview(showBackground = true, apiLevel = 34)
 @Composable

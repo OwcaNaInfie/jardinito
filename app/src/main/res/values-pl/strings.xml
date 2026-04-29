@@ -9,11 +9,17 @@
     <string name="password">Hasło</string>
     <string name="username">Nazwa użytkownika</string>
     <string name="or">lub</string>
-
     <string name="no_account">Nie masz konta?</string>
     <string name="go_to_register"> Zarejestruj się</string>
     <string name="have_account">Masz już konto?</string>
     <string name="go_to_login"> Zaloguj się</string>
+
+    <!-- Auth errors -->
+    <string name="error_invalid_credentials">Nieprawidłowy login lub hasło</string>
+    <string name="error_server">Błąd serwera, spróbuj ponownie później</string>
+    <string name="error_invalid_response">Nieprawidłowa odpowiedź serwera</string>
+    <string name="error_google_login">Logowanie przez Google nie powiodło się</string>
+    <string name="error_registration">Rejestracja nie powiodła się, spróbuj ponownie</string>
 
     <!-- States -->
     <string name="loading">Ładowanie…</string>

@@ -29,9 +29,14 @@ fun AuthEntryScreen(
             if (sheetContent != null) {
                 sheetState.hide()
                 delay(300)
+                sheetContent = target
+                sheetState.show()
+
+            } else {
+                sheetContent = target
+                delay(300)
+                sheetState.show()
             }
-            sheetContent = target
-            sheetState.show()
         }
     }
 
