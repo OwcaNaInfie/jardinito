@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.viewmodel
+package pl.edu.pb.jardinito.viewmodel.state
 
 sealed class AuthState {
     object Idle : AuthState()

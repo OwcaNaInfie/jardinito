@@ -70,6 +70,7 @@ private fun OnboardingScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.primary100)
+            .windowInsetsPadding(WindowInsets(0, 0, 0, 0))
     ) {
         val screenHeight = maxHeight
 
@@ -178,51 +179,6 @@ private fun rememberOnboardingAnimations(
     )
 }
 
-//@Preview(showBackground = true, apiLevel = 34)
-//@Composable
-//fun OnboardingPreviewTitleCentered() {
-//    JardinitoTheme {
-//        OnboardingScreenContent(
-//            showTitle = true,
-//            moveTitle = false,
-//            showBackground = false,
-//            showButtons = false,
-//            onLoginClick = {},
-//            onRegisterClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true, apiLevel = 34)
-//@Composable
-//fun OnboardingPreviewTitleMovedUp() {
-//    JardinitoTheme {
-//        OnboardingScreenContent(
-//            showTitle = true,
-//            moveTitle = true,
-//            showBackground = false,
-//            showButtons = false,
-//            onLoginClick = {},
-//            onRegisterClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(showBackground = true, apiLevel = 34)
-//@Composable
-//fun OnboardingPreviewWithBackground() {
-//    JardinitoTheme {
-//        OnboardingScreenContent(
-//            showTitle = true,
-//            moveTitle = true,
-//            showBackground = true,
-//            showButtons = false,
-//            onLoginClick = {},
-//            onRegisterClick = {}
-//        )
-//    }
-//}
-//
 @Preview(showBackground = true, apiLevel = 34)
 @Composable
 fun OnboardingPreviewFinal() {

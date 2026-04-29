@@ -29,9 +29,8 @@ import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
-import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.viewmodel.AuthState
+import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable
@@ -70,8 +69,6 @@ fun RegisterScreenContent(
     onGoogleSignInClick: () -> Unit
 ) {
     val form by authViewModel.registerFormState.collectAsState()
-
-    // Form validation – do włączania submit button
     val formValid = listOf(
         form.usernameError,
         form.emailError,
@@ -83,7 +80,9 @@ fun RegisterScreenContent(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp),
+
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -134,10 +133,6 @@ fun RegisterScreenContent(
                     onRegisterClick(form.username, form.email, form.password)
             }
         )
-//        AppButton(
-//            text = "TEST 400",
-//            onClick = { authViewModel.testRegister400() }
-//        )
 
         Text(
             text = stringResource(R.string.or),
@@ -160,7 +155,8 @@ fun RegisterScreenContent(
                 text = state.message,
                 color = MaterialTheme.colorScheme.error
             )
-            else -> {}
+            else -> {
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -168,6 +164,7 @@ fun RegisterScreenContent(
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
+
         ) {
             Text(
                 text = stringResource(R.string.have_account),
@@ -186,16 +183,3 @@ fun RegisterScreenContent(
         }
     }
 }
-
-//@Preview(showBackground = true, apiLevel = 34)
-//@Composable
-//fun RegisterScreenPreview() {
-//    JardinitoTheme {
-//        RegisterScreenContent(
-//            state = AuthState.Idle,
-//            onRegisterClick = { _, _, _ -> },
-//            onLoginClick = {},
-//            onGoogleSignInClick = {}
-//        )
-//    }
-//}

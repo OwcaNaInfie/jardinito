@@ -29,11 +29,21 @@
     <string name="validator_password_regex">Must include an uppercase, number and special character.</string>
     <string name="validator_password_length">Password must be at least 8 characters.</string>
     <string name="repeat_password">Repeat password</string>
-    <string name="validator_repeated_password_invalid">Passwords do not match</string>
+    <string name="validator_repeated_password_invalid">Passwords do not match.</string>
     <string name="validator_repeated_password_blank">Repeat the password</string>
-    <string name="username_taken">This username is already taken</string>
-    <string name="email_taken">This email is already registered</string>
-    <string name="validator_blank">Input cannot be empty</string>
+    <string name="username_taken">This username is already taken.</string>
+    <string name="email_taken">This email is already registered.</string>
+    <string name="validator_blank">Input cannot be empty.</string>
     <string name="email_or_username">Email or username</string>
-    <string name="validator_username_email_pattern">Username can\'t be in form of an email</string>
+    <string name="validator_username_email_pattern">Username can\'t be in form of an email.</string>
+
+    <!-- Profile Screen -->
+    <string name="log_out">Log Out</string>
+    <string name="delete_account">Delete account</string>
+    Konto zostanie usunięte na zawsze
+    <!-- Popups -->
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_account_message">Account will be deleted permamently.</string>
 </resources>

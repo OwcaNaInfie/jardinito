@@ -8,4 +8,6 @@ object Routes {
     const val HOME = "home"
     const val FOCUS = "focus"
     const val PROFILE = "profile"
+    const val TAGS = "tags"
+    const val STATISTICS = "statistics"
 }

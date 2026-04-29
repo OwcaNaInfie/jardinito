@@ -28,7 +28,7 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.viewmodel.AuthState
+import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
 @Composable
@@ -70,7 +70,8 @@ fun LoginScreenContent(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -120,7 +121,8 @@ fun LoginScreenContent(
                 text = state.message,
                 color = MaterialTheme.colorScheme.error
             )
-            else -> {}
+            else -> {
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -146,35 +148,3 @@ fun LoginScreenContent(
         }
     }
 }
-
-//@Preview(
-//    name = "Loading",
-//    showBackground = true,
-//    apiLevel = 34)
-//@Composable
-//fun LoginLoadingPreview() {
-//    JardinitoTheme {
-//        LoginScreenContent(
-//            state = AuthState.Loading,
-//            onLoginClick = { _, _ -> },
-//            onRegisterClick = {},
-//            onGoogleSignInClick = {}
-//        )
-//    }
-//}
-//
-//@Preview(
-//    showBackground = true,
-//    apiLevel = 34,
-//    name = "Error")
-//@Composable
-//fun LoginErrorPreview() {
-//    JardinitoTheme {
-//        LoginScreenContent(
-//            state = AuthState.Error("Invalid credentials"),
-//            onLoginClick = { _, _ -> },
-//            onRegisterClick = {},
-//            onGoogleSignInClick = {}
-//        )
-//    }
-//}

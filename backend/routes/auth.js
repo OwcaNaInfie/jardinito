@@ -3,10 +3,12 @@ const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
+const { getRandomDefaultAvatar } = require('../utils/avatarService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Register form Validation
+
 // Check if username is available
 router.get('/check-username', async (req, res) => {
   try {
@@ -64,7 +66,20 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({ username, email, password: hashedPassword });
+        const randomAvatar = getRandomDefaultAvatar();
+
+        const newUser = new User({
+          username,
+          email,
+          password: hashedPassword,
+          provider: 'local',
+          avatar: {
+              default: randomAvatar,
+              custom: null,
+              google: null
+          }
+        });
+
         await newUser.save();
 
         res.status(201).json({
@@ -72,6 +87,7 @@ router.post('/register', async (req, res) => {
             email: newUser.email,
             username: newUser.username,
             userId: newUser._id,
+            avatar: newUser.avatar
         });
     } catch (err) {
         console.error(err);
@@ -79,6 +95,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Login
 router.post('/login', async (req, res) => {
   try {
     console.log("=== LOGIN REQUEST ===");
@@ -115,6 +132,7 @@ router.post('/login', async (req, res) => {
       userId: user._id,
       email: user.email,
       username: user.username,
+      avatar: user.avatar
     });
 
   } catch (error) {
@@ -124,7 +142,7 @@ router.post('/login', async (req, res) => {
 });
 
 
-
+// Google Login
 router.post('/google', async (req, res) => {
   try {
     const { idToken } = req.body;
@@ -148,16 +166,25 @@ router.post('/google', async (req, res) => {
       user = new User({
         username: name || email.split('@')[0],
         email,
-        password: 'GOOGLE_AUTH', // placeholder
+        password: 'GOOGLE_AUTH',
+        provider: 'google',
+        googleId: payload.sub,
+        avatar: {
+            default: getRandomDefaultAvatar(),
+            custom: null,
+            google: payload.picture
+        }
       });
+
       await user.save();
     }
 
     res.status(200).json({
       message: 'Google login successful',
+      userId: user._id,
       email: user.email,
       username: user.username,
-      userId: user._id,
+      avatar: user.avatar
     });
 
   } catch (err) {

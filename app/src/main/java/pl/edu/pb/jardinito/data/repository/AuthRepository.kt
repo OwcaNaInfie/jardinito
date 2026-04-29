@@ -2,6 +2,7 @@ import pl.edu.pb.jardinito.data.model.AuthResponse
 import pl.edu.pb.jardinito.data.model.GoogleLoginRequest
 import pl.edu.pb.jardinito.data.model.LoginRequest
 import pl.edu.pb.jardinito.data.model.RegisterRequest
+import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 
 class AuthRepository {
 

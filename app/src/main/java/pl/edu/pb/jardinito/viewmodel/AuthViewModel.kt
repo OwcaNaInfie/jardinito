@@ -11,14 +11,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.data.model.Avatar
 import pl.edu.pb.jardinito.data.model.LoginFormState
-import pl.edu.pb.jardinito.model.User
+import pl.edu.pb.jardinito.data.model.User
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.data.model.RegisterFormState
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import retrofit2.HttpException
+import pl.edu.pb.jardinito.viewmodel.state.AuthState
+import pl.edu.pb.jardinito.viewmodel.state.UserState
 
 class AuthViewModel : ViewModel() {
 
@@ -35,6 +38,9 @@ class AuthViewModel : ViewModel() {
 
     private val _loginFormState = MutableStateFlow(LoginFormState())
     val loginFormState: StateFlow<LoginFormState> = _loginFormState
+
+    private val _userState = MutableStateFlow<UserState>(UserState.Idle)
+    val userState: StateFlow<UserState> = _userState
 
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
@@ -240,17 +246,22 @@ class AuthViewModel : ViewModel() {
                 val response = repository.login(identifier, password)
                 Log.d("JARDINITO", "DEBUG login response: $response")
 
+                val userId = response.userId
                 val username = response.username
                 val userEmail = response.email
+                val avatar = response.avatar
 
-                if (username == null || userEmail == null) {
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid server response")
                     return@launch
                 }
 
                 _currentUser.value = User(
+                    userId = userId,
                     username = username,
-                    email = userEmail
+                    email = userEmail,
+                    avatar = avatar
+
                 )
 
                 _uiState.value = AuthState.Success(response.message)
@@ -267,17 +278,21 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = repository.googleLogin(idToken)
 
-                val email = response.email
+                val userId = response.userId
                 val username = response.username
+                val userEmail = response.email
+                val avatar = response.avatar
 
-                if (email == null || username == null) {
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid Google response")
                     return@launch
                 }
 
                 _currentUser.value = User(
-                    email = email,
-                    username = username
+                    userId = userId,
+                    username = username,
+                    email = userEmail,
+                    avatar = avatar
                 )
 
                 _uiState.value = AuthState.Success(response.message)
@@ -294,17 +309,22 @@ class AuthViewModel : ViewModel() {
             try {
                 val response = repository.register(username, email, password)
                 Log.d("REGISTER_RESPONSE", response.toString())
-                val usernameResp = response.username
-                val userEmail = response.email
 
-                if (usernameResp == null || userEmail == null) {
+                val userId = response.userId
+                val username = response.username
+                val userEmail = response.email
+                val avatar = response.avatar
+
+                if (userId == null || username == null || userEmail == null || avatar == null) {
                     _uiState.value = AuthState.Error("Invalid server response")
                     return@launch
                 }
 
                 _currentUser.value = User(
-                    username = usernameResp,
-                    email = userEmail
+                    userId = userId,
+                    username = username,
+                    email = userEmail,
+                    avatar = avatar
                 )
 
                 _uiState.value = AuthState.Success(response.message)
@@ -317,6 +337,16 @@ class AuthViewModel : ViewModel() {
     }
 
     fun logout() {
+        _currentUser.value = null
+        _uiState.value = AuthState.Idle
+    }
+
+    // Callback from UserViewModel
+    fun updateAvatar(avatar: Avatar) {
+        _currentUser.update { it?.copy(avatar = avatar) }
+    }
+
+    fun clearUserSession() {
         _currentUser.value = null
         _uiState.value = AuthState.Idle
     }
