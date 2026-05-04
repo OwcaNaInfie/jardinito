@@ -14,6 +14,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.Part
 
 interface ApiService {
+    // Auth and verification
     @POST("api/auth/register")
     suspend fun register(
         @Body request: RegisterRequest
@@ -29,6 +30,41 @@ interface ApiService {
         @Body request: GoogleLoginRequest
     ): AuthResponse
 
+    @POST("api/auth/verify-email")
+    suspend fun verifyEmail(
+        @Body request: VerifyEmailRequest
+    ): AuthResponse
+
+    @POST("api/auth/resend-verification")
+    suspend fun resendVerification(
+        @Body request: ResendVerificationRequest
+    ): MessageResponse
+
+    data class VerifyEmailRequest(
+        val userId: String,
+        val code: String
+    )
+
+    data class ResendVerificationRequest(
+        val userId: String
+    )
+
+    @POST("api/auth/get-user-id")
+    suspend fun getUserId(
+        @Body request: GetUserIdRequest
+    ): GetUserIdResponse
+
+    data class GetUserIdRequest(
+        val identifier: String
+    )
+
+    data class GetUserIdResponse(
+        val userId: String,
+        val email: String,
+        val isVerified: Boolean
+    )
+
+    // Profile
     @Multipart
     @POST("api/user/upload-avatar")
     suspend fun uploadAvatar(
@@ -47,6 +83,20 @@ interface ApiService {
     ): MessageResponse
 
     data class DeleteAccountRequest(
+        val userId: String
+    )
+
+    data class AvatarUploadResponse(
+        val avatar: AvatarDto
+    )
+
+    data class AvatarDto(
+        val default: String,
+        val custom: String? = null,
+        val google: String? = null
+    )
+
+    data class DeleteAvatarRequest(
         val userId: String
     )
 
@@ -69,18 +119,3 @@ data class UsernameAvailabilityResponse(
 data class EmailAvailabilityResponse(
     val emailAvailable: Boolean
 )
-
-data class AvatarUploadResponse(
-    val avatar: AvatarDto
-)
-
-data class AvatarDto(
-    val default: String,
-    val custom: String? = null,
-    val google: String? = null
-)
-
-data class DeleteAvatarRequest(
-    val userId: String
-)
-

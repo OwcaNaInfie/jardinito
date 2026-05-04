@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { startCronJobs } = require('./utils/cronService');
 
 // Load .env
 dotenv.config();
@@ -31,7 +32,10 @@ app.use('/api/user', userRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(() => {
+  console.log('MongoDB connected');
+  startCronJobs();
+  })
   .catch(err => console.log(err));
 
 // Root route

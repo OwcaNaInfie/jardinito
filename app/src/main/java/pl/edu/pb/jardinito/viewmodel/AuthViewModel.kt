@@ -1,7 +1,6 @@
 package pl.edu.pb.jardinito.viewmodel
 
 import AuthRepository
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -42,6 +41,12 @@ class AuthViewModel : ViewModel() {
     private val _userState = MutableStateFlow<UserState>(UserState.Idle)
     val userState: StateFlow<UserState> = _userState
 
+    private val _pendingUserId = MutableStateFlow<String?>(null)
+    val pendingUserId: StateFlow<String?> = _pendingUserId
+
+    private val _pendingEmail = MutableStateFlow<String?>(null)
+    val pendingEmail: StateFlow<String?> = _pendingEmail
+
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
     private var passwordJob: Job? = null
@@ -58,22 +63,6 @@ class AuthViewModel : ViewModel() {
     ) {
         _loginFormState.update { it.block() }
     }
-
-    fun testRegister400() {
-        viewModelScope.launch {
-            try {
-                repository.register(
-                    username = "",
-                    email = "test@test.com",
-                    password = "Haslo123!"
-                )
-            } catch (e: HttpException) {
-                Log.d("REGISTER_TEST", "Status: ${e.code()}")
-                Log.d("REGISTER_TEST", "Body: ${e.response()?.errorBody()?.string()}")
-            }
-        }
-    }
-
 
     fun onUsernameChanged(username: String) {
         updateRegisterForm { copy(username = username, usernameTouched = true) }
@@ -266,16 +255,34 @@ class AuthViewModel : ViewModel() {
                 _uiState.value = AuthState.Success(response.message)
 
             } catch (e: HttpException) {
-                val errorRes = when (e.code()) {
-                    401 -> R.string.error_invalid_credentials
-                    else -> R.string.error_server
+                when (e.code()) {
+                    401 -> {
+                        val errorRes = R.string.error_invalid_credentials
+                        _uiState.value = AuthState.Error(errorRes)
+                        updateLoginForm { copy(serverError = errorRes) }
+                    }
+                    403 -> {
+                        viewModelScope.launch {
+                            try {
+                                val result = repository.getUserId(identifier)
+                                _pendingUserId.value = result.userId
+                                _pendingEmail.value = result.email
+                                _uiState.value = AuthState.UnverifiedAccount
+                            } catch (e: Exception) {
+                                _uiState.value = AuthState.Error(R.string.error_server)
+                            }
+                        }
+                    }
+                    else -> {
+                        val errorRes = R.string.error_server
+                        _uiState.value = AuthState.Error(errorRes)
+                        updateLoginForm { copy(serverError = errorRes) }
+                    }
                 }
-                _uiState.value = AuthState.Error(errorRes)
-                updateLoginForm { copy(serverError = errorRes) }
             } catch (e: Exception) {
                 val errorRes = R.string.error_server
                 _uiState.value = AuthState.Error(errorRes)
-                updateLoginForm { copy(serverError = errorRes) }
+                updateLoginForm { copy(serverError = errorRes)}
             }
         }
     }
@@ -316,7 +323,6 @@ class AuthViewModel : ViewModel() {
             _uiState.value = AuthState.Loading
             try {
                 val response = repository.register(username, email, password)
-                Log.d("REGISTER_RESPONSE", response.toString())
 
                 val userId = response.userId
                 val username = response.username
@@ -328,14 +334,9 @@ class AuthViewModel : ViewModel() {
                     return@launch
                 }
 
-                _currentUser.value = User(
-                    userId = userId,
-                    username = username,
-                    email = userEmail,
-                    avatar = avatar
-                )
-
-                _uiState.value = AuthState.Success(response.message)
+                _pendingUserId.value = userId
+                _pendingEmail.value = userEmail
+                _uiState.value = AuthState.VerificationRequired
 
             } catch (e: HttpException) {
                 _uiState.value = when (e.code()) {
@@ -345,6 +346,69 @@ class AuthViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.value = AuthState.Error(R.string.error_registration)
             }
+        }
+    }
+
+    fun verifyEmail(code: String) {
+        val userId = _pendingUserId.value ?: return
+
+        viewModelScope.launch {
+            _uiState.value = AuthState.Loading
+            try {
+                val response = repository.verifyEmail(userId, code)
+
+                val username = response.username
+                val userEmail = response.email
+                val avatar = response.avatar
+
+                if (username == null || userEmail == null || avatar == null) {
+                    _uiState.value = AuthState.Error(R.string.error_invalid_response)
+                    return@launch
+                }
+
+                _currentUser.value = User(
+                    userId = userId,
+                    username = username,
+                    email = userEmail,
+                    avatar = avatar
+                )
+
+                _pendingUserId.value = null
+                _pendingEmail.value = null
+                _uiState.value = AuthState.Success(response.message)
+
+            } catch (e: HttpException) {
+                _uiState.value = when (e.code()) {
+                    400 -> AuthState.Error(R.string.error_invalid_code)
+                    410 -> AuthState.Error(R.string.error_code_expired)
+                    else -> AuthState.Error(R.string.error_server)
+                }
+            } catch (e: Exception) {
+                _uiState.value = AuthState.Error(R.string.error_server)
+            }
+        }
+    }
+
+    fun resendVerification() {
+        val userId = _pendingUserId.value
+
+        if (userId == null) {
+            _uiState.value = AuthState.Error(R.string.error_server)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                repository.resendVerification(userId)
+            } catch (e: Exception) {
+                _uiState.value = AuthState.Error(R.string.error_server)
+            }
+        }
+    }
+
+    fun resetUiState() {
+        if (_uiState.value is AuthState.Error) {
+            _uiState.value = AuthState.Idle
         }
     }
 
