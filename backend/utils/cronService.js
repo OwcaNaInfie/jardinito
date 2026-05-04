@@ -1,23 +1,29 @@
 const cron = require('node-cron');
 const User = require('../models/User');
+const VerificationToken = require('../models/VerificationToken');
 
 const startCronJobs = () => {
-    // Uruchamia się raz dziennie
-//    cron.schedule('0 2 * * *', async () => {
-    // Uruchamia się co minutę
-    cron.schedule('* * * * *', async () => {
+//Raz dziennie
+    cron.schedule('0 2 * * *', async () => {
+//Co minutę
+//cron.schedule('* * * * *', async () => {
+    console.log('[CRON] Running at', new Date().toISOString());
+    try {
+        const expiredTokens = await VerificationToken.find({
+            type: 'email_verification',
+            accountExpiry: { $lt: new Date() }
+        });
+        console.log('[CRON] Found expired tokens:', expiredTokens.length);
+            if (expiredTokens.length > 0) {
+                const userIds = expiredTokens.map(t => t.userId);
 
-        try {
-            const result = await User.deleteMany({
-                isVerified: false,
-                accountExpiry: { $lt: new Date() }
-            });
+                await User.deleteMany({ _id: { $in: userIds } });
+                await VerificationToken.deleteMany({ _id: { $in: expiredTokens.map(t => t._id) } });
 
-            if (result.deletedCount > 0) {
-                console.log(`[CRON] Deleted ${result.deletedCount} unverified accounts`);
+                console.log(`[CRON] Deleted ${expiredTokens.length} unverified accounts`);
             }
         } catch (err) {
-            console.error('[CRON] Error deleting unverified accounts:', err);
+            console.error('[CRON] Error:', err);
         }
     });
 

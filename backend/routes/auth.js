@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const { getRandomDefaultAvatar } = require('../utils/avatarService');
 const { sendVerificationEmail } = require('../utils/emailService');
+const VerificationToken = require('../models/VerificationToken');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -68,12 +69,6 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const randomAvatar = getRandomDefaultAvatar();
 
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const verificationCodeExpiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minuty
-
-        const accountExpiry = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 dni
-//        const accountExpiry = new Date(Date.now() + 2 * 60 * 1000); // 2 minuty
-
         const newUser = new User({
             username,
             email,
@@ -84,13 +79,21 @@ router.post('/register', async (req, res) => {
                 custom: null,
                 google: null
             },
-            isVerified: false,
-            verificationCode,
-            verificationCodeExpiry,
-            accountExpiry
+            isVerified: false
         });
 
         await newUser.save();
+
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        await VerificationToken.create({
+            userId: newUser._id,
+            type: 'email_verification',
+            code: verificationCode,
+            codeExpiry: new Date(Date.now() + 2 * 60 * 1000),
+            accountExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        });
+
         await sendVerificationEmail(email, verificationCode);
 
         res.status(201).json({
@@ -220,19 +223,27 @@ router.post('/verify-email', async (req, res) => {
             return res.status(400).json({ message: 'Account already verified' });
         }
 
-        if (new Date() > user.verificationCodeExpiry) {
+        const token = await VerificationToken.findOne({
+            userId,
+            type: 'email_verification'
+        });
+
+        if (!token) {
+            return res.status(404).json({ message: 'Verification token not found' });
+        }
+
+        if (new Date() > token.codeExpiry) {
             return res.status(410).json({ message: 'Code expired' });
         }
 
-        if (user.verificationCode !== code) {
+        if (token.code !== code) {
             return res.status(400).json({ message: 'Invalid code' });
         }
 
         user.isVerified = true;
-        user.verificationCode = null;
-        user.verificationCodeExpiry = null;
-        user.accountExpiry = null;
         await user.save();
+
+        await VerificationToken.deleteOne({ _id: token._id });
 
         res.status(200).json({
             message: 'Email verified successfully',
@@ -262,11 +273,15 @@ router.post('/resend-verification', async (req, res) => {
         }
 
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const verificationCodeExpiry = new Date(Date.now() + 2 * 60 * 1000);
 
-        user.verificationCode = verificationCode;
-        user.verificationCodeExpiry = verificationCodeExpiry;
-        await user.save();
+        await VerificationToken.findOneAndUpdate(
+            { userId, type: 'email_verification' },
+            {
+                code: verificationCode,
+                codeExpiry: new Date(Date.now() + 2 * 60 * 1000)
+            },
+            { upsert: true }
+        );
 
         await sendVerificationEmail(user.email, verificationCode);
 

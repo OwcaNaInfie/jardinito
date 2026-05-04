@@ -26,10 +26,7 @@ const userSchema = new mongoose.Schema({
       type: avatarSchema,
       required: true
   },
-  isVerified: { type: Boolean, default: false },
-  verificationCode: { type: String, default: null },
-  verificationCodeExpiry: { type: Date, default: null },
-  accountExpiry: { type: Date, default: null }
+  isVerified: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
