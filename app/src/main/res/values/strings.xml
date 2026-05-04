@@ -26,6 +26,18 @@
     <string name="login_success">Login successful</string>
     <string name="register_success">Registration successful</string>
 
+    <!-- Account verification -->
+    <string name="verification_title">Email Verification</string>
+    <string name="verification_message">We sent the verification code to %1$s. The code is valid for 2 minutes.</string>
+    <string name="verification_code_hint">Enter code</string>
+    <string name="verify">Verify</string>
+    <string name="resend_code">Resend code</string>
+    <string name="error_invalid_code">Invalid verification code</string>
+    <string name="error_code_expired">Code expired, send new</string>
+    <string name="error_email_not_verified">Verify your email address before logging in</string>
+    <string name="verification_resend_prompt">Your account has not been verified yet. Would you like to send a new verification code?</string>
+    <string name="verification_code_sent">A new verification code has been sent to %1$s</string>
+
     <!-- Home Screen -->
     <string name="welcome_message">Welcome to Jardinito 🌱</string>
 

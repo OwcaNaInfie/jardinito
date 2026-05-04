@@ -6,13 +6,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import pl.edu.pb.jardinito.data.remote.ApiService
-import pl.edu.pb.jardinito.data.remote.AvatarUploadResponse
-import pl.edu.pb.jardinito.data.remote.DeleteAvatarRequest
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 
 class UserRepository {
 
-    suspend fun uploadAvatar(userId: String, imageUri: Uri, context: Context): AvatarUploadResponse {
+    suspend fun uploadAvatar(userId: String, imageUri: Uri, context: Context): ApiService.AvatarUploadResponse {
         val contentResolver = context.contentResolver
         val inputStream = contentResolver.openInputStream(imageUri)
             ?: throw Exception("Cannot open image")
@@ -29,8 +27,8 @@ class UserRepository {
         return RetrofitInstance.api.uploadAvatar(imagePart, userIdPart)
     }
 
-    suspend fun deleteAvatar(userId: String): AvatarUploadResponse {
-        return RetrofitInstance.api.deleteAvatar(DeleteAvatarRequest(userId))
+    suspend fun deleteAvatar(userId: String): ApiService.AvatarUploadResponse {
+        return RetrofitInstance.api.deleteAvatar(ApiService.DeleteAvatarRequest(userId))
     }
 
     suspend fun deleteAccount(userId: String): ApiService.MessageResponse {

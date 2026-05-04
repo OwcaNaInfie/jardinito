@@ -7,5 +7,6 @@ data class AuthResponse(
     val userId: String?,
     val username: String?,
     val email: String?,
-    val avatar: Avatar?
+    val avatar: Avatar?,
+    val isVerified: Boolean? = null
 )

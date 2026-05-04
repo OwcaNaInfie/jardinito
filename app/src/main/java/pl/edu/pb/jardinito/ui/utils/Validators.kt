@@ -48,3 +48,7 @@ fun validateRepeatedPassword(password: String, repeatedPassword: String): Int? {
         return R.string.validator_repeated_password_invalid
     return null
 }
+
+fun validateVerificationCode(input: String): Boolean {
+    return input.length <= 6 && input.all { it.isDigit() }
+}
