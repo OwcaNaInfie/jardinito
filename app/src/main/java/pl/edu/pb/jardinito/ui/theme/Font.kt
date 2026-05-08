@@ -36,6 +36,20 @@ val ComicNeue = FontFamily(
     )
 )
 
+val MsMadi = FontFamily(
+    Font(
+        resId = R.font.ms_madi_regular,
+        weight = FontWeight.Normal
+    )
+)
+
+val BadScript = FontFamily(
+    Font(
+        resId = R.font.bad_script_regular,
+        weight = FontWeight.Normal
+    )
+)
+
 val MountainsOfChristmas = FontFamily(
     Font(
         resId = R.font.mountains_of_christmas_regular,

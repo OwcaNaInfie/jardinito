@@ -14,6 +14,7 @@ import pl.edu.pb.jardinito.data.model.AuthSheetState
 import pl.edu.pb.jardinito.ui.components.AuthBottomSheet
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant
+import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 
@@ -32,6 +33,8 @@ fun AuthEntryScreen(
     val pendingEmail by authViewModel.pendingEmail.collectAsState()
     var showUnverifiedDialog by remember { mutableStateOf(false) }
     var showCodeSentDialog by remember { mutableStateOf(false) }
+    var showResetCodeSentDialog by remember { mutableStateOf(false) }
+
 
     fun switchSheet(target: AuthSheetState) {
         scope.launch {
@@ -56,6 +59,8 @@ fun AuthEntryScreen(
             is AuthState.UnverifiedAccount -> {
                 showUnverifiedDialog = true
             }
+            is AuthState.PasswordResetRequired -> showResetCodeSentDialog = true
+            is AuthState.PasswordResetSuccess -> switchSheet(AuthSheetState.Login)
             else -> {}
         }
     }
@@ -69,7 +74,11 @@ fun AuthEntryScreen(
         sheetContent?.let { state ->
             AuthBottomSheet(
                 sheetState = sheetState,
-                onDismiss = { sheetContent = null }
+                onDismiss = {
+                    sheetContent = null
+                    authViewModel.resetUiState()
+                    authViewModel.resetPasswordFlow()
+                }
             ) {
                 when (state) {
                     AuthSheetState.Login -> LoginScreen(
@@ -79,7 +88,8 @@ fun AuthEntryScreen(
                             onLoginSuccess()
                         },
                         onRegisterClick = { switchSheet(AuthSheetState.Register) },
-                        onGoogleSignInClick = onGoogleSignInClick
+                        onGoogleSignInClick = onGoogleSignInClick,
+                        onForgotPasswordClick = { switchSheet(AuthSheetState.ForgotPassword) }
                     )
                     AuthSheetState.Register -> RegisterScreen(
                         authViewModel = authViewModel,
@@ -96,6 +106,12 @@ fun AuthEntryScreen(
                         onVerificationSuccess = {
                             sheetContent = null
                             onRegisterSuccess()
+                        }
+                    )
+                    AuthSheetState.ForgotPassword -> ForgotPasswordScreen(
+                        authViewModel = authViewModel,
+                        onPasswordResetSuccess = {
+                            switchSheet(AuthSheetState.Login)
                         }
                     )
                 }
@@ -136,6 +152,22 @@ fun AuthEntryScreen(
                     }
                 }
             )
+        }
+
+        if (showResetCodeSentDialog) {
+            ConfirmDialog(
+                title = stringResource(R.string.reset_password),
+                message = stringResource(R.string.reset_code_sent),
+                confirmText = "OK",
+                singleButton = true,
+                variant = DialogVariant.Success,
+                onConfirm = { showResetCodeSentDialog = false },
+                onDismiss = { showResetCodeSentDialog = false }
+            )
+        }
+
+        if (uiState is AuthState.Loading) {
+            LoadingOverlay()
         }
     }
 }

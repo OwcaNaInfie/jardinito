@@ -64,6 +64,32 @@ interface ApiService {
         val isVerified: Boolean
     )
 
+    // Reset password
+    @POST("api/auth/forgot-password")
+    suspend fun forgotPassword(
+        @Body request: ForgotPasswordRequest
+    ): ForgotPasswordResponse
+
+    @POST("api/auth/reset-password")
+    suspend fun resetPassword(
+        @Body request: ResetPasswordRequest
+    ): MessageResponse
+
+    data class ForgotPasswordRequest(
+        val identifier: String
+    )
+
+    data class ForgotPasswordResponse(
+        val message: String,
+        val userId: String?
+    )
+
+    data class ResetPasswordRequest(
+        val userId: String,
+        val code: String,
+        val newPassword: String
+    )
+
     // Profile
     @Multipart
     @POST("api/user/upload-avatar")

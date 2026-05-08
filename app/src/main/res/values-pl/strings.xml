@@ -15,6 +15,7 @@
     <string name="go_to_login"> Zaloguj się</string>
 
     <!-- Auth errors -->
+    <string name="error_title">Błąd</string>
     <string name="error_invalid_credentials">Nieprawidłowy login lub hasło</string>
     <string name="error_server">Błąd serwera, spróbuj ponownie później</string>
     <string name="error_invalid_response">Nieprawidłowa odpowiedź serwera</string>
@@ -42,6 +43,15 @@
     <string name="verification_resend_prompt">Twoje konto nie zostało jeszcze zweryfikowane. Czy chcesz wysłać nowy kod weryfikacyjny?</string>
     <string name="verification_code_sent">Nowy kod weryfikacyjny został wysłany na adres %1$s</string>
 
+    <!-- Reset password -->
+    <string name="forgot_password">Zapomniałeś hasła?</string>
+    <string name="reset_password">Resetuj hasło</string>
+    <string name="enter_email_or_username">Wpisz email lub nazwę użytkownika</string>
+    <string name="send_reset_code">Wyślij kod</string>
+    <string name="new_password">Nowe hasło</string>
+    <string name="password_reset_success">Hasło zostało zmienione pomyślnie</string>
+    <string name="error_google_account">Konta Google nie mogą resetować hasła</string>
+    <string name="reset_code_sent">Kod do resetu hasła został wysłany na Twój adres email.</string>
     <!-- Validators -->
     <string name="validator_email_blank">Email jest wymagany.</string>
     <string name="validator_email_invalid">Niepoprawny adres email.</string>
