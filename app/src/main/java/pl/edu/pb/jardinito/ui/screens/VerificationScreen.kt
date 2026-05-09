@@ -2,13 +2,10 @@ package pl.edu.pb.jardinito.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,16 +32,16 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
-import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 
 @Composable
 fun VerificationScreen(
-    authViewModel: AuthViewModel,
+    verificationViewModel: VerificationViewModel,
     email: String?,
     onVerificationSuccess: () -> Unit
 ) {
-    val state by authViewModel.uiState.collectAsState()
+    val state by verificationViewModel.uiState.collectAsState()
 
     LaunchedEffect(state) {
         if (state is AuthState.Success) {
@@ -55,9 +52,9 @@ fun VerificationScreen(
     VerificationScreenContent(
         state = state,
         email = email,
-        onVerifyClick = { code -> authViewModel.verifyEmail(code) },
-        onResendClick = { authViewModel.resendVerification() },
-        onCodeChange = { authViewModel.resetUiState() }
+        onVerifyClick = { code -> verificationViewModel.verifyEmail(code) },
+        onResendClick = { verificationViewModel.resendVerification() },
+        onCodeChange = { verificationViewModel.resetUiState() }
     )
 }
 
