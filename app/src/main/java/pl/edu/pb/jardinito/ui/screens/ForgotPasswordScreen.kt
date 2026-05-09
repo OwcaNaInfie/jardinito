@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.autoSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
+import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 
@@ -70,13 +72,11 @@ fun ForgotPasswordScreen(
         ForgotPasswordResetContent(
             state = state,
             identifier = lastIdentifier,
+            authViewModel = authViewModel,
             onResetPassword = { code, newPassword ->
                 authViewModel.resetPassword(code, newPassword)
             },
-            onResendCode = {
-                android.util.Log.d("ForgotPassword", "resendCode identifier: $lastIdentifier")
-                authViewModel.forgotPassword(lastIdentifier)
-            }
+            onResendCode = { authViewModel.forgotPassword(lastIdentifier) }
         )
     }
 }
@@ -129,15 +129,17 @@ fun ForgotPasswordRequestContent(
 fun ForgotPasswordResetContent(
     state: AuthState,
     identifier: String,
+    authViewModel: AuthViewModel,
     onResetPassword: (String, String) -> Unit,
     onResendCode: () -> Unit
 ) {
-    var code by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var repeatedPassword by remember { mutableStateOf("") }
+//    var code by remember { mutableStateOf("") }
+//    var newPassword by remember { mutableStateOf("") }
+//    var repeatedPassword by remember { mutableStateOf("") }
+    val form by authViewModel.resetPasswordFormState.collectAsState()
     var timeLeft by remember { mutableIntStateOf(120) }
     var showCodeSentDialog by remember { mutableStateOf(false) }
-    var passwordError by remember { mutableStateOf<Int?>(null) }
+//    var passwordError by remember { mutableStateOf<Int?>(null) }
 
     val serverError = if (state is AuthState.Error) state.messageRes else null
 
@@ -175,9 +177,11 @@ fun ForgotPasswordResetContent(
 
             FormTextField(
                 label = stringResource(R.string.verification_code_hint),
-                value = code,
+                value = form.code,
                 onValueChange = {
-                    if (it.length <= 6 && it.all { c -> c.isDigit() }) code = it
+                    if (validateVerificationCode(it)) {
+                        authViewModel.onResetCodeChanged(it)
+                    }
                 },
                 required = true,
                 isError = serverError != null,
@@ -187,28 +191,22 @@ fun ForgotPasswordResetContent(
 
             FormTextField(
                 label = stringResource(R.string.new_password),
-                value = newPassword,
-                onValueChange = {
-                    newPassword = it
-                    passwordError = validatePassword(it)
-                },
+                value = form.newPassword,
+                onValueChange = { authViewModel.onResetPasswordChanged(it) },
                 required = true,
                 isPassword = true,
-                errorRes = passwordError,
-                isValid = passwordError == null && newPassword.isNotEmpty()
+                errorRes = form.newPasswordError,
+                isValid = form.newPasswordIsValid
             )
 
             FormTextField(
                 label = stringResource(R.string.repeat_password),
-                value = repeatedPassword,
-                onValueChange = {
-                    repeatedPassword = it
-                    passwordError = validateRepeatedPassword(newPassword, it)
-                },
+                value = form.repeatedPassword,
+                onValueChange = { authViewModel.onResetRepeatedPasswordChanged(it) },
                 required = true,
                 isPassword = true,
-                errorRes = passwordError,
-                isValid = passwordError == null && repeatedPassword.isNotEmpty()
+                errorRes = form.repeatedPasswordError,
+                isValid = form.repeatedPasswordIsValid
             )
 
             AppButton(
@@ -216,10 +214,10 @@ fun ForgotPasswordResetContent(
                 size = ButtonSize.Max,
                 variant = ButtonVariant.Tertiary,
                 enabled = timeLeft > 0
-                        && code.length == 6
-                        && validatePassword(newPassword) == null
-                        && validateRepeatedPassword(newPassword, repeatedPassword) == null,
-                onClick = { onResetPassword(code, newPassword) }
+                        && form.code.length == 6
+                        && form.newPasswordIsValid
+                        && form.repeatedPasswordIsValid,
+                onClick = { onResetPassword(form.code, form.newPassword) }
             )
 
             TextButton(
@@ -257,19 +255,6 @@ fun ForgotPasswordRequestPreview() {
         ForgotPasswordRequestContent(
             state = AuthState.Idle,
             onSendCode = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFE0F4F5, apiLevel = 34)
-@Composable
-fun ForgotPasswordResetPreview() {
-    JardinitoTheme {
-        ForgotPasswordResetContent(
-            state = AuthState.Idle,
-            onResetPassword = {_,_->},
-            onResendCode = {},
-            identifier = ""
         )
     }
 }
