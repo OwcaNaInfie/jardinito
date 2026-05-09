@@ -47,6 +47,9 @@ class AuthViewModel : ViewModel() {
     private val _pendingEmail = MutableStateFlow<String?>(null)
     val pendingEmail: StateFlow<String?> = _pendingEmail
 
+    private val _pendingResetIdentifier = MutableStateFlow("")
+    val pendingResetIdentifier: StateFlow<String> = _pendingResetIdentifier
+
     private var usernameJob: Job? = null
     private var emailJob: Job? = null
     private var passwordJob: Job? = null
@@ -398,6 +401,7 @@ class AuthViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
+            _uiState.value = AuthState.Loading
             try {
                 repository.resendVerification(userId)
             } catch (e: Exception) {
@@ -407,9 +411,61 @@ class AuthViewModel : ViewModel() {
     }
 
     fun resetUiState() {
-        if (_uiState.value is AuthState.Error) {
+        if (_uiState.value !is AuthState.Loading) {
             _uiState.value = AuthState.Idle
         }
+    }
+
+    private val _pendingResetPasswordUserId = MutableStateFlow<String?>(null)
+    val pendingResetPasswordUserId: StateFlow<String?> = _pendingResetPasswordUserId
+
+    fun forgotPassword(identifier: String) {
+        viewModelScope.launch {
+            _uiState.value = AuthState.Loading
+            try {
+                val response = repository.forgotPassword(identifier)
+                _pendingResetPasswordUserId.value = response.userId
+                _uiState.value = AuthState.PasswordResetRequired
+            } catch (e: HttpException) {
+                android.util.Log.e("ForgotPassword", "HTTP error: ${e.code()}")
+                _uiState.value = when (e.code()) {
+                    403 -> AuthState.Error(R.string.error_email_not_verified)
+                    400 -> AuthState.Error(R.string.error_google_account)
+                    422 -> AuthState.Error(R.string.validator_blank)
+                    else -> AuthState.Error(R.string.error_server)
+                }
+            } catch (e: Exception) {
+                _uiState.value = AuthState.Error(R.string.error_server)
+            }
+        }
+    }
+
+    fun resetPassword(code: String, newPassword: String) {
+        val userId = _pendingResetPasswordUserId.value ?: return
+
+        viewModelScope.launch {
+            _uiState.value = AuthState.Loading
+            try {
+                repository.resetPassword(userId, code, newPassword)
+                _pendingResetPasswordUserId.value = null
+                _uiState.value = AuthState.PasswordResetSuccess
+            } catch (e: HttpException) {
+                android.util.Log.e("ResetPassword", "HTTP error: ${e.code()}")
+                _uiState.value = when (e.code()) {
+                    400 -> AuthState.Error(R.string.error_invalid_code)
+                    404 -> AuthState.Error(R.string.error_invalid_code)
+                    410 -> AuthState.Error(R.string.error_code_expired)
+                    else -> AuthState.Error(R.string.error_server)
+                }
+            } catch (e: Exception) {
+                _uiState.value = AuthState.Error(R.string.error_server)
+            }
+        }
+    }
+
+    fun resetPasswordFlow() {
+        _pendingResetPasswordUserId.value = null
+        _pendingResetIdentifier.value = ""
     }
 
     fun logout() {

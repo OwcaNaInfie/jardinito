@@ -57,5 +57,13 @@ class AuthRepository {
     suspend fun getUserId(identifier: String): ApiService.GetUserIdResponse {
         return RetrofitInstance.api.getUserId(ApiService.GetUserIdRequest(identifier))
     }
+
+    suspend fun forgotPassword(identifier: String): ApiService.ForgotPasswordResponse {
+        return RetrofitInstance.api.forgotPassword(ApiService.ForgotPasswordRequest(identifier))
+    }
+
+    suspend fun resetPassword(userId: String, code: String, newPassword: String): ApiService.MessageResponse {
+        return RetrofitInstance.api.resetPassword(ApiService.ResetPasswordRequest(userId, code, newPassword))
+    }
 }
 

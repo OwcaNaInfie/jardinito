@@ -26,19 +26,28 @@ val Typography = Typography(
 
     // H1 Heading (32)
     headlineLarge = TextStyle(
-        fontFamily = ComicNeue,
+        fontFamily = MsMadi,
         fontWeight = FontWeight.Normal,
         fontSize = 32.sp,
         lineHeight = 32.sp
     ),
 
-    // H2 Heading (20)
+    // H2 Heading (28)
     headlineMedium = TextStyle(
-        fontFamily = ComicNeue,
+        fontFamily = MsMadi,
         fontWeight = FontWeight.Normal,
         fontSize = 28.sp,
         lineHeight = 28.sp
     ),
+
+    // H3 Heading (24)
+    headlineSmall = TextStyle(
+        fontFamily = MsMadi,
+        fontWeight = FontWeight.Normal,
+        fontSize = 24.sp,
+        lineHeight = 24.sp
+    ),
+
 
     // 24
     titleLarge = TextStyle(

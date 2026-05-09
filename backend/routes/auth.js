@@ -4,13 +4,12 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
 const { getRandomDefaultAvatar } = require('../utils/avatarService');
-const { sendVerificationEmail } = require('../utils/emailService');
 const VerificationToken = require('../models/VerificationToken');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Register form Validation
-
 // Check if username is available
 router.get('/check-username', async (req, res) => {
   try {
@@ -154,7 +153,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-
 // Google Login
 router.post('/google', async (req, res) => {
   try {
@@ -206,6 +204,7 @@ router.post('/google', async (req, res) => {
   }
 });
 
+// Email verification
 router.post('/verify-email', async (req, res) => {
     try {
         const { userId, code } = req.body;
@@ -314,6 +313,97 @@ router.post('/get-user-id', async (req, res) => {
             email: user.email,
             isVerified: user.isVerified
         });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Password reset
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { identifier } = req.body;
+        if (!identifier) {
+            return res.status(422).json({ message: 'Email or username is required' });
+        }
+
+        const identifierClean = identifier.trim();
+        const user = await User.findOne({
+            $or: [
+                { email: identifierClean },
+                { username: identifierClean }
+            ]
+        });
+
+        // Always returning 200 for safety reasons
+        if (!user) {
+            return res.status(200).json({ message: 'If account exists, code will be sent' });
+        }
+
+        if (!user.isVerified) {
+            return res.status(403).json({ message: 'Account not verified' });
+        }
+
+        if (user.provider === 'google') {
+            return res.status(400).json({ message: 'Google account cannot reset password' });
+        }
+
+        const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+        await VerificationToken.findOneAndUpdate(
+            { userId: user._id, type: 'password_reset' },
+            {
+                code: resetCode,
+                codeExpiry: new Date(Date.now() + 2 * 60 * 1000)
+            },
+            { upsert: true }
+        );
+
+        await sendPasswordResetEmail(user.email, resetCode);
+
+        res.status(200).json({
+            message: 'Reset code sent',
+            userId: user._id
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { userId, code, newPassword } = req.body;
+
+        if (!userId || !code || !newPassword) {
+            return res.status(400).json({ message: 'userId, code and newPassword are required' });
+        }
+
+        const token = await VerificationToken.findOne({
+            userId,
+            type: 'password_reset'
+        });
+
+        if (!token) {
+            return res.status(404).json({ message: 'Reset token not found' });
+        }
+
+        if (new Date() > token.codeExpiry) {
+            return res.status(410).json({ message: 'Code expired' });
+        }
+
+        if (token.code !== code) {
+            return res.status(400).json({ message: 'Invalid code' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await User.findByIdAndUpdate(userId, { password: hashedPassword });
+        await VerificationToken.deleteOne({ _id: token._id });
+
+        res.status(200).json({ message: 'Password reset successfully' });
 
     } catch (err) {
         console.error(err);

@@ -31,6 +31,7 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.colors
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.SecureFlagPolicy
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 
 enum class DialogVariant { Info, Warning, Error, Success }
@@ -48,7 +49,11 @@ fun ConfirmDialog(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+            securePolicy = SecureFlagPolicy.Inherit
+        )
     ) {
         Box(
             modifier = Modifier
