@@ -29,7 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -42,22 +42,27 @@ import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
+import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(
-    authViewModel: AuthViewModel,
     onGoogleSignInClick: () -> Unit
 ) {
     val navController = rememberNavController()
     val actions = remember(navController) { NavActions(navController) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val userViewModel: UserViewModel = viewModel()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var isEditingProfile by rememberSaveable { mutableStateOf(false) }
+
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
+    val verificationViewModel: VerificationViewModel = hiltViewModel()
+    val passwordResetViewModel: PasswordResetViewModel = hiltViewModel()
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
@@ -130,6 +135,8 @@ fun AppNavGraph(
                 composable(Routes.ENTRY) {
                     AuthEntryScreen(
                         authViewModel = authViewModel,
+                        verificationViewModel = verificationViewModel,
+                        passwordResetViewModel = passwordResetViewModel,
                         onRegisterSuccess = actions.toHomeFromRegister,
                         onLoginSuccess = actions.toHomeFromLogin,
                         onGoogleSignInClick = onGoogleSignInClick
@@ -155,7 +162,7 @@ fun AppNavGraph(
                             onLogout = {
                                 authViewModel.logout()
                                 navController.navigate(Routes.ENTRY) {
-                                    popUpTo(Routes.HOME) { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             authViewModel = authViewModel,

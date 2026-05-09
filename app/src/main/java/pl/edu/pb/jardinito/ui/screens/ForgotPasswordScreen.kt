@@ -3,14 +3,10 @@ package pl.edu.pb.jardinito.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.autoSaver
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,25 +29,22 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
-import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.ui.utils.validatePassword
-import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
 import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
-import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 
 @Composable
 fun ForgotPasswordScreen(
-    authViewModel: AuthViewModel,
+    passwordResetViewModel: PasswordResetViewModel,
     onPasswordResetSuccess: () -> Unit
 ) {
-    val state by authViewModel.uiState.collectAsState()
-    val pendingUserId by authViewModel.pendingResetPasswordUserId.collectAsState()
+    val state by passwordResetViewModel.uiState.collectAsState()
+    val pendingUserId by passwordResetViewModel.pendingResetPasswordUserId.collectAsState()
     var lastIdentifier by remember { mutableStateOf("") }
 
     LaunchedEffect(state) {
@@ -66,17 +58,18 @@ fun ForgotPasswordScreen(
             state = state,
             onSendCode = { identifier ->
                 lastIdentifier = identifier
-                authViewModel.forgotPassword(identifier) }
+                passwordResetViewModel.forgotPassword(identifier)
+            }
         )
     } else {
         ForgotPasswordResetContent(
             state = state,
             identifier = lastIdentifier,
-            authViewModel = authViewModel,
+            passwordResetViewModel = passwordResetViewModel,
             onResetPassword = { code, newPassword ->
-                authViewModel.resetPassword(code, newPassword)
+                passwordResetViewModel.resetPassword(code, newPassword)
             },
-            onResendCode = { authViewModel.forgotPassword(lastIdentifier) }
+            onResendCode = { passwordResetViewModel.forgotPassword(lastIdentifier) }
         )
     }
 }
@@ -129,18 +122,13 @@ fun ForgotPasswordRequestContent(
 fun ForgotPasswordResetContent(
     state: AuthState,
     identifier: String,
-    authViewModel: AuthViewModel,
+    passwordResetViewModel: PasswordResetViewModel,
     onResetPassword: (String, String) -> Unit,
     onResendCode: () -> Unit
 ) {
-//    var code by remember { mutableStateOf("") }
-//    var newPassword by remember { mutableStateOf("") }
-//    var repeatedPassword by remember { mutableStateOf("") }
-    val form by authViewModel.resetPasswordFormState.collectAsState()
+    val form by passwordResetViewModel.resetPasswordFormState.collectAsState()
     var timeLeft by remember { mutableIntStateOf(120) }
     var showCodeSentDialog by remember { mutableStateOf(false) }
-//    var passwordError by remember { mutableStateOf<Int?>(null) }
-
     val serverError = if (state is AuthState.Error) state.messageRes else null
 
     LaunchedEffect(timeLeft) {
@@ -180,7 +168,7 @@ fun ForgotPasswordResetContent(
                 value = form.code,
                 onValueChange = {
                     if (validateVerificationCode(it)) {
-                        authViewModel.onResetCodeChanged(it)
+                        passwordResetViewModel.onResetCodeChanged(it)
                     }
                 },
                 required = true,
@@ -192,7 +180,7 @@ fun ForgotPasswordResetContent(
             FormTextField(
                 label = stringResource(R.string.new_password),
                 value = form.newPassword,
-                onValueChange = { authViewModel.onResetPasswordChanged(it) },
+                onValueChange = { passwordResetViewModel.onResetPasswordChanged(it) },
                 required = true,
                 isPassword = true,
                 errorRes = form.newPasswordError,
@@ -202,7 +190,7 @@ fun ForgotPasswordResetContent(
             FormTextField(
                 label = stringResource(R.string.repeat_password),
                 value = form.repeatedPassword,
-                onValueChange = { authViewModel.onResetRepeatedPasswordChanged(it) },
+                onValueChange = { passwordResetViewModel.onResetRepeatedPasswordChanged(it) },
                 required = true,
                 isPassword = true,
                 errorRes = form.repeatedPasswordError,

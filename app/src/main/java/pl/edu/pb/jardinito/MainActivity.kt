@@ -8,17 +8,19 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import dagger.hilt.android.AndroidEntryPoint
 import pl.edu.pb.jardinito.ui.navigation.AppNavGraph
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private lateinit var authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
@@ -30,16 +32,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
 
-        authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
-
         val googleSignInLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)
                     val idToken = account.idToken
-
                     if (idToken != null) {
                         authViewModel.loginWithGoogle(idToken)
                     }
@@ -51,10 +49,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             JardinitoTheme {
                 AppNavGraph(
-                    authViewModel = authViewModel,
                     onGoogleSignInClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken(getString(R.string.default_web_client_id)) // client ID Androida
+                            .requestIdToken(getString(R.string.default_web_client_id))
                             .requestEmail()
                             .build()
 
