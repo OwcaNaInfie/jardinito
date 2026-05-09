@@ -78,6 +78,7 @@ fun AuthEntryScreen(
                     sheetContent = null
                     authViewModel.resetUiState()
                     authViewModel.resetPasswordFlow()
+                    authViewModel.resetPasswordFormClear()
                 }
             ) {
                 when (state) {

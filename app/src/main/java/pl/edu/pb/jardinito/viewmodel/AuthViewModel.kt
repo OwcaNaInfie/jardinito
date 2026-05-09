@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.data.model.ResetPasswordFormState
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Avatar
 import pl.edu.pb.jardinito.data.model.LoginFormState
@@ -113,40 +114,18 @@ class AuthViewModel : ViewModel() {
 
     fun onPasswordChanged(password: String) {
         updateRegisterForm { copy(password = password, passwordTouched = true) }
-
-        passwordJob?.cancel()
-        passwordJob = viewModelScope.launch {
-            delay(500)
-            val frontendError = validatePassword(password)
-
-            updateRegisterForm {
-                copy(
-                    password = password,
-                    passwordTouched = true,
-                    passwordError = frontendError,
-                    passwordIsValid = frontendError == null
-                )
-            }
+        passwordJob = launchedWithDelay(passwordJob) {
+            val error = validatePassword(password)
+            updateRegisterForm { copy(passwordError = error, passwordIsValid = error == null) }
         }
     }
 
     fun onRepeatedPasswordChanged(repeated: String) {
         updateRegisterForm { copy(repeatedPassword = repeated, repeatedPasswordTouched = true) }
-
-        repeatedPasswordJob?.cancel()
-        repeatedPasswordJob = viewModelScope.launch {
-            delay(500)
-        val password = _registerFormState.value.password
-        val frontendError = validateRepeatedPassword(password, repeated)
-
-        updateRegisterForm {
-            copy(
-                repeatedPassword = repeated,
-                repeatedPasswordError = frontendError,
-                repeatedPasswordIsValid = frontendError == null
-            )
+        repeatedPasswordJob = launchedWithDelay(repeatedPasswordJob) {
+            val error = validateRepeatedPassword(_registerFormState.value.password, repeated)
+            updateRegisterForm { copy(repeatedPasswordError = error, repeatedPasswordIsValid = error == null) }
         }
-            }
     }
 
     private fun checkUsername(username: String) {
@@ -232,6 +211,17 @@ class AuthViewModel : ViewModel() {
     // =====================
     // AUTH ACTIONS
     // =====================
+
+    private fun launchedWithDelay(
+        job: Job?,
+        block: suspend () -> Unit
+    ): Job {
+        job?.cancel()
+        return viewModelScope.launch {
+            delay(500)
+            block()
+        }
+    }
 
     fun login(identifier: String, password: String) {
         viewModelScope.launch {
@@ -466,6 +456,42 @@ class AuthViewModel : ViewModel() {
     fun resetPasswordFlow() {
         _pendingResetPasswordUserId.value = null
         _pendingResetIdentifier.value = ""
+    }
+
+    private val _resetPasswordFormState = MutableStateFlow(ResetPasswordFormState())
+    val resetPasswordFormState: StateFlow<ResetPasswordFormState> = _resetPasswordFormState
+
+    private var resetPasswordJob: Job? = null
+    private var resetRepeatedPasswordJob: Job? = null
+
+    private inline fun updateResetPasswordForm(
+        block: ResetPasswordFormState.() -> ResetPasswordFormState
+    ) {
+        _resetPasswordFormState.update { it.block() }
+    }
+
+    fun onResetPasswordChanged(password: String) {
+        updateResetPasswordForm { copy(newPassword = password, newPasswordTouched = true) }
+        resetPasswordJob = launchedWithDelay(resetPasswordJob) {
+            val error = validatePassword(password)
+            updateResetPasswordForm { copy(newPasswordError = error, newPasswordIsValid = error == null) }
+        }
+    }
+
+    fun onResetRepeatedPasswordChanged(repeated: String) {
+        updateResetPasswordForm { copy(repeatedPassword = repeated, repeatedPasswordTouched = true) }
+        resetRepeatedPasswordJob = launchedWithDelay(resetRepeatedPasswordJob) {
+            val error = validateRepeatedPassword(_resetPasswordFormState.value.newPassword, repeated)
+            updateResetPasswordForm { copy(repeatedPasswordError = error, repeatedPasswordIsValid = error == null) }
+        }
+    }
+
+    fun onResetCodeChanged(code: String) {
+        updateResetPasswordForm { copy(code = code, codeTouched = true) }
+    }
+
+    fun resetPasswordFormClear() {
+        _resetPasswordFormState.value = ResetPasswordFormState()
     }
 
     fun logout() {
