@@ -39,7 +39,7 @@ fun AppButton(
     // ===== CIRCLE =====
     circle: Boolean = false,
     buttonColor: Color? = null,
-    iconColor: Color? = null,
+    contentColor: Color? = null,
 
     onClick: () -> Unit
 ) {
@@ -62,7 +62,7 @@ fun AppButton(
         colors = buttonColors(
             variant = variant,
             buttonColor = buttonColor,
-            iconColor = iconColor
+            contentColor = contentColor
         ),
         shape = sizeTokens.shape,
         contentPadding = if (circle) PaddingValues(0.dp) else sizeTokens.padding,
@@ -76,14 +76,14 @@ fun AppButton(
                     painter = painterResource(id = iconRes),
                     contentDescription = null,
                     modifier = Modifier.size(sizeTokens.iconSize),
-                    tint = iconColor ?: LocalContentColor.current
+                    tint = contentColor ?: LocalContentColor.current
                 )
 
                 iconVector != null -> Icon(
                     imageVector = iconVector,
                     contentDescription = null,
                     modifier = Modifier.size(sizeTokens.iconSize),
-                    tint = iconColor ?: LocalContentColor.current
+                    tint = contentColor ?: LocalContentColor.current
                 )
             }
             return@Button
@@ -95,14 +95,14 @@ fun AppButton(
                 painter = painterResource(id = iconRes),
                 contentDescription = null,
                 modifier = Modifier.size(sizeTokens.iconSize),
-                tint = iconColor ?: LocalContentColor.current
+                tint = contentColor ?: LocalContentColor.current
             )
 
             iconVector != null -> Icon(
                 imageVector = iconVector,
                 contentDescription = null,
                 modifier = Modifier.size(sizeTokens.iconSize),
-                tint = iconColor ?: LocalContentColor.current
+                tint = contentColor ?: LocalContentColor.current
             )
 
             text != null -> Text(
@@ -197,7 +197,7 @@ fun AppButtonPreviews() {
                     size = ButtonSize.Medium,
                     circle = true,
                     buttonColor = colors.primary100,
-                    iconColor = Color.Unspecified,
+                    contentColor = Color.Unspecified,
                     onClick = {}
                 )
 
@@ -206,7 +206,7 @@ fun AppButtonPreviews() {
                     size = ButtonSize.Large,
                     circle = true,
                     buttonColor = colors.primary500,
-                    iconColor = Color.White,
+                    contentColor = Color.White,
                     onClick = {}
                 )
                 AppButton(
@@ -214,7 +214,7 @@ fun AppButtonPreviews() {
                     size = ButtonSize.Max,
                     circle = true,
                     buttonColor = colors.primary500,
-                    iconColor = Color.Unspecified,
+                    contentColor = Color.Unspecified,
                     onClick = {}
                 )
             }

@@ -130,6 +130,47 @@ interface ApiService {
         val message: String
     )
 
+    // Profile - update user data
+    @POST("api/user/update-username")
+    suspend fun updateUsername(
+        @Body request: UpdateUsernameRequest
+    ): UpdateUsernameResponse
+
+    @POST("api/user/request-email-change")
+    suspend fun requestEmailChange(
+        @Body request: RequestEmailChangeRequest
+    ): MessageResponse
+
+    @POST("api/user/confirm-email-change")
+    suspend fun confirmEmailChange(
+        @Body request: ConfirmEmailChangeRequest
+    ): ConfirmEmailChangeResponse
+
+    data class UpdateUsernameRequest(
+        val userId: String,
+        val username: String
+    )
+
+    data class UpdateUsernameResponse(
+        val message: String,
+        val username: String
+    )
+
+    data class RequestEmailChangeRequest(
+        val userId: String,
+        val newEmail: String
+    )
+
+    data class ConfirmEmailChangeRequest(
+        val userId: String,
+        val code: String
+    )
+
+    data class ConfirmEmailChangeResponse(
+        val message: String,
+        val email: String
+    )
+
 //    Register Form Validation
 @GET("api/auth/check-username")
     suspend fun checkUsername(@Query("username") username: String): UsernameAvailabilityResponse

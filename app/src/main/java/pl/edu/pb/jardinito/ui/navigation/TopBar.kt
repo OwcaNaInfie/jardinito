@@ -1,10 +1,15 @@
 package pl.edu.pb.jardinito.ui.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.ui.theme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +40,12 @@ fun TopBar(
                     Icon(Icons.Default.Settings, contentDescription = "Settings")
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = colors.transparent
+        ),
+        windowInsets = WindowInsets(0),
+        modifier = Modifier.padding(vertical = 4.dp)
+
     )
 }

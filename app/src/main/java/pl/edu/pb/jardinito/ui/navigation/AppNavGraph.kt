@@ -1,6 +1,8 @@
 package pl.edu.pb.jardinito.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
@@ -28,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -35,12 +38,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.ui.components.ScreenContainer
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
 import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
+import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
@@ -104,15 +109,71 @@ fun AppNavGraph(
                                 }
                             }
                         },
-                        modifier = androidx.compose.ui.Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+//                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                 }
             }
         }
     ) {
-        Scaffold(
-            contentWindowInsets = WindowInsets(0),
-            topBar = {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                contentWindowInsets = WindowInsets(0),
+                containerColor = colors.transparent,
+
+                bottomBar = {
+                    if (currentRoute in bottomBarRoutes) {
+                        BottomBar(navController)
+                    }
+                }
+            ) { paddingValues ->
+                NavHost(
+                    navController = navController,
+                    startDestination = Routes.ENTRY,
+                    modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
+                ) {
+                    composable(Routes.ENTRY) {
+                        AuthEntryScreen(
+                            authViewModel = authViewModel,
+                            verificationViewModel = verificationViewModel,
+                            passwordResetViewModel = passwordResetViewModel,
+                            onRegisterSuccess = actions.toHomeFromRegister,
+                            onLoginSuccess = actions.toHomeFromLogin,
+                            onGoogleSignInClick = onGoogleSignInClick
+                        )
+                    }
+                    composable(Routes.HOME) {
+                        ScreenContainer {
+                            HomeScreen()
+                        }
+                    }
+                    composable(Routes.FOCUS) {
+                        FocusScreen()
+                    }
+                    composable(Routes.TAGS) {
+                        TagsScreen()
+                    }
+                    composable(Routes.STATISTICS) {
+                        StatisticsScreen()
+                    }
+                    composable(Routes.PROFILE) {
+                        val user by authViewModel.currentUser.collectAsState(initial = null)
+                        user?.let {
+                                ProfileScreen(
+                                    user = it,
+                                    onLogout = {
+                                        authViewModel.logout()
+                                        navController.navigate(Routes.ENTRY) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    },
+                                    authViewModel = authViewModel,
+                                    userViewModel = userViewModel,
+                                    isEditing = isEditingProfile
+                                )
+                            }
+                    }
+                }
+            }
                 if (currentRoute in bottomBarRoutes) {
                     TopBar(
                         currentRoute = currentRoute,
@@ -120,58 +181,6 @@ fun AppNavGraph(
                         onSettingsClick = { isEditingProfile = !isEditingProfile }
                     )
                 }
-            },
-            bottomBar = {
-                if (currentRoute in bottomBarRoutes) {
-                    BottomBar(navController)
-                }
-            }
-        ) { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = Routes.ENTRY,
-                modifier = androidx.compose.ui.Modifier.padding(paddingValues)
-            ) {
-                composable(Routes.ENTRY) {
-                    AuthEntryScreen(
-                        authViewModel = authViewModel,
-                        verificationViewModel = verificationViewModel,
-                        passwordResetViewModel = passwordResetViewModel,
-                        onRegisterSuccess = actions.toHomeFromRegister,
-                        onLoginSuccess = actions.toHomeFromLogin,
-                        onGoogleSignInClick = onGoogleSignInClick
-                    )
-                }
-                composable(Routes.HOME) {
-                    HomeScreen()
-                }
-                composable(Routes.FOCUS) {
-                    FocusScreen()
-                }
-                composable(Routes.TAGS) {
-                    TagsScreen()
-                }
-                composable(Routes.STATISTICS) {
-                    StatisticsScreen()
-                }
-                composable(Routes.PROFILE) {
-                    val user by authViewModel.currentUser.collectAsState(initial = null)
-                    user?.let {
-                        ProfileScreen(
-                            user = it,
-                            onLogout = {
-                                authViewModel.logout()
-                                navController.navigate(Routes.ENTRY) {
-                                    popUpTo(0) { inclusive = true }
-                                }
-                            },
-                            authViewModel = authViewModel,
-                            userViewModel = userViewModel,
-                            isEditing = isEditingProfile
-                        )
-                    }
-                }
-            }
         }
     }
 }

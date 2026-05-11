@@ -8,7 +8,7 @@ const verificationTokenSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['email_verification', 'password_reset'],
+        enum: ['email_verification', 'password_reset', 'email_change'],
         required: true
     },
     code: {
@@ -21,6 +21,10 @@ const verificationTokenSchema = new mongoose.Schema({
     },
     accountExpiry: {
         type: Date,
+        default: null
+    },
+    newEmail: {
+        type: String,
         default: null
     }
 }, { timestamps: true });

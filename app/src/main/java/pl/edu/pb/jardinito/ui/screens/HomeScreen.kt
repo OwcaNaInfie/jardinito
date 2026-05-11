@@ -30,8 +30,10 @@ import pl.edu.pb.jardinito.ui.theme.colors
 @Composable
 fun HomeScreen() {
     Column(
-        modifier = Modifier
+
+    modifier = Modifier
             .fillMaxSize()
+            .background(colors.primary500)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -39,7 +41,7 @@ fun HomeScreen() {
         // ===== TYPOGRAPHY =====
 
         Text(
-            text = "Jardinito",
+            text = "displayLarge",
             style = MaterialTheme.typography.displayLarge,
             color = colors.primary900
         )
@@ -50,12 +52,12 @@ fun HomeScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Jardinito",
+                text = "displaySmall",
                 style = MaterialTheme.typography.displaySmall
             )
 
             Text(
-                text = "Jardinito",
+                text = "headlineLarge",
                 style = MaterialTheme.typography.headlineLarge
             )
         }
@@ -65,12 +67,12 @@ fun HomeScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Jardinito",
+                text = "headlineMedium",
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.primary900
             )
             Text(
-                text = "Jardinito",
+                text = "bodyLarge",
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -80,11 +82,11 @@ fun HomeScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Jardinito",
+                text = "bodyMedium",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Jardinito",
+                text = "bodySmall",
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -94,117 +96,18 @@ fun HomeScreen() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Jardinito",
+                text = "labelLarge",
                 style = MaterialTheme.typography.labelLarge
             )
             Text(
-                text = "Jardinito",
+                text = "labelMedium",
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
-                text = "Jardinito",
+                text = "labelSmall",
                 style = MaterialTheme.typography.labelSmall
             )
         }
-        IconButton(
-            onClick = {},
-            modifier = Modifier
-                .size(100.dp) // cały przycisk
-                .padding(0.dp), // usuwa domyślne paddingi IconButton
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.arrow_left),
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.fillMaxSize() // ikona wypełnia cały przycisk
-            )
-        }
-
-        ColorPreview(
-            name = "Error",
-            color = MaterialTheme.colorScheme.error
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row (
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    AppButton(
-                        text = "Continue",
-                        size = ButtonSize.Small,
-                        variant = ButtonVariant.Secondary,
-                        onClick = {}
-                    )
-                    AppButton(
-                        text = "Exit",
-                        size = ButtonSize.Small,
-                        variant = ButtonVariant.Primary,
-                        onClick = {}
-                    )
-                }
-                Column (
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    AppButton(
-                        text = "Focus",
-                        size = ButtonSize.Large,
-                        variant = ButtonVariant.Tertiary,
-                        onClick = {}
-                    )
-                    AppButton(
-                        text = "Focus",
-                        size = ButtonSize.Large,
-                        variant = ButtonVariant.Primary,
-                        onClick = {}
-                    )
-                }
-            }
-
-            AppButton(
-                text = "Log in",
-                size = ButtonSize.Medium,
-                variant = ButtonVariant.Primary,
-                onClick = {}
-            )
-
-            AppButton(
-                text = "Log in",
-                size = ButtonSize.Max,
-                variant = ButtonVariant.Tertiary,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Composable
-fun ColorPreview(
-    name: String,
-    color: Color
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .background(color)
-            .padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = name,
-            color = Color.White,
-            style = MaterialTheme.typography.labelLarge
-        )
     }
 }
 

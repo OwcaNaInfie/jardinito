@@ -70,6 +70,9 @@
     <!-- Profile Screen -->
     <string name="log_out">Wyloguj</string>
     <string name="delete_account">Usuń konto</string>
+    <string name="edit_username">Edytuj nazwę użytkownika</string>
+    <string name="edit_email">Edytuj adres email</string>
+    <string name="gardeners_name">Ogrodnik</string>
 
     <!-- Popups -->
     <string name="delete">Usuń</string>

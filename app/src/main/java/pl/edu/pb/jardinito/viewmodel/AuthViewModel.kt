@@ -304,4 +304,12 @@ class AuthViewModel @Inject constructor(
     fun updateAvatar(avatar: Avatar) {
         sessionManager.updateCurrentUser { it?.copy(avatar = avatar) }
     }
+
+    fun updateUsername(username: String) {
+        sessionManager.updateCurrentUser { it?.copy(username = username) }
+    }
+
+    fun updateEmail(email: String) {
+        sessionManager.updateCurrentUser { it?.copy(email = email) }
+    }
 }
