@@ -18,6 +18,7 @@ import pl.edu.pb.jardinito.data.repository.AuthRepository
 import pl.edu.pb.jardinito.data.repository.UserRepository
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank
+import pl.edu.pb.jardinito.ui.utils.validateUsername
 import pl.edu.pb.jardinito.viewmodel.state.UserState
 import javax.inject.Inject
 
@@ -78,10 +79,10 @@ class UserViewModel @Inject constructor(
     fun onProfileUsernameChanged(username: String, currentUsername: String) {
         updateProfileForm { copy(username = username, usernameTouched = true, usernameError = null) }
         usernameCheckJob = launchedWithDelay(usernameCheckJob) {
-            val blankError = validateIsBlank(username)
+            val formatError = validateUsername(username)
             when {
-                blankError != null -> updateProfileForm {
-                    copy(usernameError = blankError, usernameIsValid = false)
+                formatError != null -> updateProfileForm {
+                    copy(usernameError = formatError, usernameIsValid = false)
                 }
                 username != currentUsername -> {
                     val available = authRepository.isUsernameAvailable(username)

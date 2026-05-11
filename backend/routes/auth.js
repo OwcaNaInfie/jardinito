@@ -59,6 +59,10 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ message: 'Username, email and password are required' });
     }
 
+    if (username.length > 20) {
+        return res.status(400).json({ message: 'Username cannot exceed 20 characters' });
+    }
+
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {

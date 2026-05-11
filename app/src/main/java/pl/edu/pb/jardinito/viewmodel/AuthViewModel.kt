@@ -20,6 +20,7 @@ import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword
+import pl.edu.pb.jardinito.ui.utils.validateUsername
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import retrofit2.HttpException
 import javax.inject.Inject
@@ -118,7 +119,7 @@ class AuthViewModel @Inject constructor(
         usernameJob?.cancel()
         usernameJob = viewModelScope.launch {
             delay(500)
-            val frontendError = validateIsBlank(username)
+            val frontendError = validateUsername(username)
             updateRegisterForm {
                 copy(username = username, usernameError = frontendError, usernameIsValid = frontendError == null)
             }

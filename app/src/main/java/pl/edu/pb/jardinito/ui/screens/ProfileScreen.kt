@@ -111,7 +111,7 @@ fun ProfileScreen(
         }
     }
 
-    val avatarUrl = when (user.avatar?.activeType()) {
+    val avatarUrl = when (user.avatar.activeType()) {
         "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.activeValue()}"
         "google" -> user.avatar.activeValue()
         else -> null

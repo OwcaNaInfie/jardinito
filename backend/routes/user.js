@@ -1,18 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const VerificationToken = require('../models/VerificationToken');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const fs = require('fs');
 const { sendVerificationEmail } = require('../utils/emailService');
-const VerificationToken = require('../models/VerificationToken');
-const bcrypt = require('bcryptjs');
 
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// =====================
+// AVATAR
+// =====================
 
 router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
     try {
@@ -21,11 +24,6 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
         if (!userId) return res.status(400).json({ message: 'userId is required' });
 
-        const filename = `custom_${uuidv4()}.jpg`;
-        const outputPath = path.join(__dirname, '../public/avatars', filename);
-
-        fs.writeFileSync(outputPath, req.file.buffer);
-
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -33,6 +31,10 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
             const oldPath = path.join(__dirname, '../public/avatars', user.avatar.custom);
             if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
         }
+
+        const filename = `custom_${uuidv4()}.jpg`;
+        const outputPath = path.join(__dirname, '../public/avatars', filename);
+        fs.writeFileSync(outputPath, req.file.buffer);
 
         user.avatar.custom = filename;
         await user.save();
@@ -48,6 +50,7 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
 router.post('/delete-avatar', async (req, res) => {
     try {
         const { userId } = req.body;
+
         if (!userId) return res.status(400).json({ message: 'userId is required' });
 
         const user = await User.findById(userId);
@@ -68,29 +71,9 @@ router.post('/delete-avatar', async (req, res) => {
     }
 });
 
-router.post('/delete-account', async (req, res) => {
-    try {
-        const { userId } = req.body;
-        if (!userId) return res.status(400).json({ message: 'userId is required' });
-
-        const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
-
-        if (user.avatar?.custom) {
-            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.custom);
-            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-        }
-
-        await User.findByIdAndDelete(userId);
-        console.log(`Account deleted: ${userId}`);
-        res.json({ message: 'Account deleted successfully' });
-
-    } catch (err) {
-        console.error(err);
-        console.log(`Account deletetion failed: ${userId}`);
-        res.status(500).json({ message: 'Delete account failed' });
-    }
-});
+// =====================
+// USERNAME
+// =====================
 
 router.post('/update-username', async (req, res) => {
     try {
@@ -98,6 +81,9 @@ router.post('/update-username', async (req, res) => {
 
         if (!userId || !username) {
             return res.status(400).json({ message: 'userId and username are required' });
+        }
+        if (username.length > 20) {
+            return res.status(422).json({ message: 'Username cannot exceed 20 characters' });
         }
 
         const existingUser = await User.findOne({ username });
@@ -110,7 +96,6 @@ router.post('/update-username', async (req, res) => {
             { username },
             { new: true }
         );
-
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         res.json({
@@ -123,6 +108,10 @@ router.post('/update-username', async (req, res) => {
         res.status(500).json({ message: 'Update username failed' });
     }
 });
+
+// =====================
+// EMAIL
+// =====================
 
 router.post('/request-email-change', async (req, res) => {
     try {
@@ -170,20 +159,10 @@ router.post('/confirm-email-change', async (req, res) => {
             return res.status(400).json({ message: 'userId and code are required' });
         }
 
-        const token = await VerificationToken.findOne({
-            userId,
-            type: 'email_change'
-        });
-
+        const token = await VerificationToken.findOne({ userId, type: 'email_change' });
         if (!token) return res.status(404).json({ message: 'Token not found' });
-
-        if (new Date() > token.codeExpiry) {
-            return res.status(410).json({ message: 'Code expired' });
-        }
-
-        if (token.code !== code) {
-            return res.status(400).json({ message: 'Invalid code' });
-        }
+        if (new Date() > token.codeExpiry) return res.status(410).json({ message: 'Code expired' });
+        if (token.code !== code) return res.status(400).json({ message: 'Invalid code' });
 
         const user = await User.findByIdAndUpdate(
             userId,
@@ -201,6 +180,35 @@ router.post('/confirm-email-change', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Confirm email change failed' });
+    }
+});
+
+// =====================
+// ACCOUNT
+// =====================
+
+router.post('/delete-account', async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        if (!userId) return res.status(400).json({ message: 'userId is required' });
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (user.avatar?.custom) {
+            const oldPath = path.join(__dirname, '../public/avatars', user.avatar.custom);
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        await User.findByIdAndDelete(userId);
+        console.log(`Account deleted: ${userId}`);
+
+        res.json({ message: 'Account deleted successfully' });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Delete account failed' });
     }
 });
 
