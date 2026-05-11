@@ -165,7 +165,7 @@ fun LoginScreenContent(
                     size = ButtonSize.Large,
                     circle = true,
                     buttonColor = colors.primary50,
-                    iconColor = Color.Unspecified,
+                    contentColor = Color.Unspecified,
                     onClick = onGoogleSignInClick
                 )
             }

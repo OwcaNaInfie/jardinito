@@ -57,6 +57,14 @@ val Typography = Typography(
         lineHeight = 24.sp
     ),
 
+    // 24
+    titleMedium = TextStyle(
+        fontFamily = ComicNeue,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        lineHeight = 20.sp
+    ),
+
     // Body1 (16)
     bodyLarge = TextStyle(
         fontFamily = ComicNeue,

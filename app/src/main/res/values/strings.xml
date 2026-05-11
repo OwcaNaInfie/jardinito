@@ -69,6 +69,9 @@
     <!-- Profile Screen -->
     <string name="log_out">Log Out</string>
     <string name="delete_account">Delete account</string>
+    <string name="edit_username">Edit username</string>
+    <string name="edit_email">Edit email address</string>
+    <string name="gardeners_name">Gardener</string>
     Konto zostanie usunięte na zawsze
     <!-- Popups -->
     <string name="delete">Delete</string>

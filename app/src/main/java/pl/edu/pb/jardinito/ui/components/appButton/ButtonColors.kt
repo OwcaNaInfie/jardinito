@@ -11,7 +11,7 @@ import pl.edu.pb.jardinito.ui.theme.colors
 fun buttonColors(
     variant: ButtonVariant,
     buttonColor: Color?,
-    iconColor: Color?
+    contentColor: Color?
 ): ButtonColors {
     return ButtonDefaults.buttonColors(
         containerColor = buttonColor ?: when (variant) {
@@ -19,7 +19,7 @@ fun buttonColors(
             ButtonVariant.Secondary -> colors.primary300
             ButtonVariant.Tertiary -> colors.primary900
         },
-        contentColor = iconColor ?: when (variant) {
+        contentColor = contentColor ?: when (variant) {
             ButtonVariant.Primary -> colors.primary300
             ButtonVariant.Secondary -> colors.primary50
             ButtonVariant.Tertiary -> colors.neutralDark
@@ -29,7 +29,7 @@ fun buttonColors(
             ButtonVariant.Secondary -> colors.primary50
             ButtonVariant.Tertiary -> colors.primary900
         },
-        disabledContentColor = iconColor ?: when (variant) {
+        disabledContentColor = contentColor ?: when (variant) {
             ButtonVariant.Primary -> colors.primary100
             ButtonVariant.Secondary -> colors.primary100
             ButtonVariant.Tertiary -> colors.neutralLight
