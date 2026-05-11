@@ -38,7 +38,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
-import pl.edu.pb.jardinito.ui.components.ScreenContainer
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
@@ -142,9 +141,7 @@ fun AppNavGraph(
                         )
                     }
                     composable(Routes.HOME) {
-                        ScreenContainer {
                             HomeScreen()
-                        }
                     }
                     composable(Routes.FOCUS) {
                         FocusScreen()

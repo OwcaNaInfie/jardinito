@@ -16,6 +16,7 @@ fun validateIsBlank(input: String): Int? {
 @StringRes
 fun validateUsername(username: String): Int? {
     validateIsBlank(username)
+    if (username.length > 20) return R.string.validator_username_too_long
     if (Patterns.EMAIL_ADDRESS.matcher(username).matches())
         return R.string.validator_username_email_pattern
     return null

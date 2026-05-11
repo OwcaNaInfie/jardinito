@@ -65,6 +65,7 @@
     <string name="validator_blank">Input cannot be empty.</string>
     <string name="email_or_username">Email or username</string>
     <string name="validator_username_email_pattern">Username can\'t be in form of an email.</string>
+    <string name="validator_username_too_long">Username can be up to 20 characters long.</string>
 
     <!-- Profile Screen -->
     <string name="log_out">Log Out</string>
