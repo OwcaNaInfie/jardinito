@@ -4,23 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,13 +18,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
@@ -76,42 +63,38 @@ fun AppNavGraph(
         Routes.STATISTICS
     )
 
-    val drawerRoutes = listOf(
-        Triple(Routes.HOME, Icons.Default.Home, "Home"),
-        Triple(Routes.FOCUS, Icons.Default.LocalFlorist, "Plant"),
-        Triple(Routes.TAGS, Icons.AutoMirrored.Filled.Label, "Tags"),
-        Triple(Routes.STATISTICS, Icons.Default.BarChart, "Statistics"),
-        Triple(Routes.PROFILE, Icons.Default.AccountCircle, "Profile")
+    val navRoutes = listOf(
+        NavRoute(Routes.HOME, R.drawable.windmill, "Home"),
+        NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
+        NavRoute(Routes.MARKET, R.drawable.market, "Market"),
+        NavRoute(Routes.TAGS, R.drawable.signpost, "Tags"),
+        NavRoute(Routes.STATISTICS, R.drawable.chartpieslice, "Statistics"),
+        NavRoute(Routes.PROFILE, R.drawable.rabbit, "Profile")
+    )
+
+    val bottomNavRoutes = listOf(
+        NavRoute(Routes.HOME, R.drawable.windmill, "Home"),
+        NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
+        NavRoute(Routes.PROFILE, R.drawable.rabbit, "Profile")
     )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Text(
-                    text = "Jardinito",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = androidx.compose.ui.Modifier.padding(24.dp)
-                )
-                HorizontalDivider()
-                drawerRoutes.forEach { (route, icon, label) ->
-                    NavigationDrawerItem(
-                        icon = { Icon(icon, contentDescription = label) },
-                        label = { Text(label) },
-                        selected = currentRoute == route,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            if (currentRoute != route) {
-                                navController.navigate(route) {
-                                    popUpTo(Routes.HOME)
-                                    launchSingleTop = true
-                                }
-                            }
-                        },
-//                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
+            DrawerContent(
+                navRoutes = navRoutes,
+                currentRoute = currentRoute,
+                user = authViewModel.currentUser.collectAsState().value,
+                onRouteClick = { route ->
+                    scope.launch { drawerState.close() }
+                    if (currentRoute != route) {
+                        navController.navigate(route) {
+                            popUpTo(Routes.HOME)
+                            launchSingleTop = true
+                        }
+                    }
                 }
-            }
+            )
         }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -121,7 +104,10 @@ fun AppNavGraph(
 
                 bottomBar = {
                     if (currentRoute in bottomBarRoutes) {
-                        BottomBar(navController)
+                        BottomBar(
+                            navController = navController,
+                            navRoutes = bottomNavRoutes
+                        )
                     }
                 }
             ) { paddingValues ->
@@ -141,7 +127,7 @@ fun AppNavGraph(
                         )
                     }
                     composable(Routes.HOME) {
-                            HomeScreen()
+                        HomeScreen()
                     }
                     composable(Routes.FOCUS) {
                         FocusScreen()
@@ -171,13 +157,14 @@ fun AppNavGraph(
                     }
                 }
             }
-                if (currentRoute in bottomBarRoutes) {
-                    TopBar(
-                        currentRoute = currentRoute,
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onSettingsClick = { isEditingProfile = !isEditingProfile }
-                    )
-                }
+            if (currentRoute in bottomBarRoutes) {
+                TopBar(
+                    title = navRoutes.find { it.route == currentRoute }?.title ?: "",
+                    showSettings = currentRoute == Routes.PROFILE,
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onSettingsClick = { isEditingProfile = !isEditingProfile }
+                )
+            }
         }
     }
 }
