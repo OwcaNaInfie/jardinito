@@ -9,5 +9,6 @@ object Routes {
     const val FOCUS = "focus"
     const val PROFILE = "profile"
     const val TAGS = "tags"
+    const val MARKET = "market"
     const val STATISTICS = "statistics"
 }

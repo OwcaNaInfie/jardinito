@@ -8,7 +8,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
@@ -37,14 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.User
-import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -61,11 +56,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
+import pl.edu.pb.jardinito.ui.components.UserAvatar
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
 
@@ -111,16 +106,9 @@ fun ProfileScreen(
         }
     }
 
-    val avatarUrl = when (user.avatar.activeType()) {
-        "default", "custom" -> "${RetrofitInstance.BASE_URL}avatars/${user.avatar.activeValue()}"
-        "google" -> user.avatar.activeValue()
-        else -> null
-    }
-
     ProfileScreenContent(
         user = user,
         isEditing = isEditing,
-        avatarUrl = avatarUrl,
         galleryLauncher = galleryLauncher,
         onDeleteAvatar = {
             val userId = user.userId ?: return@ProfileScreenContent
@@ -232,7 +220,6 @@ fun ProfileScreen(
 fun ProfileHeader(
     user: User,
     isEditing: Boolean,
-    avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     onDeleteAvatar: () -> Unit,
     onUsernameClick: () -> Unit,
@@ -247,7 +234,6 @@ fun ProfileHeader(
                 modifier = Modifier.weight(1f),
                 user = user,
                 isEditing = isEditing,
-                avatarUrl = avatarUrl,
                 galleryLauncher = galleryLauncher,
                 onDeleteAvatar = onDeleteAvatar
             )
@@ -268,21 +254,17 @@ fun AvatarSection(
     modifier: Modifier = Modifier,
     user: User,
     isEditing: Boolean,
-    avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     onDeleteAvatar: () -> Unit
 ) {
     var showDeleteAvatarDialog by remember { mutableStateOf(false) }
 
     Box (modifier = modifier.aspectRatio(1f))  {
-        AsyncImage(
-            model = avatarUrl,
-            contentDescription = "User avatar",
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .border(5.dp, colors.primary300, CircleShape),
-            contentScale = ContentScale.Crop
+        UserAvatar(
+            user = user,
+            size = 130.dp,
+            borderWidth = 5.dp,
+            modifier = Modifier.fillMaxSize()
         )
         if (isEditing) {
             AppButton(
@@ -357,7 +339,7 @@ fun UserInfoSection(
                     text = user.username,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    color = colors.primary300
+                    color = colors.neutralBlack
                 )
                 if (isEditing) {
                     Icon(
@@ -461,7 +443,6 @@ fun ProfileActions(
 fun ProfileScreenContent(
     user: User,
     isEditing: Boolean,
-    avatarUrl: String?,
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     onDeleteAvatar: () -> Unit,
     onLogout: () -> Unit,
@@ -478,7 +459,6 @@ fun ProfileScreenContent(
         ProfileHeader(
             user = user,
             isEditing = isEditing,
-            avatarUrl = avatarUrl,
             galleryLauncher = galleryLauncher,
             onDeleteAvatar = onDeleteAvatar,
             onUsernameClick = onUsernameClick,

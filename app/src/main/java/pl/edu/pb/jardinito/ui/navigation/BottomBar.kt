@@ -1,53 +1,49 @@
 package pl.edu.pb.jardinito.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import pl.edu.pb.jardinito.data.model.BottomNavItem
+import pl.edu.pb.jardinito.ui.theme.colors
 
 @Composable
-fun BottomBar(navController: NavController) {
-
-    val items = listOf(
-        BottomNavItem(
-            route = Routes.HOME,
-            icon = Icons.Default.Home,
-            label = "Home"
-        ),
-        BottomNavItem(
-            route = Routes.FOCUS,
-            icon = Icons.Default.LocalFlorist,
-            label = "Plant"
-        ),
-        BottomNavItem(
-            route = Routes.PROFILE,
-            icon = Icons.Default.AccountCircle,
-            label = "Profile"
-        )
-    )
-
+fun BottomBar(
+    navController: NavController,
+    navRoutes: List<NavRoute>
+) {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route
 
-    NavigationBar {
-        items.forEach { item ->
+    NavigationBar(
+        containerColor = colors.neutralLight
+    ) {
+        navRoutes.forEach { navRoute ->
+            val selected = currentRoute == navRoute.route
             NavigationBarItem(
-                selected = currentRoute == item.route,
+                selected = selected,
                 onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
+                    if (currentRoute != navRoute.route) {
+                        navController.navigate(navRoute.route) {
                             popUpTo(Routes.HOME)
                             launchSingleTop = true
                         }
                     }
                 },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) }
+                icon = {
+                    Icon(
+                        painter = painterResource(id = navRoute.iconRes),
+                        contentDescription = navRoute.title
+                    )
+                },
+                label = { Text(navRoute.title) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = colors.secondaryBlue,
+                    selectedTextColor = colors.secondaryBlue,
+                    unselectedIconColor = colors.neutralGray,
+                    unselectedTextColor = colors.neutralGray,
+                    indicatorColor = colors.transparent
+                )
             )
         }
     }
