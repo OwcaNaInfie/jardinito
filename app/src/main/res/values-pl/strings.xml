@@ -74,6 +74,23 @@
     <string name="edit_username">Edytuj nazwę użytkownika</string>
     <string name="edit_email">Edytuj adres email</string>
     <string name="gardeners_name">Ogrodnik</string>
+    <string name="delete_avatar_title">Usuń zdjęcie profilowe</string>
+    <string name="delete_avatar_message">Czy na pewno chcesz usunąć swoje zdjęcie profilowe?</string>
+    <string name="delete_avatar_confirm">Usuń</string>
+    <string name="logout_message">Czy na pewno chcesz się wylogować?</string>
+    <string name="account_deleted_title">Konto usunięte</string>
+    <string name="account_deleted_message">Twoje konto zostało pomyślnie usunięte.</string>
+    
+
+    <!-- Tags Screen -->
+    <string name="tags_empty_title">Czas stworzyć nowy tag!</string>
+    <string name="tags_search_placeholder">Szukaj tagów…</string>
+    <string name="tag_add_title">Dodaj tag</string>
+    <string name="tag_edit_title">Edytuj tag</string>
+    <string name="tag_delete_title">Usuń tag</string>
+    <string name="tag_delete_message">Czy na pewno chcesz usunąć tag \"%s\"?</string>
+    <string name="tag_name_placeholder">Nazwa tagu</string>
+    <string name="tag_save">Zapisz</string>
 
     <!-- Popups -->
     <string name="delete">Usuń</string>

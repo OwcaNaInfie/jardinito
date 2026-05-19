@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
@@ -18,8 +19,7 @@ import pl.edu.pb.jardinito.ui.theme.colors
 fun TopBar(
     title: String,
     onMenuClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    showSettings: Boolean = false
+    actions: List<Pair<ImageVector, () -> Unit>> = emptyList()
 ) {
     TopAppBar(
         windowInsets = WindowInsets(0),
@@ -38,13 +38,9 @@ fun TopBar(
             }
         },
         actions = {
-            if (showSettings) {
-                IconButton(onClick = onSettingsClick) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = colors.neutralGray
-                    )
+            actions.forEach { (icon, onClick) ->
+                IconButton(onClick = onClick) {
+                    Icon(icon, contentDescription = null, tint = colors.neutralGray)
                 }
             }
         },
@@ -61,8 +57,7 @@ fun TopBarPreview() {
     JardinitoTheme {
         TopBar(
             title = "Home",
-            onMenuClick = {},
-            onSettingsClick = {}
+            onMenuClick = {}
         )
     }
 }
@@ -73,9 +68,7 @@ fun TopBarProfilePreview() {
     JardinitoTheme {
         TopBar(
             title = "Profile",
-            onMenuClick = {},
-            onSettingsClick = {},
-            showSettings = true
+            onMenuClick = {}
         )
     }
 }

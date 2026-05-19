@@ -20,7 +20,7 @@ object AppColors {
     val SecondaryBeige  = Color(0xFFFFE9BD)
     val SecondaryCream  = Color(0xFFFFF6E3)
     val SecondaryYellow = Color(0xFFFFC107)
-    /* ======================
+    /* ======================Timer
        Neutral colours
        ====================== */
     val NeutralDark  = Color(0xFF29351F)

@@ -4,7 +4,8 @@ import pl.edu.pb.jardinito.data.model.AuthResponse
 import pl.edu.pb.jardinito.data.model.GoogleLoginRequest
 import pl.edu.pb.jardinito.data.model.LoginRequest
 import pl.edu.pb.jardinito.data.model.RegisterRequest
-import pl.edu.pb.jardinito.data.remote.ApiService
+import pl.edu.pb.jardinito.data.remote.MessageResponse
+import pl.edu.pb.jardinito.data.remote.AuthApiService
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class AuthRepository @Inject constructor() {
 
-    private val api = RetrofitInstance.api
+    private val api = RetrofitInstance.auth
 
     //    Register Form Validation
     suspend fun isUsernameAvailable(username: String): Boolean {
@@ -53,23 +54,22 @@ class AuthRepository @Inject constructor() {
     }
 
     suspend fun verifyEmail(userId: String, code: String): AuthResponse {
-        return api.verifyEmail(ApiService.VerifyEmailRequest(userId, code))
+        return api.verifyEmail(AuthApiService.VerifyEmailRequest(userId, code))
     }
 
-    suspend fun resendVerification(userId: String): ApiService.MessageResponse {
-        return api.resendVerification(ApiService.ResendVerificationRequest(userId))
+    suspend fun resendVerification(userId: String): MessageResponse {
+        return api.resendVerification(AuthApiService.ResendVerificationRequest(userId))
     }
 
-    suspend fun getUserId(identifier: String): ApiService.GetUserIdResponse {
-        return api.getUserId(ApiService.GetUserIdRequest(identifier))
+    suspend fun getUserId(identifier: String): AuthApiService.GetUserIdResponse {
+        return api.getUserId(AuthApiService.GetUserIdRequest(identifier))
     }
 
-    suspend fun forgotPassword(identifier: String): ApiService.ForgotPasswordResponse {
-        return api.forgotPassword(ApiService.ForgotPasswordRequest(identifier))
+    suspend fun forgotPassword(identifier: String): AuthApiService.ForgotPasswordResponse {
+        return api.forgotPassword(AuthApiService.ForgotPasswordRequest(identifier))
     }
 
-    suspend fun resetPassword(userId: String, code: String, newPassword: String): ApiService.MessageResponse {
-        return api.resetPassword(ApiService.ResetPasswordRequest(userId, code, newPassword))
+    suspend fun resetPassword(userId: String, code: String, newPassword: String): MessageResponse {
+        return api.resetPassword(AuthApiService.ResetPasswordRequest(userId, code, newPassword))
     }
 }
-

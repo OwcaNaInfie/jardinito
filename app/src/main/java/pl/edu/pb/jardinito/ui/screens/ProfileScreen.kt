@@ -197,8 +197,8 @@ fun ProfileScreen(
 
     if (showAccountDeletedDialog) {
         ConfirmDialog(
-            title = "Konto usunięte",
-            message = "Twoje konto zostało pomyślnie usunięte.",
+            title = stringResource(R.string.account_deleted_title),
+            message = stringResource(R.string.account_deleted_message),
             confirmText = "OK",
             singleButton = true,
             variant = DialogVariant.Success,
@@ -296,9 +296,9 @@ fun AvatarSection(
 
     if (showDeleteAvatarDialog) {
         ConfirmDialog(
-            title = "Usuń zdjęcie profilowe",
-            message = "Czy na pewno chcesz usunąć swoje zdjęcie profilowe?",
-            confirmText = "Usuń",
+            title = stringResource(R.string.delete_avatar_title),
+            message = stringResource(R.string.delete_avatar_message),
+            confirmText = stringResource(R.string.delete_avatar_confirm),
             variant = DialogVariant.Warning,
             onConfirm = {
                 showDeleteAvatarDialog = false
@@ -413,9 +413,9 @@ fun ProfileActions(
 
     if (showLogOutDialog) {
         ConfirmDialog(
-            title = "Wyloguj",
-            message = "Czy na pewno chcesz się wylogować?",
-            confirmText = "Wyloguj",
+            title = stringResource(R.string.log_out),
+            message = stringResource(R.string.logout_message),
+            confirmText = stringResource(R.string.log_out),
             variant = DialogVariant.Warning,
             onConfirm = {
                 showLogOutDialog = false

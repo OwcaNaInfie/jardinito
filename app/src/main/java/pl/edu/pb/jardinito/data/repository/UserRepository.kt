@@ -5,15 +5,18 @@ import android.net.Uri
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import pl.edu.pb.jardinito.data.remote.ApiService
+import pl.edu.pb.jardinito.data.remote.MessageResponse
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.data.remote.UserApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserRepository @Inject constructor() {
 
-    suspend fun uploadAvatar(userId: String, imageUri: Uri, context: Context): ApiService.AvatarUploadResponse {
+    private val api = RetrofitInstance.user
+
+    suspend fun uploadAvatar(userId: String, imageUri: Uri, context: Context): UserApiService.AvatarUploadResponse {
         val contentResolver = context.contentResolver
         val inputStream = contentResolver.openInputStream(imageUri)
             ?: throw Exception("Cannot open image")
@@ -27,26 +30,26 @@ class UserRepository @Inject constructor() {
         )
         val userIdPart = userId.toRequestBody("text/plain".toMediaType())
 
-        return RetrofitInstance.api.uploadAvatar(imagePart, userIdPart)
+        return api.uploadAvatar(imagePart, userIdPart)
     }
 
-    suspend fun deleteAvatar(userId: String): ApiService.AvatarUploadResponse {
-        return RetrofitInstance.api.deleteAvatar(ApiService.DeleteAvatarRequest(userId))
+    suspend fun deleteAvatar(userId: String): UserApiService.AvatarUploadResponse {
+        return api.deleteAvatar(UserApiService.DeleteAvatarRequest(userId))
     }
 
-    suspend fun deleteAccount(userId: String): ApiService.MessageResponse {
-        return RetrofitInstance.api.deleteAccount(ApiService.DeleteAccountRequest(userId))
+    suspend fun deleteAccount(userId: String): MessageResponse {
+        return api.deleteAccount(UserApiService.DeleteAccountRequest(userId))
     }
 
-    suspend fun updateUsername(userId: String, username: String): ApiService.UpdateUsernameResponse {
-        return RetrofitInstance.api.updateUsername(ApiService.UpdateUsernameRequest(userId, username))
+    suspend fun updateUsername(userId: String, username: String): UserApiService.UpdateUsernameResponse {
+        return api.updateUsername(UserApiService.UpdateUsernameRequest(userId, username))
     }
 
-    suspend fun requestEmailChange(userId: String, newEmail: String): ApiService.MessageResponse {
-        return RetrofitInstance.api.requestEmailChange(ApiService.RequestEmailChangeRequest(userId, newEmail))
+    suspend fun requestEmailChange(userId: String, newEmail: String): MessageResponse {
+        return api.requestEmailChange(UserApiService.RequestEmailChangeRequest(userId, newEmail))
     }
 
-    suspend fun confirmEmailChange(userId: String, code: String): ApiService.ConfirmEmailChangeResponse {
-        return RetrofitInstance.api.confirmEmailChange(ApiService.ConfirmEmailChangeRequest(userId, code))
+    suspend fun confirmEmailChange(userId: String, code: String): UserApiService.ConfirmEmailChangeResponse {
+        return api.confirmEmailChange(UserApiService.ConfirmEmailChangeRequest(userId, code))
     }
 }
