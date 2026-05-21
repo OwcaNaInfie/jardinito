@@ -1,6 +1,8 @@
 package pl.edu.pb.jardinito.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,6 +51,8 @@ import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun TagsScreen(
@@ -69,7 +73,8 @@ fun TagsScreen(
         filteredTags = filteredTags,
         searchQuery = searchQuery,
         onSearchQueryChanged = { tagViewModel.onSearchQueryChanged(it) },
-        onTagClick = { tagToEdit = it }
+        onTagClick = { tagToEdit = it },
+        onReorder = { tagIds -> tagViewModel.reorderTags(userId, tagIds) }
     )
 
     if (showAddTagDialog) {
@@ -107,7 +112,8 @@ fun TagsScreenContent(
     filteredTags: List<Tag>,
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
-    onTagClick: (Tag) -> Unit
+    onTagClick: (Tag) -> Unit,
+    onReorder: (List<String>) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -122,7 +128,7 @@ fun TagsScreenContent(
             placeholder = { Text(stringResource(R.string.tags_search_placeholder)) },
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(50.dp)),
+                .clip(RoundedCornerShape(6.dp)),
             singleLine = true,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = colors.neutralLight,
@@ -135,9 +141,52 @@ fun TagsScreenContent(
         if (filteredTags.isEmpty()) {
             TagsEmptyState()
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(filteredTags, key = { it.tagId }) { tag ->
-                    TagItem(tag = tag, onClick = { onTagClick(tag) })
+            TagsReorderableList(
+                tags = filteredTags,
+                onTagClick = onTagClick,
+                onReorder = onReorder
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TagsReorderableList(
+    tags: List<Tag>,
+    onTagClick: (Tag) -> Unit,
+    onReorder: (List<String>) -> Unit
+) {
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val mutableList = tags.toMutableList()
+        mutableList.add(to.index, mutableList.removeAt(from.index))
+        onReorder(mutableList.map { it.tagId })
+    }
+
+    LazyColumn(
+        state = lazyListState,
+    ) {
+        items(tags.size, key = { tags[it].tagId }) { index ->
+            val tag = tags[index]
+            ReorderableItem(
+                state = reorderableLazyListState,
+                key = tag.tagId
+            ) { isDragging ->
+                Column(
+                    modifier = Modifier
+                        .then(
+                            if (isDragging) Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(2.dp, colors.primary300, RoundedCornerShape(8.dp))
+                            else Modifier
+                        )
+                ) {
+                    TagItem(
+                        tag = tag,
+                        onClick = { onTagClick(tag) },
+                        modifier = Modifier.longPressDraggableHandle()
+                    )
                 }
             }
         }
@@ -167,13 +216,12 @@ private fun TagsEmptyState() {
 @Composable
 fun TagItem(
     tag: Tag,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(colors.neutralLight)
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -195,7 +243,7 @@ fun TagItem(
         }
         Text(
             text = tag.name,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }

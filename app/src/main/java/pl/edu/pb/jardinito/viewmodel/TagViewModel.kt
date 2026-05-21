@@ -64,6 +64,19 @@ class TagViewModel @Inject constructor(
         }
     }
 
+    fun reorderTags(userId: String, tagIds: List<String>) {
+        // local list instant actualization for better UX
+        val reordered = tagIds.mapNotNull { id -> _tags.value.find { it.tagId == id } }
+        _tags.value = reordered
+        viewModelScope.launch {
+            try {
+                repository.reorderTags(userId, tagIds)
+            } catch (e: Exception) {
+                _tagState.value = TagState.Error(e.message ?: "Reorder failed")
+            }
+        }
+    }
+
     fun updateTag(tagId: String, userId: String, name: String, color: String) {
         viewModelScope.launch {
             _tagState.value = TagState.Loading

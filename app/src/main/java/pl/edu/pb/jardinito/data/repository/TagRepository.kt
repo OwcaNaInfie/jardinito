@@ -22,6 +22,10 @@ class TagRepository @Inject constructor() {
         return Tag(tagId = response.tag._id, name = response.tag.name, color = response.tag.color)
     }
 
+    suspend fun reorderTags(userId: String, tagIds: List<String>) {
+        api.reorderTags(TagApiService.ReorderTagsRequest(userId, tagIds))
+    }
+
     suspend fun updateTag(tagId: String, userId: String, name: String, color: String): Tag {
         val response = api.updateTag(tagId, TagApiService.UpdateTagRequest(userId, name, color))
         return Tag(tagId = response.tag._id, name = response.tag.name, color = response.tag.color)

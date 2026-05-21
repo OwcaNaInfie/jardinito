@@ -16,6 +16,9 @@ interface TagApiService {
     @POST("api/tags")
     suspend fun createTag(@Body request: CreateTagRequest): CreateTagResponse
 
+    @PUT("api/tags/reorder")
+    suspend fun reorderTags(@Body request: ReorderTagsRequest): TagsResponse
+
     @PUT("api/tags/{tagId}")
     suspend fun updateTag(
         @Path("tagId") tagId: String,
@@ -34,4 +37,5 @@ interface TagApiService {
     data class CreateTagResponse(val tag: TagDto)
     data class UpdateTagRequest(val userId: String, val name: String, val color: String)
     data class UpdateTagResponse(val tag: TagDto)
+    data class ReorderTagsRequest(val userId: String, val tagIds: List<String>)
 }

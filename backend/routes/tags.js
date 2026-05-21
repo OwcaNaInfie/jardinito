@@ -46,6 +46,36 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.put('/reorder', async (req, res) => {
+    try {
+        const { userId, tagIds } = req.body;
+
+        if (!userId || !tagIds) {
+            return res.status(400).json({ message: 'userId and tagIds are required' });
+        }
+
+        const userTags = await UserTags.findOne({ userId });
+        console.log("UserTags found:", userTags ? "yes" : "no");
+
+        if (!userTags) return res.status(404).json({ message: 'Tags not found' });
+
+        const reordered = tagIds.map(id =>
+            userTags.tags.find(t => t._id.toString() === id)
+        ).filter(Boolean);
+
+        console.log("Reordered count:", reordered.length, "Original count:", userTags.tags.length);
+
+        userTags.tags = reordered;
+        await userTags.save();
+
+        res.json({ tags: userTags.tags });
+
+    } catch (err) {
+        console.error("REORDER ERROR:", err);
+        res.status(500).json({ message: 'Reorder failed' });
+    }
+});
+
 router.put('/:tagId', async (req, res) => {
     try {
         const { tagId } = req.params;
@@ -78,6 +108,7 @@ router.put('/:tagId', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 router.delete('/:tagId', async (req, res) => {
     try {

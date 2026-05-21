@@ -66,6 +66,7 @@ fun AppNavGraph(
         Routes.HOME,
         Routes.FOCUS,
         Routes.PROFILE,
+        Routes.MARKET,
         Routes.TAGS,
         Routes.STATISTICS
     )
