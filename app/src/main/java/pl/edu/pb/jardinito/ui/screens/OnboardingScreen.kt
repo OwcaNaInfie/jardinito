@@ -1,24 +1,40 @@
 package pl.edu.pb.jardinito.ui.screens
 
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
@@ -30,41 +46,56 @@ import pl.edu.pb.jardinito.ui.theme.colors
 fun OnboardingScreen(
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit
-    ) {
-    var showTitle by remember { mutableStateOf(false) }
-    var moveTitle by remember { mutableStateOf(false) }
-    var showBackground by remember { mutableStateOf(false) }
-    var showButtons by remember { mutableStateOf(false) }
+) {
+    var animationFinished by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val titleAlpha = remember { Animatable(0f) }
+    val titleOffsetYFraction = remember { Animatable(0.5f) }
+    val backgroundAlpha = remember { Animatable(0f) }
+    val buttonsAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
-        showTitle = true
+        titleAlpha.animateTo(1f, tween(1500, delayMillis = 500))
         delay(2500)
-        moveTitle = true
+        titleOffsetYFraction.animateTo(0.27f, tween(2000))
         delay(2500)
-        showBackground = true
+        backgroundAlpha.animateTo(1f, tween(1500))
         delay(1500)
-        showButtons = true
+        buttonsAlpha.animateTo(1f, tween(1000))
+        animationFinished = true
     }
 
     OnboardingScreenContent(
-        showTitle = showTitle,
-        moveTitle = moveTitle,
-        showBackground = showBackground,
-        showButtons = showButtons,
+        animationState = OnboardingAnimationState(
+            titleAlpha = titleAlpha.value,
+            titleOffsetYFraction = titleOffsetYFraction.value,
+            backgroundAlpha = backgroundAlpha.value,
+            buttonsAlpha = buttonsAlpha.value,
+            animationFinished = animationFinished
+        ),
         onLoginClick = onLoginClick,
-        onRegisterClick = onRegisterClick
+        onRegisterClick = onRegisterClick,
+        onSkipAnimation = {
+            if (!animationFinished) {
+                scope.launch {
+                    titleAlpha.snapTo(1f)
+                    titleOffsetYFraction.snapTo(0.27f)
+                    backgroundAlpha.snapTo(1f)
+                    buttonsAlpha.snapTo(1f)
+                    animationFinished = true
+                }
+            }
+        }
     )
 }
 
 @Composable
 private fun OnboardingScreenContent(
-    showTitle: Boolean,
-    moveTitle: Boolean,
-    showBackground: Boolean,
-    showButtons: Boolean,
+    animationState: OnboardingAnimationState,
     onLoginClick: () -> Unit,
-    onRegisterClick: () -> Unit
-
+    onRegisterClick: () -> Unit,
+    onSkipAnimation: () -> Unit
 ) {
     BoxWithConstraints(
         modifier = Modifier
@@ -73,15 +104,7 @@ private fun OnboardingScreenContent(
             .windowInsetsPadding(WindowInsets(0, 0, 0, 0))
     ) {
         val screenHeight = maxHeight
-
-        val (titleAlpha, titleOffsetY, backgroundAlpha, buttonsAlpha) =
-            rememberOnboardingAnimations(
-                screenHeight = screenHeight,
-                showTitle = showTitle,
-                moveTitle = moveTitle,
-                showBackground = showBackground,
-                showButtons = showButtons
-            )
+        val titleOffsetY = screenHeight * animationState.titleOffsetYFraction
 
         Image(
             painter = painterResource(R.drawable.onboarding_bg),
@@ -89,7 +112,7 @@ private fun OnboardingScreenContent(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayer { alpha = backgroundAlpha }
+                .graphicsLayer { alpha = animationState.backgroundAlpha }
         )
 
         Column(
@@ -99,7 +122,7 @@ private fun OnboardingScreenContent(
             Text(
                 text = "Jardinito",
                 style = MaterialTheme.typography.displayLarge,
-                color = colors.neutralLight.copy(alpha = titleAlpha),
+                color = colors.neutralLight.copy(alpha = animationState.titleAlpha),
                 modifier = Modifier.offset(y = titleOffsetY),
                 textAlign = TextAlign.Center
             )
@@ -109,7 +132,7 @@ private fun OnboardingScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .offset(y = screenHeight * 0.45f)
-                .graphicsLayer { alpha = buttonsAlpha },
+                .graphicsLayer { alpha = animationState.buttonsAlpha },
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -117,79 +140,54 @@ private fun OnboardingScreenContent(
                 text = stringResource(R.string.login),
                 size = ButtonSize.Medium,
                 variant = ButtonVariant.Primary,
+                enabled = animationState.animationFinished,
                 onClick = onLoginClick
             )
             AppButton(
                 text = stringResource(R.string.register),
                 size = ButtonSize.Medium,
                 variant = ButtonVariant.Primary,
+                enabled = animationState.animationFinished,
                 onClick = onRegisterClick
             )
         }
     }
+
+    if (!animationState.animationFinished) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onSkipAnimation() }
+        )
+    }
 }
 
-// UI MODELS
-data class OnboardingAnimations(
+data class OnboardingAnimationState(
     val titleAlpha: Float,
-    val titleOffsetY: Dp,
+    val titleOffsetYFraction: Float,
     val backgroundAlpha: Float,
-    val buttonsAlpha: Float
+    val buttonsAlpha: Float,
+    val animationFinished: Boolean
 )
-
-// ANIMATION LOGIC
-@Composable
-private fun rememberOnboardingAnimations(
-    screenHeight: Dp,
-    showTitle: Boolean,
-    moveTitle: Boolean,
-    showBackground: Boolean,
-    showButtons: Boolean
-): OnboardingAnimations {
-
-    val titleAlpha by animateFloatAsState(
-        targetValue = if (showTitle) 1f else 0f,
-        animationSpec = tween(durationMillis = 1500, delayMillis = 500),
-        label = "titleAlpha"
-    )
-
-    val titleOffsetY by animateFloatAsState(
-        targetValue = if (moveTitle) screenHeight.value * 0.27f else screenHeight.value * 0.5f,
-        animationSpec = tween(durationMillis = 2000),
-        label = "titleOffset"
-    )
-
-    val backgroundAlpha by animateFloatAsState(
-        targetValue = if (showBackground) 1f else 0f,
-        animationSpec = tween(durationMillis = 1500),
-        label = "backgroundAlpha"
-    )
-
-    val buttonsAlpha by animateFloatAsState(
-        targetValue = if (showButtons) 1f else 0f,
-        animationSpec = tween(durationMillis = 1000),
-        label = "buttonsAlpha"
-    )
-
-    return OnboardingAnimations(
-        titleAlpha = titleAlpha,
-        titleOffsetY = titleOffsetY.dp,
-        backgroundAlpha = backgroundAlpha,
-        buttonsAlpha = buttonsAlpha
-    )
-}
 
 @Preview(showBackground = true, apiLevel = 34)
 @Composable
 fun OnboardingPreviewFinal() {
     JardinitoTheme {
         OnboardingScreenContent(
-            showTitle = true,
-            moveTitle = true,
-            showBackground = true,
-            showButtons = true,
+            animationState = OnboardingAnimationState(
+                titleAlpha = 1f,
+                titleOffsetYFraction = 0.27f,
+                backgroundAlpha = 1f,
+                buttonsAlpha = 1f,
+                animationFinished = true
+            ),
             onLoginClick = {},
-            onRegisterClick = {}
+            onRegisterClick = {},
+            onSkipAnimation = {}
         )
     }
 }
