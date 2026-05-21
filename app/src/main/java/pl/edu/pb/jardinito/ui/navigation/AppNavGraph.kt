@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
@@ -34,6 +37,7 @@ import pl.edu.pb.jardinito.ui.screens.TagsScreen
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
+import pl.edu.pb.jardinito.viewmodel.TagViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
 import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
 
@@ -49,16 +53,20 @@ fun AppNavGraph(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var isEditingProfile by rememberSaveable { mutableStateOf(false) }
+    var showAddTagDialog by remember { mutableStateOf(false) }
+
 
     val authViewModel: AuthViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
     val verificationViewModel: VerificationViewModel = hiltViewModel()
     val passwordResetViewModel: PasswordResetViewModel = hiltViewModel()
+    val tagViewModel: TagViewModel = hiltViewModel()
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
         Routes.FOCUS,
         Routes.PROFILE,
+        Routes.MARKET,
         Routes.TAGS,
         Routes.STATISTICS
     )
@@ -133,7 +141,12 @@ fun AppNavGraph(
                         FocusScreen()
                     }
                     composable(Routes.TAGS) {
-                        TagsScreen()
+                        TagsScreen(
+                            tagViewModel = tagViewModel,
+                            userId = authViewModel.currentUser.collectAsState().value?.userId ?: "",
+                            showAddTagDialog = showAddTagDialog,
+                            onAddTagDialogDismiss = { showAddTagDialog = false }
+                        )
                     }
                     composable(Routes.STATISTICS) {
                         StatisticsScreen()
@@ -160,9 +173,12 @@ fun AppNavGraph(
             if (currentRoute in bottomBarRoutes) {
                 TopBar(
                     title = navRoutes.find { it.route == currentRoute }?.title ?: "",
-                    showSettings = currentRoute == Routes.PROFILE,
                     onMenuClick = { scope.launch { drawerState.open() } },
-                    onSettingsClick = { isEditingProfile = !isEditingProfile }
+                    actions = when (currentRoute) {
+                        Routes.PROFILE -> listOf(Icons.Default.Settings to { isEditingProfile = !isEditingProfile })
+                        Routes.TAGS -> listOf(Icons.Default.Add to { showAddTagDialog = true })
+                        else -> emptyList()
+                    }
                 )
             }
         }

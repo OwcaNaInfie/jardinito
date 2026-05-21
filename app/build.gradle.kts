@@ -71,6 +71,10 @@ dependencies {
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
 
+    // Reorderable
+//    implementation("sh.calvin.reorderable:reorderable:2.1.1")
+    implementation("sh.calvin.reorderable:reorderable:2.4.3")
+
     // Google
     implementation("com.google.android.gms:play-services-auth:20.5.0")
 

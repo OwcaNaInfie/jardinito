@@ -26,9 +26,11 @@ app.use((req, res, next) => {
 // Routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const tagRoutes = require('./routes/tags');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/tags', tagRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
