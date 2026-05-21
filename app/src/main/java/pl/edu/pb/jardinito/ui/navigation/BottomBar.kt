@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +29,26 @@ fun BottomBar(
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route
 
+    BottomBarContent(
+        navRoutes = navRoutes,
+        currentRoute = currentRoute,
+        onRouteClick = { route ->
+            if (currentRoute != route) {
+                navController.navigate(route) {
+                    popUpTo(Routes.HOME)
+                    launchSingleTop = true
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun BottomBarContent(
+    navRoutes: List<NavRoute>,
+    currentRoute: String?,
+    onRouteClick: (String) -> Unit
+) {
     NavigationBar(
         containerColor = colors.neutralLight,
         tonalElevation = 0.dp,
@@ -37,19 +56,15 @@ fun BottomBar(
     ) {
         navRoutes.forEach { navRoute ->
             val selected = currentRoute == navRoute.route
+            val iconSize = if (selected) 30.dp else 28.dp
+            val contentColor = if (selected) colors.secondaryBlue else colors.neutralLightGray
+            val textStyle = if (selected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall
 
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable {
-                        if (currentRoute != navRoute.route) {
-                            navController.navigate(navRoute.route) {
-                                popUpTo(Routes.HOME)
-                                launchSingleTop = true
-                            }
-                        }
-                    },
+                    .clickable { onRouteClick(navRoute.route) },
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -60,13 +75,13 @@ fun BottomBar(
                     Icon(
                         painter = painterResource(id = navRoute.iconRes),
                         contentDescription = navRoute.title,
-                        tint = if (selected) colors.secondaryBlue else colors.neutralLightGray,
-                        modifier = if (selected) Modifier.size(30.dp) else Modifier.size(28.dp)
+                        tint = contentColor,
+                        modifier = Modifier.size(iconSize)
                     )
                     Text(
                         text = navRoute.title,
-                        style = if (selected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
-                        color = if (selected) colors.secondaryBlue else colors.neutralLightGray
+                        style = textStyle,
+                        color = contentColor
                     )
                 }
             }
