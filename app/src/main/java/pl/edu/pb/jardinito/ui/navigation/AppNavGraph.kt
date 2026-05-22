@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
+import pl.edu.pb.jardinito.viewmodel.FocusViewModel
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
+import pl.edu.pb.jardinito.ui.screens.MarketScreen
 import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
@@ -61,6 +63,7 @@ fun AppNavGraph(
     val verificationViewModel: VerificationViewModel = hiltViewModel()
     val passwordResetViewModel: PasswordResetViewModel = hiltViewModel()
     val tagViewModel: TagViewModel = hiltViewModel()
+    val focusViewModel: FocusViewModel = hiltViewModel()
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
@@ -137,8 +140,11 @@ fun AppNavGraph(
                     composable(Routes.HOME) {
                         HomeScreen()
                     }
+                    composable(Routes.MARKET) {
+                        MarketScreen()
+                    }
                     composable(Routes.FOCUS) {
-                        FocusScreen()
+                        FocusScreen(focusViewModel = focusViewModel)
                     }
                     composable(Routes.TAGS) {
                         TagsScreen(
