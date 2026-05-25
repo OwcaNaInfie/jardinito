@@ -17,7 +17,7 @@ const sessionSchema = new mongoose.Schema({
         ref: 'Plant',
         required: true
     },
-    tags: [tagSnapshotSchema],
+    tag: tagSnapshotSchema,
     plannedDuration: { type: Number, required: true },
     actualDuration: { type: Number, default: null },
     status: {

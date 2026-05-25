@@ -81,6 +81,10 @@
     <string name="account_deleted_message">Your account has been successfully deleted.</string>
     Konto zostanie usunięte na zawsze
 
+    <!-- Focus Screen -->
+    <string name="focus_add_tag">Add tag</string>
+    <string name="focus_pick_tags">Select tags</string>
+
     <!-- Tags Screen -->
     <string name="tags_empty_title">Time to create a new tag!</string>
     <string name="tags_search_placeholder">Search for tags…</string>

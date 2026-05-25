@@ -26,7 +26,7 @@ const calculateReward = (durationMinutes) => {
 // POST
 router.post('/', async (req, res) => {
     try {
-        const { userId, plantId, tags, plannedDuration, actualDuration, status, startedAt, completedAt } = req.body;
+        const { userId, plantId, tag, plannedDuration, actualDuration, status, startedAt, completedAt } = req.body;
 
         if (!userId || !plantId || !plannedDuration || !status || !startedAt) {
             return res.status(400).json({ message: 'Missing required fields' });
@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
         const session = await Session.create({
             userId,
             plantId,
-            tags: tags || [],
+            tag: tag || null,
             plannedDuration,
             actualDuration,
             status,

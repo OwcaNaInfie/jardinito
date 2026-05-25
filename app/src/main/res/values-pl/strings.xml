@@ -80,7 +80,10 @@
     <string name="logout_message">Czy na pewno chcesz się wylogować?</string>
     <string name="account_deleted_title">Konto usunięte</string>
     <string name="account_deleted_message">Twoje konto zostało pomyślnie usunięte.</string>
-    
+
+    <!-- Focus Screen -->
+    <string name="focus_add_tag">Dodaj tag</string>
+    <string name="focus_pick_tags">Wybierz tag</string>
 
     <!-- Tags Screen -->
     <string name="tags_empty_title">Czas stworzyć nowy tag!</string>

@@ -27,7 +27,7 @@ interface SessionApiService {
     data class CreateSessionRequest(
         val userId: String,
         val plantId: String,
-        val tags: List<TagSnapshotDto>,
+        val tag: TagSnapshotDto?,
         val plannedDuration: Int,
         val actualDuration: Int?,
         val status: String,
@@ -44,7 +44,7 @@ interface SessionApiService {
         val _id: String,
         val userId: String,
         val plantId: PlantApiService.PlantDto,
-        val tags: List<TagSnapshotDto>,
+        val tag: TagSnapshotDto?,
         val plannedDuration: Int,
         val actualDuration: Int?,
         val status: String,

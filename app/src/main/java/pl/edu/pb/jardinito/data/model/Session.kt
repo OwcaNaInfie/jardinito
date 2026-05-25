@@ -4,7 +4,7 @@ data class Session(
     val sessionId: String,
     val userId: String,
     val plant: Plant,
-    val tags: List<Tag>,
+    val tag: Tag?,
     val plannedDuration: Int,
     val actualDuration: Int?,
     val status: String,

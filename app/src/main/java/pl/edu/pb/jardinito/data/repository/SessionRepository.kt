@@ -17,7 +17,7 @@ class SessionRepository @Inject constructor(
     suspend fun createSession(
         userId: String,
         plantId: String,
-        tags: List<Tag>,
+        tag: Tag?,
         plannedDuration: Int,
         actualDuration: Int?,
         status: String,
@@ -28,13 +28,7 @@ class SessionRepository @Inject constructor(
             SessionApiService.CreateSessionRequest(
                 userId = userId,
                 plantId = plantId,
-                tags = tags.map {
-                    SessionApiService.TagSnapshotDto(
-                        tagId = it.tagId,
-                        name = it.name,
-                        color = it.color
-                    )
-                },
+                tag = tag?.let { SessionApiService.TagSnapshotDto(it.tagId, it.name, it.color) },
                 plannedDuration = plannedDuration,
                 actualDuration = actualDuration,
                 status = status,
@@ -55,7 +49,7 @@ class SessionRepository @Inject constructor(
                 sessionId = dto._id,
                 userId = dto.userId,
                 plant = plantRepository.getPlant(dto.plantId._id),
-                tags = dto.tags.map { Tag(tagId = it.tagId, name = it.name, color = it.color) },
+                tag = dto.tag?.let { Tag(tagId = it.tagId, name = it.name, color = it.color) },
                 plannedDuration = dto.plannedDuration,
                 actualDuration = dto.actualDuration,
                 status = dto.status,

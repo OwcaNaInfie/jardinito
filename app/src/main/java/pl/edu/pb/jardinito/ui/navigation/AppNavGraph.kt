@@ -147,6 +147,7 @@ fun AppNavGraph(
                         val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
                         FocusScreen(
                             focusViewModel = focusViewModel,
+                            tagViewModel = tagViewModel,
                             userId = userId
                         )
                     }

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserTags = require('../models/UserTags');
+const Session = require('../models/Session');
 
 router.get('/', async (req, res) => {
     try {
@@ -99,7 +100,10 @@ router.put('/:tagId', async (req, res) => {
 
         const updatedTag = userTags.tags.find(t => t._id.toString() === tagId);
 
-        // TODO: zaktualizować snapshot w sesjach gdy Session model będzie gotowy
+        await Session.updateMany(
+                    { userId, "tag.tagId": tagId },
+                    { $set: { "tag.name": name, "tag.color": color } }
+                );
 
         res.json({ tag: updatedTag });
 

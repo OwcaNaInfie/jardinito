@@ -52,8 +52,8 @@ class FocusViewModel @Inject constructor(
     private val _selectedPlant = MutableStateFlow<Plant?>(null)
     val selectedPlant: StateFlow<Plant?> = _selectedPlant
 
-    private val _selectedTags = MutableStateFlow<List<Tag>>(emptyList())
-    val selectedTags: StateFlow<List<Tag>> = _selectedTags
+    private val _selectedTag = MutableStateFlow<Tag?>(null)
+    val selectedTag: StateFlow<Tag?> = _selectedTag
 
     private val _coins = MutableStateFlow(0)
     val coins: StateFlow<Int> = _coins
@@ -107,8 +107,8 @@ class FocusViewModel @Inject constructor(
         updateDuration(if (devMode) plant.minDurationDev else plant.minDuration)
     }
 
-    fun selectTags(tags: List<Tag>) {
-        _selectedTags.value = tags
+    fun selectTag(tag: Tag?) {
+        _selectedTag.value = tag
     }
 
     fun setDurationDev(seconds: Int) = updateDuration(seconds)
@@ -171,7 +171,7 @@ class FocusViewModel @Inject constructor(
             val response = sessionRepository.createSession(
                 userId = userId,
                 plantId = plant.plantId,
-                tags = _selectedTags.value,
+                tag = _selectedTag.value,
                 plannedDuration = _selectedDuration.value,
                 actualDuration = actualDuration,
                 status = status,
