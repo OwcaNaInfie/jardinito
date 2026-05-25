@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.AuthSheetState
+import pl.edu.pb.jardinito.data.model.auth.AuthSheetState
 import pl.edu.pb.jardinito.ui.components.AuthBottomSheet
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant

@@ -1,9 +1,9 @@
 package pl.edu.pb.jardinito.data.repository
 
-import pl.edu.pb.jardinito.data.model.AuthResponse
-import pl.edu.pb.jardinito.data.model.GoogleLoginRequest
-import pl.edu.pb.jardinito.data.model.LoginRequest
-import pl.edu.pb.jardinito.data.model.RegisterRequest
+import pl.edu.pb.jardinito.data.model.auth.AuthResponse
+import pl.edu.pb.jardinito.data.model.auth.GoogleLoginRequest
+import pl.edu.pb.jardinito.data.model.auth.LoginRequest
+import pl.edu.pb.jardinito.data.model.auth.RegisterRequest
 import pl.edu.pb.jardinito.data.remote.MessageResponse
 import pl.edu.pb.jardinito.data.remote.AuthApiService
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance

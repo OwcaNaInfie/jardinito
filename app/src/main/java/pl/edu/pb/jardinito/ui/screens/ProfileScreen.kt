@@ -39,7 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.yalantis.ucrop.UCrop
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton

@@ -144,7 +144,11 @@ fun AppNavGraph(
                         MarketScreen()
                     }
                     composable(Routes.FOCUS) {
-                        FocusScreen(focusViewModel = focusViewModel)
+                        val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
+                        FocusScreen(
+                            focusViewModel = focusViewModel,
+                            userId = userId
+                        )
                     }
                     composable(Routes.TAGS) {
                         TagsScreen(

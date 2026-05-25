@@ -9,23 +9,23 @@ mongoose.connect(process.env.MONGO_URI).then(async () => {
 
 const plants = [
     // Podstawowe (price: 0)
-    { name: "tulip",     minDuration: 30, minDurationDev: 3, price: 0   },
-    { name: "poppy",     minDuration: 60, minDurationDev: 5, price: 0   },
-    { name: "sunflower", minDuration: 90, minDurationDev: 7, price: 0   },
+    { name: "tulip",     minDuration: 30, minDurationDev: 5, price: 0   },
+    { name: "poppy",     minDuration: 60, minDurationDev: 10, price: 0   },
+    { name: "sunflower", minDuration: 90, minDurationDev: 15, price: 0   },
 
     // 3-6 sesji
-    { name: "daffodil",  minDuration: 30, minDurationDev: 3, price: 200 },
-    { name: "rose",      minDuration: 60, minDurationDev: 5, price: 260 },
-    { name: "bloodroot", minDuration: 30, minDurationDev: 3, price: 320 },
+    { name: "daffodil",  minDuration: 30, minDurationDev: 5, price: 200 },
+    { name: "rose",      minDuration: 60, minDurationDev: 10, price: 260 },
+    { name: "bloodroot", minDuration: 30, minDurationDev: 5, price: 320 },
 
     // 7-10 sesji
-    { name: "gerbera",   minDuration: 60, minDurationDev: 5, price: 440 },
-    { name: "pansy",     minDuration: 30, minDurationDev: 3, price: 500 },
-    { name: "lavender",  minDuration: 90, minDurationDev: 7, price: 560 },
+    { name: "gerbera",   minDuration: 60, minDurationDev: 10, price: 440 },
+    { name: "pansy",     minDuration: 30, minDurationDev: 5, price: 500 },
+    { name: "lavender",  minDuration: 90, minDurationDev: 15, price: 560 },
 
     // 11-13 sesji
-    { name: "lily",      minDuration: 90, minDurationDev: 7, price: 680 },
-    { name: "orchid",    minDuration: 90, minDurationDev: 7, price: 780 },
+    { name: "lily",      minDuration: 90, minDurationDev: 15, price: 680 },
+    { name: "orchid",    minDuration: 90, minDurationDev: 15, price: 780 },
 ].map(plant => ({
     ...plant,
     images: {

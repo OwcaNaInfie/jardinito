@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.manager.AuthSessionManager
-import pl.edu.pb.jardinito.data.model.Avatar
-import pl.edu.pb.jardinito.data.model.LoginFormState
-import pl.edu.pb.jardinito.data.model.RegisterFormState
-import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.model.profile.Avatar
+import pl.edu.pb.jardinito.data.model.auth.LoginFormState
+import pl.edu.pb.jardinito.data.model.auth.RegisterFormState
+import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.data.repository.AuthRepository
 import pl.edu.pb.jardinito.ui.utils.validateEmail
 import pl.edu.pb.jardinito.ui.utils.validateIsBlank

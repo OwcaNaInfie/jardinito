@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.data.model
+package pl.edu.pb.jardinito.data.model.auth
 
 data class ResetPasswordFormState(
     val code: String = "",

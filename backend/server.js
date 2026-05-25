@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 app.use('/avatars', express.static('public/avatars'));
-app.use('/avatars', express.static('public/avatars'));
+app.use('/plants', express.static('public/plants'));
 
 // Log every incoming request
 app.use((req, res, next) => {

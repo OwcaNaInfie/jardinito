@@ -7,9 +7,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
-//    const val BASE_URL = "http://192.168.0.28:5000/"
+    const val BASE_URL = "http://192.168.0.28:5000/"
 //    Dołubowo
-const val BASE_URL = "http://192.168.1.27:5000/"
+//const val BASE_URL = "http://192.168.1.27:5000/"
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -36,4 +36,7 @@ const val BASE_URL = "http://192.168.1.27:5000/"
     val auth: AuthApiService by lazy { retrofit.create(AuthApiService::class.java) }
     val user: UserApiService by lazy { retrofit.create(UserApiService::class.java) }
     val tags: TagApiService by lazy { retrofit.create(TagApiService::class.java) }
+    val plants: PlantApiService by lazy { retrofit.create(PlantApiService::class.java) }
+    val sessions: SessionApiService by lazy { retrofit.create(SessionApiService::class.java) }
+    val wallet: WalletApiService by lazy { retrofit.create(WalletApiService::class.java) }
 }

@@ -1,9 +1,9 @@
 package pl.edu.pb.jardinito.data.remote
 
-import pl.edu.pb.jardinito.data.model.AuthResponse
-import pl.edu.pb.jardinito.data.model.GoogleLoginRequest
-import pl.edu.pb.jardinito.data.model.LoginRequest
-import pl.edu.pb.jardinito.data.model.RegisterRequest
+import pl.edu.pb.jardinito.data.model.auth.AuthResponse
+import pl.edu.pb.jardinito.data.model.auth.GoogleLoginRequest
+import pl.edu.pb.jardinito.data.model.auth.LoginRequest
+import pl.edu.pb.jardinito.data.model.auth.RegisterRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

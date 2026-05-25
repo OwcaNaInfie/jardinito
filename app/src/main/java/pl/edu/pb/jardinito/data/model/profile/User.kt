@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.data.model
+package pl.edu.pb.jardinito.data.model.profile
 
 data class User(
     val userId: String,

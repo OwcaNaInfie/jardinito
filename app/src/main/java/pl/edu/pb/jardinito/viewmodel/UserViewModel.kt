@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.Avatar
-import pl.edu.pb.jardinito.data.model.ProfileFormState
+import pl.edu.pb.jardinito.data.model.profile.Avatar
+import pl.edu.pb.jardinito.data.model.profile.ProfileFormState
 import pl.edu.pb.jardinito.data.repository.AuthRepository
 import pl.edu.pb.jardinito.data.repository.UserRepository
 import pl.edu.pb.jardinito.ui.utils.validateEmail
@@ -137,11 +137,13 @@ class UserViewModel @Inject constructor(
             _userState.value = UserState.Loading
             try {
                 val response = repository.uploadAvatar(userId, imageUri, context)
-                onSuccess(Avatar(
+                onSuccess(
+                    Avatar(
                     default = response.avatar.default,
                     custom = response.avatar.custom,
                     google = response.avatar.google
-                ))
+                )
+                )
                 _userState.value = UserState.Success
             } catch (e: Exception) {
                 _userState.value = UserState.Error(e.message ?: "Upload failed")
@@ -154,11 +156,13 @@ class UserViewModel @Inject constructor(
             _userState.value = UserState.Loading
             try {
                 val response = repository.deleteAvatar(userId)
-                onSuccess(Avatar(
+                onSuccess(
+                    Avatar(
                     default = response.avatar.default,
                     custom = response.avatar.custom,
                     google = response.avatar.google
-                ))
+                )
+                )
                 _userState.value = UserState.Success
             } catch (e: Exception) {
                 _userState.value = UserState.Error(e.message ?: "Delete failed")

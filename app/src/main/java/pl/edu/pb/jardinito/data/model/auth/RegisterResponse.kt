@@ -1,6 +1,6 @@
-package pl.edu.pb.jardinito.data.model
+package pl.edu.pb.jardinito.data.model.auth
 
-import pl.edu.pb.jardinito.data.model.Avatar
+import pl.edu.pb.jardinito.data.model.profile.Avatar
 
 data class RegisterResponse(
     val token: String,
