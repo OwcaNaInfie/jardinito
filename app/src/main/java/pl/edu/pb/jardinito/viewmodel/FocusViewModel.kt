@@ -44,7 +44,6 @@ class FocusViewModel @Inject constructor(
     private val _selectedDuration = MutableStateFlow(5)
     val selectedDuration: StateFlow<Int> = _selectedDuration
 
-    // totalSeconds() może być wywołane po inicjalizacji _selectedDuration
     private val _remainingSeconds = MutableStateFlow(totalSeconds())
     val remainingSeconds: StateFlow<Int> = _remainingSeconds
 
@@ -66,11 +65,14 @@ class FocusViewModel @Inject constructor(
     private val _lastEarnedCoins = MutableStateFlow(0)
     val lastEarnedCoins: StateFlow<Int> = _lastEarnedCoins
 
-    private var timerJob: Job? = null
-    private var sessionStartedAt: String? = null
-
     private val _sessionResult = MutableStateFlow<SessionResult?>(null)
     val sessionResult: StateFlow<SessionResult?> = _sessionResult
+
+    private val _showStopConfirmDialog = MutableStateFlow(false)
+    val showStopConfirmDialog: StateFlow<Boolean> = _showStopConfirmDialog
+
+    private var timerJob: Job? = null
+    private var sessionStartedAt: String? = null
 
     // =====================
     // INIT
@@ -89,12 +91,9 @@ class FocusViewModel @Inject constructor(
             try {
                 val result = plantRepository.getPlants()
                 _plants.value = result
-
-                // Zawsze wybierz tulipan (price == 0), fallback na pierwszą roślinę
                 val defaultPlant = result.firstOrNull { it.price == 0 } ?: result.firstOrNull()
                 defaultPlant?.let { plant ->
                     _selectedPlant.value = plant
-                    // Ustaw timer na minimum wybranej rośliny
                     updateDuration(if (devMode) plant.minDurationDev else plant.minDuration)
                 }
             } catch (e: Exception) { }
@@ -154,11 +153,29 @@ class FocusViewModel @Inject constructor(
         }
     }
 
+    fun requestStop(userId: String) {
+        pause()
+        _showStopConfirmDialog.value = true
+    }
+
+    fun confirmStop(userId: String) {
+        _showStopConfirmDialog.value = false
+        stop(userId)
+    }
+
+    fun dismissStop(userId: String) {
+        _showStopConfirmDialog.value = false
+        resume(userId)
+    }
+
+    fun clearSessionResult() {
+        _sessionResult.value = null
+    }
+
     // =====================
     // PRIVATE HELPERS
     // =====================
 
-    // Shared timer loop — used by start() and resume()
     private fun runTimer(userId: String) {
         timerJob = viewModelScope.launch {
             while (_remainingSeconds.value > 0) {
@@ -176,9 +193,7 @@ class FocusViewModel @Inject constructor(
     private suspend fun saveSession(userId: String, plant: Plant, status: String) {
         try {
             val now = nowIso()
-            // Elapsed time in minutes — works for both dev (seconds/60) and prod (seconds/60)
             val actualDuration = (totalSeconds() - _remainingSeconds.value) / 60
-
             val response = sessionRepository.createSession(
                 userId = userId,
                 plantId = plant.plantId,
@@ -189,7 +204,6 @@ class FocusViewModel @Inject constructor(
                 startedAt = sessionStartedAt ?: now,
                 completedAt = if (status == "completed") now else null
             )
-
             if (status == "completed") {
                 _lastEarnedCoins.value = response.coinsEarned
                 _coins.value += response.coinsEarned
@@ -202,11 +216,6 @@ class FocusViewModel @Inject constructor(
         }
     }
 
-    fun clearSessionResult() {
-        _sessionResult.value = null
-    }
-
-    // Sets duration and syncs remainingSeconds via totalSeconds()
     private fun updateDuration(value: Int) {
         if (_timerState.value !is TimerState.Idle) return
         _selectedDuration.value = value
@@ -218,11 +227,6 @@ class FocusViewModel @Inject constructor(
         _timerState.value = TimerState.Idle
         _remainingSeconds.value = totalSeconds()
         _progress.value = 1f
-    }
-
-    private fun enforceMinDuration(plant: Plant) {
-        val min = if (devMode) plant.minDurationDev else plant.minDuration
-        if (_selectedDuration.value < min) updateDuration(min)
     }
 
     private fun totalSeconds(): Int =
