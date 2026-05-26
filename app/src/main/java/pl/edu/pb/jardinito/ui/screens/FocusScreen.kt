@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -32,9 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
@@ -48,16 +51,12 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.ui.utils.rememberPlantName
+import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 import pl.edu.pb.jardinito.viewmodel.FocusViewModel
+import pl.edu.pb.jardinito.viewmodel.SessionResult
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
 import pl.edu.pb.jardinito.viewmodel.state.TimerState
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
-import pl.edu.pb.jardinito.ui.components.DialogConfig
-import pl.edu.pb.jardinito.ui.components.DialogVariant
-import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
-import pl.edu.pb.jardinito.viewmodel.SessionResult
 
 // =====================
 // DATA CLASSES
@@ -85,7 +84,7 @@ data class TimerActions(
     val onStart: () -> Unit,
     val onPause: () -> Unit,
     val onResume: () -> Unit,
-    val onStop: () -> Unit
+    val onStopClick: () -> Unit
 )
 
 data class TimerCallbacks(
@@ -143,6 +142,7 @@ fun FocusScreen(
     val selectedTag by focusViewModel.selectedTag.collectAsState()
     val tags by tagViewModel.tags.collectAsState()
     val sessionResult by focusViewModel.sessionResult.collectAsState()
+    val showStopConfirmDialog by focusViewModel.showStopConfirmDialog.collectAsState()
 
     LaunchedEffect(userId) {
         if (userId.isNotBlank()) tagViewModel.loadTags(userId)
@@ -167,15 +167,22 @@ fun FocusScreen(
             onStart = { focusViewModel.start(userId) },
             onPause = { focusViewModel.pause() },
             onResume = { focusViewModel.resume(userId) },
-            onStop = { focusViewModel.stop(userId) }
+            onStopClick = { focusViewModel.requestStop(userId) }
         ),
         config = config,
         onPlantSelected = { focusViewModel.selectPlant(it) },
         onTagSelected = { focusViewModel.selectTag(it) },
         sessionResult = sessionResult,
-        onSessionResultDismissed = { focusViewModel.clearSessionResult() }
+        showStopConfirmDialog = showStopConfirmDialog,
+        onSessionResultDismissed = { focusViewModel.clearSessionResult() },
+        onStopConfirmed = { focusViewModel.confirmStop(userId) },
+        onStopDismissed = { focusViewModel.dismissStop(userId) }
     )
 }
+
+// =====================
+// CONTENT
+// =====================
 
 @Composable
 fun FocusScreenContent(
@@ -187,14 +194,16 @@ fun FocusScreenContent(
     onPlantSelected: (Plant) -> Unit,
     onTagSelected: (Tag?) -> Unit,
     sessionResult: SessionResult?,
+    showStopConfirmDialog: Boolean,
     onSessionResultDismissed: () -> Unit,
+    onStopConfirmed: () -> Unit,
+    onStopDismissed: () -> Unit
 ) {
     val isIdle = timerUiState.timerState is TimerState.Idle
     val isRunning = timerUiState.timerState is TimerState.Running
     val isPaused = timerUiState.timerState is TimerState.Paused
     var showPlantPicker by remember { mutableStateOf(false) }
     var showTagPicker by remember { mutableStateOf(false) }
-    var showStopConfirmDialog by remember { mutableStateOf(false) }
 
     val minutes = timerUiState.remainingSeconds / 60
     val seconds = timerUiState.remainingSeconds % 60
@@ -221,7 +230,6 @@ fun FocusScreenContent(
             config = config
         )
 
-
         Text(
             text = if (isIdle) "${timerUiState.selectedDuration} $unit" else timeText,
             style = MaterialTheme.typography.headlineLarge,
@@ -239,11 +247,7 @@ fun FocusScreenContent(
             isIdle = isIdle,
             isRunning = isRunning,
             isPaused = isPaused,
-            actions = timerActions,
-            onStopClick = {
-                timerActions.onPause()
-                showStopConfirmDialog = true
-            }
+            actions = timerActions
         )
     }
 
@@ -267,84 +271,23 @@ fun FocusScreenContent(
             onDismiss = { showTagPicker = false }
         )
     }
+
     if (showStopConfirmDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-            title = stringResource(R.string.session_stop_title),
-            message = stringResource(R.string.session_stop_message),
-            confirmText = stringResource(R.string.session_stop_confirm),
-            variant = DialogVariant.Warning
-            ),
-            onConfirm = {
-                showStopConfirmDialog = false
-                timerActions.onStop()
-            },
-            onDismiss = {
-                showStopConfirmDialog = false
-                timerActions.onResume()
-            }
+        StopConfirmDialog(
+            onConfirm = onStopConfirmed,
+            onDismiss = onStopDismissed
         )
     }
 
     when (val result = sessionResult) {
-        is SessionResult.Completed -> {
-            val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.images.medium}")
-            ConfirmDialog(
-                config = DialogConfig(
-                title = stringResource(R.string.session_completed_title),
-                message = stringResource(R.string.session_completed_message, result.plant.name, result.coinsEarned),
-                variant = DialogVariant.Success,
-                singleButton = true
-                ),
-                content = {
-                    Row(
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            filterQuality = FilterQuality.None,
-                            modifier = Modifier.size(100.dp)
-                        )
-                    }
-                },
-                onConfirm = onSessionResultDismissed,
-                onDismiss = onSessionResultDismissed
-            )
-        }
-        is SessionResult.Failed -> {
-            val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.witheredImages.medium}")
-            ConfirmDialog(
-                config = DialogConfig(
-                title = stringResource(R.string.session_failed_title),
-                message = stringResource(R.string.session_failed_message, result.plant.name),
-                variant = DialogVariant.Error,
-                singleButton = true
-                ),
-                content = {
-                    Row(
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            filterQuality = FilterQuality.None,
-                            modifier = Modifier.size(100.dp)
-                        )
-                    }
-                },
-                onConfirm = onSessionResultDismissed,
-                onDismiss = onSessionResultDismissed
-            )
-        }
+        is SessionResult.Completed -> SessionCompletedDialog(
+            result = result,
+            onDismiss = onSessionResultDismissed
+        )
+        is SessionResult.Failed -> SessionFailedDialog(
+            result = result,
+            onDismiss = onSessionResultDismissed
+        )
         null -> {}
     }
 }
@@ -358,8 +301,7 @@ private fun TimerControls(
     isIdle: Boolean,
     isRunning: Boolean,
     isPaused: Boolean,
-    actions: TimerActions,
-    onStopClick: () -> Unit
+    actions: TimerActions
 ) {
     Row(
         modifier = Modifier.padding(top = 32.dp),
@@ -367,7 +309,7 @@ private fun TimerControls(
     ) {
         when {
             isIdle -> AppButton(
-                text = "Start",
+                text = stringResource(R.string.focus_start),
                 size = ButtonSize.Large,
                 variant = ButtonVariant.Tertiary,
                 onClick = actions.onStart
@@ -385,7 +327,7 @@ private fun TimerControls(
                     size = ButtonSize.Large,
                     circle = true,
                     variant = ButtonVariant.Primary,
-                    onClick = onStopClick
+                    onClick = actions.onStopClick
                 )
             }
             isPaused -> {
@@ -401,7 +343,7 @@ private fun TimerControls(
                     size = ButtonSize.Large,
                     circle = true,
                     variant = ButtonVariant.Primary,
-                    onClick = onStopClick
+                    onClick = actions.onStopClick
                 )
             }
         }
@@ -453,11 +395,11 @@ private fun SelectedTagChip(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(TagColors.colorCompose(selectedTag.color))
+                Icon(
+                    imageVector = Icons.Default.Circle,
+                    contentDescription = null,
+                    tint = TagColors.colorCompose(selectedTag.color),
+                    modifier = Modifier.size(8.dp)
                 )
                 Text(
                     text = selectedTag.name,
@@ -467,4 +409,92 @@ private fun SelectedTagChip(
             }
         }
     }
+}
+
+// =====================
+// DIALOGS
+// =====================
+
+@Composable
+private fun StopConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    ConfirmDialog(
+        config = pl.edu.pb.jardinito.ui.components.DialogConfig(
+            title = stringResource(R.string.session_stop_title),
+            message = stringResource(R.string.session_stop_message),
+            confirmText = stringResource(R.string.session_stop_confirm),
+            variant = pl.edu.pb.jardinito.ui.components.DialogVariant.Warning
+        ),
+        onConfirm = onConfirm,
+        onDismiss = onDismiss
+    )
+}
+
+@Composable
+private fun SessionCompletedDialog(
+    result: SessionResult.Completed,
+    onDismiss: () -> Unit
+) {
+    val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.images.medium}")
+    ConfirmDialog(
+        config = pl.edu.pb.jardinito.ui.components.DialogConfig(
+            title = stringResource(R.string.session_completed_title),
+            message = stringResource(R.string.session_completed_message, rememberPlantName(result.plant), result.coinsEarned),
+            variant = pl.edu.pb.jardinito.ui.components.DialogVariant.Success,
+            singleButton = true,
+            confirmText = stringResource(R.string.ok)
+        ),
+        content = {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    filterQuality = FilterQuality.None,
+                    modifier = Modifier.size(100.dp)
+                )
+            }
+        },
+        onConfirm = onDismiss,
+        onDismiss = onDismiss
+    )
+}
+
+@Composable
+private fun SessionFailedDialog(
+    result: SessionResult.Failed,
+    onDismiss: () -> Unit
+) {
+    val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.witheredImages.medium}")
+    ConfirmDialog(
+        config = pl.edu.pb.jardinito.ui.components.DialogConfig(
+            title = stringResource(R.string.session_failed_title),
+            message = stringResource(R.string.session_failed_message, rememberPlantName(result.plant)),
+            variant = pl.edu.pb.jardinito.ui.components.DialogVariant.Error,
+            singleButton = true,
+            confirmText = stringResource(R.string.ok)
+        ),
+        content = {
+            Row(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    filterQuality = FilterQuality.None,
+                    modifier = Modifier.size(100.dp)
+                )
+            }
+        },
+        onConfirm = onDismiss,
+        onDismiss = onDismiss
+    )
 }
