@@ -2,7 +2,7 @@ package pl.edu.pb.jardinito.data.manager
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import javax.inject.Inject
 import javax.inject.Singleton

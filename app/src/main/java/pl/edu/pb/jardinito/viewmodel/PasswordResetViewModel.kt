@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.manager.AuthSessionManager
-import pl.edu.pb.jardinito.data.model.ResetPasswordFormState
+import pl.edu.pb.jardinito.data.model.auth.ResetPasswordFormState
 import pl.edu.pb.jardinito.data.repository.AuthRepository
 import pl.edu.pb.jardinito.ui.utils.validatePassword
 import pl.edu.pb.jardinito.ui.utils.validateRepeatedPassword

@@ -81,6 +81,17 @@
     <string name="account_deleted_message">Your account has been successfully deleted.</string>
     Konto zostanie usunięte na zawsze
 
+    <!-- Focus Screen -->
+    <string name="focus_add_tag">Add tag</string>
+    <string name="focus_pick_tags">Select tags</string>
+    <string name="session_stop_title">End session?</string>
+    <string name="session_stop_message">The plant will wither and end up in the garden without a reward.</string>
+    <string name="session_stop_confirm">End session</string>
+    <string name="session_completed_title">Session completed!</string>
+    <string name="session_completed_message">The %1$s has been planted in your garden. You have earned %2$d coins!</string>
+    <string name="session_failed_title">Session interrupted!</string>
+    <string name="session_failed_message">The %1$s has withered and ended up in your garden.</string>
+
     <!-- Tags Screen -->
     <string name="tags_empty_title">Time to create a new tag!</string>
     <string name="tags_search_placeholder">Search for tags…</string>

@@ -16,6 +16,7 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 app.use('/avatars', express.static('public/avatars'));
+app.use('/plants', express.static('public/plants'));
 
 // Log every incoming request
 app.use((req, res, next) => {
@@ -27,10 +28,16 @@ app.use((req, res, next) => {
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const tagRoutes = require('./routes/tags');
+const plantRoutes = require('./routes/plants');
+const sessionRoutes = require('./routes/sessions');
+const walletRoutes = require('./routes/wallet');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/plants', plantRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/wallet', walletRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)

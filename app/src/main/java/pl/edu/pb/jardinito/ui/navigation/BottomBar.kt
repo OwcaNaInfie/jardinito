@@ -52,7 +52,7 @@ fun BottomBarContent(
     NavigationBar(
         containerColor = colors.neutralLight,
         tonalElevation = 0.dp,
-        modifier = Modifier.height(85.dp)
+        modifier = Modifier.height(90.dp)
     ) {
         navRoutes.forEach { navRoute ->
             val selected = currentRoute == navRoute.route

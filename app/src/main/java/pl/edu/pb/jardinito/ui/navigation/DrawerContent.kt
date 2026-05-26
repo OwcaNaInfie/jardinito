@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 import pl.edu.pb.jardinito.ui.theme.colors
 import androidx.compose.foundation.layout.Arrangement

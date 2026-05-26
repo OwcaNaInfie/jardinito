@@ -70,6 +70,8 @@ dependencies {
 
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-svg:2.6.0")
+    implementation("com.caverock:androidsvg-aar:1.4")
 
     // Reorderable
 //    implementation("sh.calvin.reorderable:reorderable:2.1.1")

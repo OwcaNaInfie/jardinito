@@ -6,7 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.manager.AuthSessionManager
-import pl.edu.pb.jardinito.data.model.User
+import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.data.repository.AuthRepository
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import retrofit2.HttpException

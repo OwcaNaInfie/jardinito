@@ -7,6 +7,7 @@ const { getRandomDefaultAvatar } = require('../utils/avatarService');
 const VerificationToken = require('../models/VerificationToken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const Tag = require('../models/UserTags');
+const UserWallet = require('../models/UserWallet');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -94,6 +95,12 @@ router.post('/register', async (req, res) => {
                 { name: 'Study', color: '#4A90D9' },
                 { name: 'Work', color: '#E67E22' }
             ]
+        });
+
+        const devMode = process.env.DEV_MODE === 'true';
+        await UserWallet.create({
+            userId: newUser._id,
+            coins: devMode ? 10000 : 0
         });
 
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();

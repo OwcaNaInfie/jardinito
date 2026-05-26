@@ -10,9 +10,10 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.AuthSheetState
+import pl.edu.pb.jardinito.data.model.auth.AuthSheetState
 import pl.edu.pb.jardinito.ui.components.AuthBottomSheet
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
@@ -168,10 +169,12 @@ private fun AuthDialogs(
 ) {
     if (showUnverifiedDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.verification_title),
             message = stringResource(R.string.verification_resend_prompt),
             confirmText = stringResource(R.string.resend_code),
             dismissText = stringResource(R.string.cancel),
+            ),
             onConfirm = onUnverifiedConfirm,
             onDismiss = onUnverifiedDismiss
         )
@@ -179,11 +182,13 @@ private fun AuthDialogs(
 
     if (showCodeSentDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.verification_title),
             message = stringResource(R.string.verification_code_sent, pendingEmail ?: ""),
             confirmText = "OK",
             singleButton = true,
             variant = DialogVariant.Success,
+            ),
             onConfirm = onCodeSentConfirm,
             onDismiss = onCodeSentDismiss
         )
@@ -191,11 +196,13 @@ private fun AuthDialogs(
 
     if (showResetCodeSentDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.reset_password),
             message = stringResource(R.string.reset_code_sent),
             confirmText = "OK",
             singleButton = true,
             variant = DialogVariant.Success,
+            ),
             onConfirm = onResetCodeSentDismiss,
             onDismiss = onResetCodeSentDismiss
         )

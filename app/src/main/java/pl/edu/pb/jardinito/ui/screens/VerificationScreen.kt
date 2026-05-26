@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
@@ -145,11 +146,13 @@ fun VerificationScreenContent(
 
     if (showCodeSentDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.verification_title),
             message = stringResource(R.string.verification_code_sent, email ?: ""),
             confirmText = "OK",
             singleButton = true,
             variant = DialogVariant.Success,
+            ),
             onConfirm = { showCodeSentDialog = false },
             onDismiss = { showCodeSentDialog = false }
         )

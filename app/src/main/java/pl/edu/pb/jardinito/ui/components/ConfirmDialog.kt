@@ -36,14 +36,19 @@ import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
 
 enum class DialogVariant { Info, Warning, Error, Success }
 
+data class DialogConfig(
+    val title: String,
+    val message: String,
+    val variant: DialogVariant = DialogVariant.Info,
+    val confirmText: String = "Confirm",
+    val dismissText: String = "Cancel",
+    val singleButton: Boolean = false
+)
+
 @Composable
 fun ConfirmDialog(
-    title: String,
-    message: String,
-    confirmText: String = stringResource(R.string.confirm),
-    dismissText: String = stringResource(R.string.cancel),
-    variant: DialogVariant = DialogVariant.Info,
-    singleButton: Boolean = false,
+    config: DialogConfig,
+    content: @Composable (() -> Unit)? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -63,12 +68,8 @@ fun ConfirmDialog(
             contentAlignment = Alignment.Center
         ) {
             ConfirmDialogContent(
-                title = title,
-                message = message,
-                confirmText = confirmText,
-                dismissText = dismissText,
-                variant = variant,
-                singleButton = singleButton,
+                config = config,
+                content = content,
                 onConfirm = onConfirm,
                 onDismiss = onDismiss
             )
@@ -78,30 +79,26 @@ fun ConfirmDialog(
 
 @Composable
 fun ConfirmDialogContent(
-    title: String,
-    message: String,
-    confirmText: String,
-    dismissText: String,
-    variant: DialogVariant,
-    singleButton: Boolean,
+    config: DialogConfig,
+    content: @Composable (() -> Unit)? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    val containerBorderColor = when (variant) {
+    val containerBorderColor = when (config.variant) {
         DialogVariant.Info -> Color.Transparent
         DialogVariant.Warning -> colors.primary900
         DialogVariant.Error -> colors.error
         DialogVariant.Success -> colors.primary500
     }
 
-    val confirmButtonVariant = when (variant) {
+    val confirmButtonVariant = when (config.variant) {
         DialogVariant.Info -> ButtonVariant.Secondary
         DialogVariant.Warning -> ButtonVariant.Tertiary
         DialogVariant.Error -> ButtonVariant.Tertiary
         DialogVariant.Success -> ButtonVariant.Tertiary
     }
 
-    val confirmButtonColor = when (variant) {
+    val confirmButtonColor = when (config.variant) {
         DialogVariant.Info -> null
         DialogVariant.Warning -> null
         DialogVariant.Error -> colors.error
@@ -117,17 +114,18 @@ fun ConfirmDialogContent(
             .clickable(enabled = false) {}
             .padding(24.dp)
     ) {
-        Text(text = title, style = MaterialTheme.typography.bodyLarge)
+        Text(text = config.title, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = message, style = MaterialTheme.typography.bodyMedium)
+        content?.invoke()
+        Text(text = config.message, style = MaterialTheme.typography.bodyMedium)
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth()
         ) {
-            if (!singleButton) {
+            if (!config.singleButton) {
                 AppButton(
-                    text = dismissText,
+                    text = config.dismissText,
                     size = ButtonSize.Small,
                     variant = ButtonVariant.Primary,
                     onClick = onDismiss
@@ -135,7 +133,7 @@ fun ConfirmDialogContent(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             AppButton(
-                text = confirmText,
+                text = config.confirmText,
                 size = ButtonSize.Small,
                 variant = confirmButtonVariant,
                 buttonColor = confirmButtonColor,
@@ -157,45 +155,53 @@ fun ConfirmDialogPreview() {
         ) {
             // Info - dwa przyciski
             ConfirmDialogContent(
+                config = DialogConfig(
                 title = "Usuń zdjęcie",
                 message = "Czy na pewno chcesz usunąć swoje zdjęcie profilowe?",
                 confirmText = "Usuń",
                 dismissText = "Anuluj",
                 variant = DialogVariant.Info,
                 singleButton = false,
+                ),
                 onConfirm = {},
                 onDismiss = {}
             )
             // Warning - dwa przyciski
             ConfirmDialogContent(
+                config = DialogConfig(
                 title = "Uwaga!",
                 message = "Ta operacja jest nieodwracalna. Czy chcesz kontynuować?",
                 confirmText = "Kontynuuj",
                 dismissText = "Anuluj",
                 variant = DialogVariant.Warning,
                 singleButton = false,
+                ),
                 onConfirm = {},
                 onDismiss = {}
             )
             // Error - dwa przyciski
             ConfirmDialogContent(
+                config = DialogConfig(
                 title = "Usuń konto",
                 message = "Twoje konto zostanie trwale usunięte.",
                 confirmText = "Usuń konto",
                 dismissText = "Anuluj",
                 variant = DialogVariant.Error,
                 singleButton = false,
+                ),
                 onConfirm = {},
                 onDismiss = {}
             )
             // Info - jeden przycisk
             ConfirmDialogContent(
+                config = DialogConfig(
                 title = "Konto usunięte",
                 message = "Twoje konto zostało pomyślnie usunięte.",
                 confirmText = "OK",
                 dismissText = "",
                 variant = DialogVariant.Success,
                 singleButton = true,
+                ),
                 onConfirm = {},
                 onDismiss = {}
             )

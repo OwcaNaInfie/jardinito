@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
@@ -191,11 +192,13 @@ fun LoginScreenContent(
             }
             if (showErrorDialog && errorMessage != null) {
                 ConfirmDialog(
+                    config = DialogConfig(
                     title = stringResource(R.string.error_title),
                     message = stringResource(errorMessage!!),
                     confirmText = "OK",
                     singleButton = true,
                     variant = DialogVariant.Error,
+                    ),
                     onConfirm = {
                         showErrorDialog = false
                         authViewModel.resetUiState()
