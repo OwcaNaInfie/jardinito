@@ -20,6 +20,11 @@ import pl.edu.pb.jardinito.data.repository.WalletRepository
 import pl.edu.pb.jardinito.viewmodel.state.TimerState
 import javax.inject.Inject
 
+sealed class SessionResult {
+    data class Completed(val plant: Plant, val coinsEarned: Int) : SessionResult()
+    data class Failed(val plant: Plant) : SessionResult()
+}
+
 @HiltViewModel
 class FocusViewModel @Inject constructor(
     private val plantRepository: PlantRepository,
@@ -31,7 +36,7 @@ class FocusViewModel @Inject constructor(
     // STATE
     // =====================
 
-    val devMode = false
+    val devMode = true
 
     private val _timerState = MutableStateFlow<TimerState>(TimerState.Idle)
     val timerState: StateFlow<TimerState> = _timerState
@@ -63,6 +68,9 @@ class FocusViewModel @Inject constructor(
 
     private var timerJob: Job? = null
     private var sessionStartedAt: String? = null
+
+    private val _sessionResult = MutableStateFlow<SessionResult?>(null)
+    val sessionResult: StateFlow<SessionResult?> = _sessionResult
 
     // =====================
     // INIT
@@ -137,10 +145,13 @@ class FocusViewModel @Inject constructor(
         if (plant != null && sessionStartedAt != null) {
             viewModelScope.launch {
                 saveSession(userId, plant, status = "failed")
+                resetToIdle()
+                sessionStartedAt = null
             }
+        } else {
+            resetToIdle()
+            sessionStartedAt = null
         }
-        resetToIdle()
-        sessionStartedAt = null
     }
 
     // =====================
@@ -182,8 +193,17 @@ class FocusViewModel @Inject constructor(
             if (status == "completed") {
                 _lastEarnedCoins.value = response.coinsEarned
                 _coins.value += response.coinsEarned
+                _sessionResult.value = SessionResult.Completed(plant, response.coinsEarned)
+            } else {
+                _sessionResult.value = SessionResult.Failed(plant)
             }
-        } catch (e: Exception) { }
+        } catch (e: Exception) {
+            android.util.Log.e("FocusViewModel", "saveSession failed: ${e.message}", e)
+        }
+    }
+
+    fun clearSessionResult() {
+        _sessionResult.value = null
     }
 
     // Sets duration and syncs remainingSeconds via totalSeconds()

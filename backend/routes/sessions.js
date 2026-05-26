@@ -53,7 +53,8 @@ router.post('/', async (req, res) => {
             );
         }
 
-        res.status(201).json({ session, coinsEarned });
+        const populated = await session.populate('plantId');
+        res.status(201).json({ session: populated, coinsEarned });
 
     } catch (err) {
         console.error(err);

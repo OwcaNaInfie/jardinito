@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.UserAvatar
@@ -197,11 +198,13 @@ fun ProfileScreen(
 
     if (showAccountDeletedDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.account_deleted_title),
             message = stringResource(R.string.account_deleted_message),
             confirmText = "OK",
             singleButton = true,
             variant = DialogVariant.Success,
+            ),
             onConfirm = {
                 showAccountDeletedDialog = false
                 authViewModel.clearUserSession()
@@ -296,10 +299,12 @@ fun AvatarSection(
 
     if (showDeleteAvatarDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.delete_avatar_title),
             message = stringResource(R.string.delete_avatar_message),
             confirmText = stringResource(R.string.delete_avatar_confirm),
             variant = DialogVariant.Warning,
+            ),
             onConfirm = {
                 showDeleteAvatarDialog = false
                 onDeleteAvatar()
@@ -413,10 +418,12 @@ fun ProfileActions(
 
     if (showLogOutDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.log_out),
             message = stringResource(R.string.logout_message),
             confirmText = stringResource(R.string.log_out),
             variant = DialogVariant.Warning,
+            ),
             onConfirm = {
                 showLogOutDialog = false
                 onLogout()
@@ -426,10 +433,11 @@ fun ProfileActions(
     }
 
     if (showDeleteAccountDialog) {
-        ConfirmDialog(
+        ConfirmDialog(config = DialogConfig(
             title = stringResource(R.string.delete_account),
             message = stringResource(R.string.delete_account_message),
             confirmText = stringResource(R.string.delete_account),
+        ),
             onConfirm = {
                 showDeleteAccountDialog = false
                 onDeleteAccount()

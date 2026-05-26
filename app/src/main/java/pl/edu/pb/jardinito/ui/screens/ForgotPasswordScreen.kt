@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -224,11 +225,13 @@ fun ForgotPasswordResetContent(
 
         if (showCodeSentDialog) {
             ConfirmDialog(
+                config = DialogConfig(
                 title = stringResource(R.string.reset_password),
                 message = stringResource(R.string.verification_code_sent, identifier),
                 confirmText = "OK",
                 singleButton = true,
                 variant = DialogVariant.Success,
+                ),
                 onConfirm = { showCodeSentDialog = false },
                 onDismiss = { showCodeSentDialog = false }
             )

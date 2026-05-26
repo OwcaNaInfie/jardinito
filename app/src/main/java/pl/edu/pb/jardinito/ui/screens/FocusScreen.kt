@@ -1,6 +1,5 @@
 package pl.edu.pb.jardinito.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -37,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
+import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.PlantPickerDrawer
 import pl.edu.pb.jardinito.ui.components.TagPickerDrawer
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
@@ -48,6 +51,13 @@ import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.FocusViewModel
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
 import pl.edu.pb.jardinito.viewmodel.state.TimerState
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import pl.edu.pb.jardinito.ui.components.DialogConfig
+import pl.edu.pb.jardinito.ui.components.DialogVariant
+import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
+import pl.edu.pb.jardinito.viewmodel.SessionResult
 
 // =====================
 // DATA CLASSES
@@ -84,7 +94,7 @@ data class TimerCallbacks(
 )
 
 data class TimerConfig(
-    val devMode: Boolean = false,
+    val devMode: Boolean = true,
     val minValue: Int = if (devMode) 5 else 15,
     val maxValue: Int = if (devMode) 60 else 120
 ) {
@@ -131,8 +141,8 @@ fun FocusScreen(
     val plants by focusViewModel.plants.collectAsState()
     val selectedPlant by focusViewModel.selectedPlant.collectAsState()
     val selectedTag by focusViewModel.selectedTag.collectAsState()
-
     val tags by tagViewModel.tags.collectAsState()
+    val sessionResult by focusViewModel.sessionResult.collectAsState()
 
     LaunchedEffect(userId) {
         if (userId.isNotBlank()) tagViewModel.loadTags(userId)
@@ -161,7 +171,9 @@ fun FocusScreen(
         ),
         config = config,
         onPlantSelected = { focusViewModel.selectPlant(it) },
-        onTagSelected = { focusViewModel.selectTag(it) }
+        onTagSelected = { focusViewModel.selectTag(it) },
+        sessionResult = sessionResult,
+        onSessionResultDismissed = { focusViewModel.clearSessionResult() }
     )
 }
 
@@ -173,17 +185,21 @@ fun FocusScreenContent(
     timerActions: TimerActions,
     config: TimerConfig,
     onPlantSelected: (Plant) -> Unit,
-    onTagSelected: (Tag?) -> Unit
+    onTagSelected: (Tag?) -> Unit,
+    sessionResult: SessionResult?,
+    onSessionResultDismissed: () -> Unit,
 ) {
     val isIdle = timerUiState.timerState is TimerState.Idle
     val isRunning = timerUiState.timerState is TimerState.Running
     val isPaused = timerUiState.timerState is TimerState.Paused
     var showPlantPicker by remember { mutableStateOf(false) }
     var showTagPicker by remember { mutableStateOf(false) }
+    var showStopConfirmDialog by remember { mutableStateOf(false) }
 
     val minutes = timerUiState.remainingSeconds / 60
     val seconds = timerUiState.remainingSeconds % 60
     val timeText = "%d:%02d".format(minutes, seconds)
+    val unit = if (config.devMode) "s" else "min"
 
     Column(
         modifier = Modifier
@@ -205,7 +221,6 @@ fun FocusScreenContent(
             config = config
         )
 
-        val unit = if (config.devMode) "s" else "min"
 
         Text(
             text = if (isIdle) "${timerUiState.selectedDuration} $unit" else timeText,
@@ -224,7 +239,11 @@ fun FocusScreenContent(
             isIdle = isIdle,
             isRunning = isRunning,
             isPaused = isPaused,
-            actions = timerActions
+            actions = timerActions,
+            onStopClick = {
+                timerActions.onPause()
+                showStopConfirmDialog = true
+            }
         )
     }
 
@@ -248,6 +267,86 @@ fun FocusScreenContent(
             onDismiss = { showTagPicker = false }
         )
     }
+    if (showStopConfirmDialog) {
+        ConfirmDialog(
+            config = DialogConfig(
+            title = stringResource(R.string.session_stop_title),
+            message = stringResource(R.string.session_stop_message),
+            confirmText = stringResource(R.string.session_stop_confirm),
+            variant = DialogVariant.Warning
+            ),
+            onConfirm = {
+                showStopConfirmDialog = false
+                timerActions.onStop()
+            },
+            onDismiss = {
+                showStopConfirmDialog = false
+                timerActions.onResume()
+            }
+        )
+    }
+
+    when (val result = sessionResult) {
+        is SessionResult.Completed -> {
+            val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.images.medium}")
+            ConfirmDialog(
+                config = DialogConfig(
+                title = stringResource(R.string.session_completed_title),
+                message = stringResource(R.string.session_completed_message, result.plant.name, result.coinsEarned),
+                variant = DialogVariant.Success,
+                singleButton = true
+                ),
+                content = {
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            filterQuality = FilterQuality.None,
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                },
+                onConfirm = onSessionResultDismissed,
+                onDismiss = onSessionResultDismissed
+            )
+        }
+        is SessionResult.Failed -> {
+            val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${result.plant.witheredImages.medium}")
+            ConfirmDialog(
+                config = DialogConfig(
+                title = stringResource(R.string.session_failed_title),
+                message = stringResource(R.string.session_failed_message, result.plant.name),
+                variant = DialogVariant.Error,
+                singleButton = true
+                ),
+                content = {
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            filterQuality = FilterQuality.None,
+                            modifier = Modifier.size(100.dp)
+                        )
+                    }
+                },
+                onConfirm = onSessionResultDismissed,
+                onDismiss = onSessionResultDismissed
+            )
+        }
+        null -> {}
+    }
 }
 
 // =====================
@@ -259,7 +358,8 @@ private fun TimerControls(
     isIdle: Boolean,
     isRunning: Boolean,
     isPaused: Boolean,
-    actions: TimerActions
+    actions: TimerActions,
+    onStopClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.padding(top = 32.dp),
@@ -285,7 +385,7 @@ private fun TimerControls(
                     size = ButtonSize.Large,
                     circle = true,
                     variant = ButtonVariant.Primary,
-                    onClick = actions.onStop
+                    onClick = onStopClick
                 )
             }
             isPaused -> {
@@ -301,7 +401,7 @@ private fun TimerControls(
                     size = ButtonSize.Large,
                     circle = true,
                     variant = ButtonVariant.Primary,
-                    onClick = actions.onStop
+                    onClick = onStopClick
                 )
             }
         }
@@ -320,18 +420,21 @@ private fun SelectedTagChip(
 ) {
     Box(
         modifier = Modifier
-            .padding(top = 16.dp)
-            .then(if (isIdle) Modifier.clickable { onClick() } else Modifier),
+            .padding(vertical = 16.dp, horizontal = 8.dp)
+            .height(36.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                if (selectedTag == null) colors.primary100
+                else TagColors.colorCompose(selectedTag.color).copy(alpha = 0.15f)
+            )
+            .then(if (isIdle) Modifier.clickable { onClick() } else Modifier)
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         if (selectedTag == null) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(colors.primary100)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Icon(
                     painter = painterResource(R.drawable.pushpin),
@@ -346,31 +449,22 @@ private fun SelectedTagChip(
                 )
             }
         } else {
-            TagChip(tag = selectedTag)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(TagColors.colorCompose(selectedTag.color))
+                )
+                Text(
+                    text = selectedTag.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = TagColors.colorCompose(selectedTag.color)
+                )
+            }
         }
-    }
-}
-
-@Composable
-private fun TagChip(tag: Tag) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(TagColors.colorCompose(tag.color).copy(alpha = 0.15f))
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(TagColors.colorCompose(tag.color))
-        )
-        Text(
-            text = tag.name,
-            style = MaterialTheme.typography.labelMedium,
-            color = TagColors.colorCompose(tag.color)
-        )
     }
 }

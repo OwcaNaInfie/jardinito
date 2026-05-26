@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
+import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
@@ -386,10 +387,12 @@ fun TagDialog(
 
     if (showDeleteConfirmDialog) {
         ConfirmDialog(
+            config = DialogConfig(
             title = stringResource(R.string.tag_delete_title),
             message = stringResource(R.string.tag_delete_message, name),
             confirmText = stringResource(R.string.tag_delete_title),
             variant = DialogVariant.Error,
+            ),
             onConfirm = {
                 showDeleteConfirmDialog = false
                 onDelete?.invoke()
