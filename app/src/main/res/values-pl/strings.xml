@@ -102,6 +102,58 @@
     <string name="tag_name_placeholder">Nazwa tagu</string>
     <string name="tag_save">Zapisz</string>
 
+    <!-- Market -->
+    <string name="market_error_insufficient_title">Za mało monet</string>
+    <string name="market_error_insufficient_message">Nie masz wystarczającej liczby monet, aby odblokować tę roślinę.</string>
+    <string name="market_error_unlocked_title">Już odblokowane</string>
+    <string name="market_error_unlocked_message">Ta roślina jest już dostępna w Twoim portfelu.</string>
+    <string name="market_error_network_title">Błąd sieci</string>
+    <string name="market_error_network_message">Nie udało się połączyć z serwerem. Spróbuj ponownie.</string>
+    <string name="market_buy_success_title">Odblokowano!</string>
+    <string name="market_buy_success_message">%s jest teraz dostępny w Twoim portfelu.</string>
+    <string name="ok">OK</string>
+    <string name="market_plant_free">Darmowy</string>
+
+    <!-- Plant names -->
+    <string name="plant_tulip_name">Tulipan</string>
+    <string name="plant_poppy_name">Mak</string>
+    <string name="plant_sunflower_name">Słonecznik</string>
+    <string name="plant_daffodil_name">Żonkil</string>
+    <string name="plant_rose_name">Róża</string>
+    <string name="plant_bloodroot_name">Krwawnik</string>
+    <string name="plant_gerbera_name">Gerbera</string>
+    <string name="plant_pansy_name">Bratek</string>
+    <string name="plant_lavender_name">Lawenda</string>
+    <string name="plant_lily_name">Lilia</string>
+    <string name="plant_orchid_name">Orchidea</string>
+
+    <!-- Plant descriptions -->
+    <string name="plant_tulip_desc">Elegancki kwiat wiosenny, symbol miłości i odrodzenia.</string>
+    <string name="plant_poppy_desc">Delikatny kwiat polny, symbol wspomnień i spokoju.</string>
+    <string name="plant_sunflower_desc">Słoneczny olbrzym, który zawsze podąża za światłem.</string>
+    <string name="plant_daffodil_desc">Zwiastun wiosny o intensywnym, radosnym zapachu.</string>
+    <string name="plant_rose_desc">Królowa kwiatów, symbol miłości i piękna.</string>
+    <string name="plant_bloodroot_desc">Rzadki kwiat lasu, kwitnący tylko przez kilka dni.</string>
+    <string name="plant_gerbera_desc">Kolorowa i radosna, symbol entuzjazmu i radości życia.</string>
+    <string name="plant_pansy_desc">Mały kwiat o aksamitnych płatkach i wesołych barwach.</string>
+    <string name="plant_lavender_desc">Aromatyczna roślina znana z kojącego i relaksującego działania.</string>
+    <string name="plant_lily_desc">Majestatyczny kwiat symbolizujący czystość i niewinność.</string>
+    <string name="plant_orchid_desc">Egzotyczna piękność, jedna z najbardziej wyrafinowanych roślin świata.</string>
+
+    <!-- Plant colors -->
+    <string name="plant_color_red">Czerwony</string>
+    <string name="plant_color_pink">Różowy</string>
+    <string name="plant_color_yellow">Żółty</string>
+    <string name="plant_color_white">Biały</string>
+    <string name="plant_color_purple">Fioletowy</string>
+    <string name="plant_color_orange">Pomarańczowy</string>
+    <string name="plant_color_blue">Niebieski</string>
+
+    <!-- Plant sizes -->
+    <string name="plant_size_small">Mała</string>
+    <string name="plant_size_medium">Średnia</string>
+    <string name="plant_size_large">Duża</string>
+
     <!-- Popups -->
     <string name="delete">Usuń</string>
     <string name="confirm">Potwierdź</string>

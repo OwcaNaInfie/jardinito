@@ -24,6 +24,10 @@ class PlantRepository @Inject constructor() {
     private fun PlantApiService.PlantDto.toModel() = Plant(
         plantId = _id,
         name = name,
+        nameKey = nameKey,
+        descriptionKey = descriptionKey,
+        colors = colors,
+        size = size,
         images = PlantImages(
             small = images.small,
             medium = images.medium,

@@ -38,6 +38,7 @@ import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.MarketViewModel
 import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
@@ -64,6 +65,9 @@ fun AppNavGraph(
     val passwordResetViewModel: PasswordResetViewModel = hiltViewModel()
     val tagViewModel: TagViewModel = hiltViewModel()
     val focusViewModel: FocusViewModel = hiltViewModel()
+    val marketViewModel: MarketViewModel = hiltViewModel()
+
+    val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
@@ -141,10 +145,12 @@ fun AppNavGraph(
                         HomeScreen()
                     }
                     composable(Routes.MARKET) {
-                        MarketScreen()
+                        MarketScreen(
+                            marketViewModel = marketViewModel,
+                            userId = userId
+                        )
                     }
                     composable(Routes.FOCUS) {
-                        val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
                         FocusScreen(
                             focusViewModel = focusViewModel,
                             tagViewModel = tagViewModel,
@@ -154,7 +160,7 @@ fun AppNavGraph(
                     composable(Routes.TAGS) {
                         TagsScreen(
                             tagViewModel = tagViewModel,
-                            userId = authViewModel.currentUser.collectAsState().value?.userId ?: "",
+                            userId = userId,
                             showAddTagDialog = showAddTagDialog,
                             onAddTagDialogDismiss = { showAddTagDialog = false }
                         )

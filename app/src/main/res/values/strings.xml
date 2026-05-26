@@ -102,6 +102,58 @@
     <string name="tag_name_placeholder">Tag name</string>
     <string name="tag_save">Save</string>
 
+    <!-- Market -->
+    <string name="market_error_insufficient_title">Not enough coins</string>
+    <string name="market_error_insufficient_message">You don\'t have enough coins to unlock this plant.</string>
+    <string name="market_error_unlocked_title">Already unlocked</string>
+    <string name="market_error_unlocked_message">This plant is now available in your wallet.</string>
+    <string name="market_error_network_title">Network Error</string>
+    <string name="market_error_network_message">Failed to connect to server. Try again.</string>
+    <string name="market_buy_success_title">Unlocked!</string>
+    <string name="market_buy_success_message">%s is now available in your wallet.</string>
+    <string name="ok">OK</string>
+    <string name="market_plant_free">Free</string>
+
+    <!-- Plant names -->
+    <string name="plant_tulip_name">Tulip</string>
+    <string name="plant_poppy_name">Poppy</string>
+    <string name="plant_sunflower_name">Sunflower</string>
+    <string name="plant_daffodil_name">Daffodil</string>
+    <string name="plant_rose_name">Rose</string>
+    <string name="plant_bloodroot_name">Yarrow</string>
+    <string name="plant_gerbera_name">Gerbera</string>
+    <string name="plant_pansy_name">Pansy</string>
+    <string name="plant_lavender_name">Lavender</string>
+    <string name="plant_lily_name">Lily</string>
+    <string name="plant_orchid_name">Orchid</string>
+
+    <!-- Plant descriptions -->
+    <string name="plant_tulip_desc">An elegant spring flower, a symbol of love and rebirth.</string>
+    <string name="plant_poppy_desc">A delicate wildflower, a symbol of memories and peace.</string>
+    <string name="plant_sunflower_desc">A solar giant that always follows the light.</string>
+    <string name="plant_daffodil_desc">A harbinger of spring with an intense, joyful scent.</string>
+    <string name="plant_rose_desc">Queen of flowers, symbol of love and beauty.</string>
+    <string name="plant_bloodroot_desc">A rare forest flower that blooms for only a few days.</string>
+    <string name="plant_gerbera_desc">Colorful and joyful, a symbol of enthusiasm and joy in life.</string>
+    <string name="plant_pansy_desc">A small flower with velvety petals and cheerful colors.</string>
+    <string name="plant_lavender_desc">An aromatic plant known for its soothing and relaxing effects.</string>
+    <string name="plant_lily_desc">A majestic flower symbolizing purity and innocence.</string>
+    <string name="plant_orchid_desc">An exotic beauty, one of the most sophisticated plants in the world.</string>
+
+    <!-- Plant colors -->
+    <string name="plant_color_red">Red</string>
+    <string name="plant_color_pink">Pink</string>
+    <string name="plant_color_yellow">Yellow</string>
+    <string name="plant_color_white">White</string>
+    <string name="plant_color_purple">Purple</string>
+    <string name="plant_color_orange">Orange</string>
+    <string name="plant_color_blue">Blue</string>
+
+    <!-- Plant sizes -->
+    <string name="plant_size_small">Small</string>
+    <string name="plant_size_medium">Average</string>
+    <string name="plant_size_large">Large</string>
+
     <!-- Popups -->
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>

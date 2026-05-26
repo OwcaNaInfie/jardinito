@@ -8,6 +8,7 @@ const VerificationToken = require('../models/VerificationToken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
 const Tag = require('../models/UserTags');
 const UserWallet = require('../models/UserWallet');
+const Plant = require('../models/Plant');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -98,8 +99,11 @@ router.post('/register', async (req, res) => {
         });
 
         const devMode = process.env.DEV_MODE === 'true';
+
+        const freePlants = await Plant.find({ price: 0 }).select('_id');
         await UserWallet.create({
             userId: newUser._id,
+            unlockedPlantIds: freePlants.map(p => p._id),
             coins: devMode ? 10000 : 0
         });
 
