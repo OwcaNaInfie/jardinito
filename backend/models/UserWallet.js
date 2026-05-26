@@ -7,7 +7,8 @@ const userWalletSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    coins: { type: Number, default: 0 }
+    coins: { type: Number, default: 0 },
+    unlockedPlantIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Plant' }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('UserWallet', userWalletSchema);

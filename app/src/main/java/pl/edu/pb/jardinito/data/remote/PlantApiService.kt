@@ -27,6 +27,10 @@ interface PlantApiService {
     data class PlantDto(
         val _id: String,
         val name: String,
+        val nameKey: String,
+        val descriptionKey: String,
+        val colors: List<String>,
+        val size: String,
         val images: PlantImagesDto,
         val witheredImages: PlantWitheredImagesDto,
         val minDurationDev: Int,
