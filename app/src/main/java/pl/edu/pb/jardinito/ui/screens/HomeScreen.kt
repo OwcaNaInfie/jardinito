@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,91 +21,56 @@ import pl.edu.pb.jardinito.ui.theme.colors
 @Composable
 fun HomeScreen() {
     Column(
-
-    modifier = Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(colors.primary500)
+            .background(colors.primary100)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        // ===== TYPOGRAPHY =====
+        TypographyItem("displayLarge", MaterialTheme.typography.displayLarge)
+        TypographyItem("displaySmall", MaterialTheme.typography.displaySmall)
 
-        Text(
-            text = "displayLarge",
-            style = MaterialTheme.typography.displayLarge,
-            color = colors.primary900
-        )
+        TypographyItem("headlineLarge", MaterialTheme.typography.headlineLarge)
+        TypographyItem("headlineMedium", MaterialTheme.typography.headlineMedium)
+        TypographyItem("headlineSmall", MaterialTheme.typography.headlineSmall)
 
-        Row (
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "displaySmall",
-                style = MaterialTheme.typography.displaySmall
-            )
+        TypographyItem("titleLarge", MaterialTheme.typography.titleLarge)
+        TypographyItem("titleMedium", MaterialTheme.typography.titleMedium)
 
-            Text(
-                text = "headlineLarge",
-                style = MaterialTheme.typography.headlineLarge
-            )
-        }
-        Row (
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "headlineMedium",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colors.primary900
-            )
-            Text(
-                text = "bodyLarge",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        Row (
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "bodyMedium",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "bodySmall",
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-        Row (
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "labelLarge",
-                style = MaterialTheme.typography.labelLarge
-            )
-            Text(
-                text = "labelMedium",
-                style = MaterialTheme.typography.labelMedium
-            )
-            Text(
-                text = "labelSmall",
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
+        TypographyItem("bodyLarge", MaterialTheme.typography.bodyLarge)
+        TypographyItem("bodyMedium", MaterialTheme.typography.bodyMedium)
+        TypographyItem("bodySmall", MaterialTheme.typography.bodySmall)
+
+        TypographyItem("labelLarge", MaterialTheme.typography.labelLarge)
+        TypographyItem("labelMedium", MaterialTheme.typography.labelMedium)
+        TypographyItem("labelSmall", MaterialTheme.typography.labelSmall)
     }
 }
 
-@Preview(
-    showBackground = true,
-    apiLevel = 34
-)
+@Composable
+private fun TypographyItem(name: String, style: androidx.compose.ui.text.TextStyle) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.neutralBlack
+        )
+
+        Text(
+            text = "The quick brown fox jumps over the lazy dog",
+            style = style,
+            color = colors.neutralBlack
+        )
+    }
+}
+
+@Preview(showBackground = true, apiLevel = 34)
 @Composable
 fun HomeScreenPreview() {
     JardinitoTheme {

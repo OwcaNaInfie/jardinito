@@ -124,19 +124,19 @@ fun LoginScreenContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .offset(y = (-10).dp),
+                        .offset(y = (-12).dp),
                     horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(
                         onClick = onForgotPasswordClick,
-                        contentPadding = PaddingValues(0.dp),
-                        modifier = Modifier.height(16.dp)
+                        contentPadding = PaddingValues(2.dp),
+                        modifier = Modifier.height(24.dp)
 
                         ) {
                         Text(
                             text = stringResource(R.string.forgot_password),
                             color = colors.secondaryBlue,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.labelSmall
                         )
                     }
                 }
@@ -186,7 +186,7 @@ fun LoginScreenContent(
                     Text(
                         text = stringResource(R.string.go_to_register),
                         color = colors.secondaryBlue,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
             }

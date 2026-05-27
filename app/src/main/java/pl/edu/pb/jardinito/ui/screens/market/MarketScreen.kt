@@ -1,5 +1,7 @@
-package pl.edu.pb.jardinito.ui.screens
+package pl.edu.pb.jardinito.ui.screens.market
 
+import MarketErrorDialog
+import MarketSuccessDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,9 +46,6 @@ import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.DialogConfig
-import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.rememberPlantName
@@ -72,7 +72,8 @@ data class MarketData(
 data class MarketActions(
     val onBuyPlant: (Plant) -> Unit,
     val onErrorDismissed: () -> Unit,
-    val onBuySuccessDismissed: () -> Unit
+    val onBuySuccessDismissed: () -> Unit,
+    val onPlantClick: (Plant) -> Unit
 )
 
 // =====================
@@ -82,7 +83,8 @@ data class MarketActions(
 @Composable
 fun MarketScreen(
     marketViewModel: MarketViewModel,
-    userId: String
+    userId: String,
+    onPlantClick: (Plant) -> Unit
 ) {
     val plants by marketViewModel.plants.collectAsState()
     val coins by marketViewModel.coins.collectAsState()
@@ -107,9 +109,10 @@ fun MarketScreen(
             buySuccess = buySuccess
         ),
         actions = MarketActions(
-            onBuyPlant = { marketViewModel.buyPlant(userId, it) },
+            onBuyPlant = { marketViewModel.buyPlant(it) },
             onErrorDismissed = { marketViewModel.clearError() },
-            onBuySuccessDismissed = { marketViewModel.clearBuySuccess() }
+            onBuySuccessDismissed = { marketViewModel.clearBuySuccess() },
+            onPlantClick = onPlantClick
         )
     )
 }
@@ -147,7 +150,8 @@ fun MarketScreenContent(
                     MarketPlantCard(
                         plant = plant,
                         isUnlocked = data.unlockedPlantIds.contains(plant.plantId),
-                        onBuy = { actions.onBuyPlant(plant) }
+                        onBuy = { actions.onBuyPlant(plant) },
+                        onPlantClick = actions.onPlantClick
                     )
                 }
             }
@@ -197,7 +201,7 @@ private fun PlantPriceChip(price: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(roundedCorner_s))
             .background(colors.primary50)
             .padding(horizontal = 6.dp, vertical = 3.dp)
     ) {
@@ -240,14 +244,15 @@ private fun PlantActionButton(isUnlocked: Boolean, onBuy: () -> Unit) {
 private fun MarketPlantCard(
     plant: Plant,
     isUnlocked: Boolean,
-    onBuy: () -> Unit
+    onBuy: () -> Unit,
+    onPlantClick: (Plant) -> Unit
 ) {
     val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${plant.images.large}")
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(roundedCorner_s))
             .background(colors.primary100)
             .padding(PaddingValues(start = 10.dp, end = 10.dp, bottom = 8.dp))
     ) {
@@ -259,6 +264,7 @@ private fun MarketPlantCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
+                .clickable { onPlantClick(plant) }
         )
         Text(
             text = rememberPlantName(plant),
@@ -279,69 +285,4 @@ private fun MarketPlantCard(
             PlantActionButton(isUnlocked = isUnlocked, onBuy = onBuy)
         }
     }
-}
-
-// =====================
-// DIALOGS
-// =====================
-
-@Composable
-private fun MarketErrorDialog(error: MarketError, onDismiss: () -> Unit) {
-    val (title, message) = when (error) {
-        is MarketError.InsufficientCoins -> Pair(
-            stringResource(R.string.market_error_insufficient_title),
-            stringResource(R.string.market_error_insufficient_message)
-        )
-        is MarketError.AlreadyUnlocked -> Pair(
-            stringResource(R.string.market_error_unlocked_title),
-            stringResource(R.string.market_error_unlocked_message)
-        )
-        is MarketError.NetworkError -> Pair(
-            stringResource(R.string.market_error_network_title),
-            stringResource(R.string.market_error_network_message)
-        )
-    }
-    ConfirmDialog(
-        config = DialogConfig(
-            title = title,
-            message = message,
-            variant = DialogVariant.Error,
-            singleButton = true,
-            confirmText = stringResource(R.string.ok)
-        ),
-        onConfirm = onDismiss,
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
-private fun MarketSuccessDialog(plant: Plant, onDismiss: () -> Unit) {
-    val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${plant.images.medium}")
-    ConfirmDialog(
-        config = DialogConfig(
-            title = stringResource(R.string.market_buy_success_title),
-            message = stringResource(R.string.market_buy_success_message, rememberPlantName(plant)),
-            variant = DialogVariant.Success,
-            singleButton = true,
-            confirmText = stringResource(R.string.ok)
-        ),
-        content = {
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    filterQuality = FilterQuality.None,
-                    modifier = Modifier.size(100.dp)
-                )
-            }
-        },
-        onConfirm = onDismiss,
-        onDismiss = onDismiss
-    )
 }

@@ -28,6 +28,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -260,7 +261,7 @@ private fun TagDialogHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
         if (showDeleteButton) {
             IconButton(onClick = onDeleteClick) {
                 Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.tag_delete_title), tint = colors.error)
@@ -329,7 +330,7 @@ fun TagDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(roundedCorner_s))
                 .background(colors.primary50)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)

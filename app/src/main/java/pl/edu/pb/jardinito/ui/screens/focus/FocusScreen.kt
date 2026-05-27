@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.screens
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import pl.edu.pb.jardinito.ui.components.CircularTimer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,8 +42,6 @@ import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.PlantPickerDrawer
-import pl.edu.pb.jardinito.ui.components.TagPickerDrawer
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
@@ -382,7 +379,7 @@ private fun SelectedTagChip(
                     painter = painterResource(R.drawable.pushpin),
                     contentDescription = null,
                     tint = colors.neutralGray,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = stringResource(R.string.focus_add_tag),

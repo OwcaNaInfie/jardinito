@@ -1,5 +1,12 @@
 <resources>
+
+    <!-- General -->
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="focus_start">Start</string>
     <string name="app_name">Jardinito</string>
+    <string name="close">Close</string>
     <string name="default_web_client_id" translatable="false">484586685422-of3ru5lnn9hprfmp9sbo7mpk78f5n6g8.apps.googleusercontent.com</string>
 
     <!-- Auth -->
@@ -128,17 +135,17 @@
     <string name="plant_orchid_name">Orchid</string>
 
     <!-- Plant descriptions -->
-    <string name="plant_tulip_desc">An elegant spring flower, a symbol of love and rebirth.</string>
-    <string name="plant_poppy_desc">A delicate wildflower, a symbol of memories and peace.</string>
-    <string name="plant_sunflower_desc">A solar giant that always follows the light.</string>
-    <string name="plant_daffodil_desc">A harbinger of spring with an intense, joyful scent.</string>
-    <string name="plant_rose_desc">Queen of flowers, symbol of love and beauty.</string>
-    <string name="plant_bloodroot_desc">A rare forest flower that blooms for only a few days.</string>
-    <string name="plant_gerbera_desc">Colorful and joyful, a symbol of enthusiasm and joy in life.</string>
-    <string name="plant_pansy_desc">A small flower with velvety petals and cheerful colors.</string>
-    <string name="plant_lavender_desc">An aromatic plant known for its soothing and relaxing effects.</string>
-    <string name="plant_lily_desc">A majestic flower symbolizing purity and innocence.</string>
-    <string name="plant_orchid_desc">An exotic beauty, one of the most sophisticated plants in the world.</string>
+    <string name="plant_tulip_desc">An elegant spring flower symbolizing love and rebirth. It is often one of the first signs that winter is ending.</string>
+    <string name="plant_poppy_desc">A delicate wildflower symbolizing memories and peace. It grows freely in meadows and along roads, softening the landscape.</string>
+    <string name="plant_sunflower_desc">A sunny giant that always follows the light. Its large blooms can reach impressive sizes and dominate any garden.</string>
+    <string name="plant_daffodil_desc">A herald of spring with a bright and cheerful fragrance. Its yellow blooms often appear before the snow has fully melted.</string>
+    <string name="plant_rose_desc">The queen of flowers, symbolizing love and beauty. It comes in many varieties and colors, each carrying its own meaning.</string>
+    <string name="plant_bloodroot_desc">A rare forest flower that blooms for only a few days. Its delicate petals emerge very early in spring.</string>
+    <string name="plant_gerbera_desc">A colorful and joyful flower symbolizing enthusiasm and happiness. It is often used in bouquets thanks to its durability and vivid colors.</string>
+    <string name="plant_pansy_desc">A small flower with velvety petals and cheerful colors. It is cold-resistant and often blooms even in early spring.</string>
+    <string name="plant_lavender_desc">An aromatic plant known for its calming and relaxing effects. Its scent is widely used in cosmetics and aromatherapy.</string>
+    <string name="plant_lily_desc">A majestic flower symbolizing purity and innocence. Its large, elegant petals make it popular for ceremonial occasions.</string>
+    <string name="plant_orchid_desc">An exotic beauty and one of the most refined plants in the world. It requires specific conditions but rewards with stunning blooms.</string>
 
     <!-- Plant colors -->
     <string name="plant_color_red">Red</string>
@@ -154,9 +161,16 @@
     <string name="plant_size_medium">Average</string>
     <string name="plant_size_large">Large</string>
 
+    <!-- Plant Screen -->
+    <string name="plant_detail_size">Size</string>
+    <string name="plant_detail_colors">Colors</string>
+    <string name="plant_detail_min_duration">Min. attention span</string>
+    <string name="plant_detail_min_duration_value">%d min</string>
+    <string name="plant_detail_price">Price</string>
+    <string name="plant_detail_owned">You already have this plant</string>
+    <string name="plant_detail_buy">Buy</string>
+    <string name="plant_detail_about">About plant</string>
+
     <!-- Popups -->
-    <string name="delete">Delete</string>
-    <string name="confirm">Confirm</string>
-    <string name="cancel">Cancel</string>
     <string name="delete_account_message">Account will be deleted permamently.</string>
 </resources>

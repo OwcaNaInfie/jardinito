@@ -169,7 +169,7 @@ fun RegisterScreenContent(
                 Text(
                     text = stringResource(R.string.go_to_login),
                     color = colors.secondaryBlue,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.labelSmall
                 )
             }
         }

@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.components
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

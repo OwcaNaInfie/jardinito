@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_l
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 
 data class ButtonSizeTokens(
     val padding: PaddingValues,
@@ -22,8 +24,8 @@ fun buttonSizeTokens(size: ButtonSize): ButtonSizeTokens {
     return when (size) {
         ButtonSize.Small -> ButtonSizeTokens(
             padding = PaddingValues(horizontal = 16.dp),
-            textStyle = MaterialTheme.typography.labelSmall,
-            shape = RoundedCornerShape(50.dp),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            shape = RoundedCornerShape(roundedCorner_l),
             iconSize = 16.dp,
             height = 30.dp
         )
@@ -31,7 +33,7 @@ fun buttonSizeTokens(size: ButtonSize): ButtonSizeTokens {
         ButtonSize.Medium -> ButtonSizeTokens(
             padding = PaddingValues(horizontal = 56.dp),
             textStyle = MaterialTheme.typography.labelMedium,
-            shape = RoundedCornerShape(50.dp),
+            shape = RoundedCornerShape(roundedCorner_l),
             iconSize = 24.dp,
             height = 48.dp
         )
@@ -39,7 +41,7 @@ fun buttonSizeTokens(size: ButtonSize): ButtonSizeTokens {
         ButtonSize.Large -> ButtonSizeTokens(
             padding = PaddingValues(horizontal = 80.dp),
             textStyle = MaterialTheme.typography.labelLarge,
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(roundedCorner_s),
             iconSize = 24.dp,
             height = 56.dp
         )

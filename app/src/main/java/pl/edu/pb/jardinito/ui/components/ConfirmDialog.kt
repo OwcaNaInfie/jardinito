@@ -33,6 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
 import pl.edu.pb.jardinito.ui.theme.JardinitoTheme
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 
 enum class DialogVariant { Info, Warning, Error, Success }
 
@@ -40,8 +41,8 @@ data class DialogConfig(
     val title: String,
     val message: String,
     val variant: DialogVariant = DialogVariant.Info,
-    val confirmText: String = "Confirm",
-    val dismissText: String = "Cancel",
+    val confirmText: String = "",
+    val dismissText: String = "",
     val singleButton: Boolean = false
 )
 
@@ -84,6 +85,9 @@ fun ConfirmDialogContent(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val confirmText = config.confirmText.ifBlank { stringResource(R.string.confirm) }
+    val dismissText = config.dismissText.ifBlank { stringResource(R.string.cancel) }
+
     val containerBorderColor = when (config.variant) {
         DialogVariant.Info -> Color.Transparent
         DialogVariant.Warning -> colors.primary900
@@ -108,16 +112,16 @@ fun ConfirmDialogContent(
     Column(
         modifier = Modifier
             .padding(horizontal = 24.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(roundedCorner_s))
             .background(colors.primary50.copy(alpha = 0.95f))
-            .border(2.dp, containerBorderColor, RoundedCornerShape(16.dp))
+            .border(2.dp, containerBorderColor, RoundedCornerShape(roundedCorner_s))
             .clickable(enabled = false) {}
             .padding(24.dp)
     ) {
-        Text(text = config.title, style = MaterialTheme.typography.bodyLarge)
+        Text(text = config.title, style = MaterialTheme.typography.labelMedium)
         Spacer(modifier = Modifier.height(8.dp))
         content?.invoke()
-        Text(text = config.message, style = MaterialTheme.typography.bodyMedium)
+        Text(text = config.message, style = MaterialTheme.typography.labelSmall)
         Spacer(modifier = Modifier.height(24.dp))
         Row(
             horizontalArrangement = Arrangement.End,
@@ -125,7 +129,7 @@ fun ConfirmDialogContent(
         ) {
             if (!config.singleButton) {
                 AppButton(
-                    text = config.dismissText,
+                    text = dismissText,
                     size = ButtonSize.Small,
                     variant = ButtonVariant.Primary,
                     onClick = onDismiss
@@ -133,7 +137,7 @@ fun ConfirmDialogContent(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             AppButton(
-                text = config.confirmText,
+                text = confirmText,
                 size = ButtonSize.Small,
                 variant = confirmButtonVariant,
                 buttonColor = confirmButtonColor,

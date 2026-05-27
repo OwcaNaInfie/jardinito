@@ -41,7 +41,10 @@ class MarketViewModel @Inject constructor(
     private val _buySuccess = MutableStateFlow<Plant?>(null)
     val buySuccess: StateFlow<Plant?> = _buySuccess
 
+    private var currentUserId: String = ""
+
     fun load(userId: String) {
+        currentUserId = userId
         viewModelScope.launch {
             _isLoading.value = true
             try {
@@ -59,11 +62,15 @@ class MarketViewModel @Inject constructor(
         }
     }
 
-    fun buyPlant(userId: String, plant: Plant) {
+    fun getPlantById(plantId: String): Plant? {
+        return _plants.value.firstOrNull { it.plantId == plantId }
+    }
+
+    fun buyPlant(plant: Plant) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val wallet = walletRepository.buyPlant(userId, plant.plantId)
+                val wallet = walletRepository.buyPlant(currentUserId, plant.plantId)
                 _coins.value = wallet.coins
                 _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
                 _buySuccess.value = plant
