@@ -1,7 +1,6 @@
-package pl.edu.pb.jardinito.ui.components
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -26,10 +24,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.ui.screens.TimerCallbacks
-import pl.edu.pb.jardinito.ui.screens.TimerCanvasColors
-import pl.edu.pb.jardinito.ui.screens.TimerCanvasState
-import pl.edu.pb.jardinito.ui.screens.TimerConfig
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 import kotlin.math.PI

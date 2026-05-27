@@ -63,6 +63,8 @@ import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.UserAvatar
 import pl.edu.pb.jardinito.ui.theme.Dimensions
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_l
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
 
 @Composable
@@ -324,7 +326,7 @@ fun UserInfoSection(
 ) {
     val fieldModifier = Modifier
         .fillMaxWidth()
-        .clip(RoundedCornerShape(50.dp))
+        .clip(RoundedCornerShape(roundedCorner_l))
         .background(colors.neutralLight)
         .padding(horizontal = 12.dp, vertical = 6.dp)
 
@@ -506,7 +508,7 @@ fun EditFieldDialog(
         Column(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(roundedCorner_s))
                 .background(colors.primary50)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -578,7 +580,7 @@ fun EmailVerificationDialog(
         Column(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(roundedCorner_s))
                 .background(colors.primary50)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),

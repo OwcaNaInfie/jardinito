@@ -6,7 +6,7 @@ const { OAuth2Client } = require('google-auth-library');
 const { getRandomDefaultAvatar } = require('../utils/avatarService');
 const VerificationToken = require('../models/VerificationToken');
 const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailService');
-const Tag = require('../models/UserTags');
+const UserTags = require('../models/UserTags');
 const UserWallet = require('../models/UserWallet');
 const Plant = require('../models/Plant');
 
@@ -98,13 +98,12 @@ router.post('/register', async (req, res) => {
             ]
         });
 
-        const devMode = process.env.DEV_MODE === 'true';
-
         const freePlants = await Plant.find({ price: 0 }).select('_id');
         await UserWallet.create({
             userId: newUser._id,
             unlockedPlantIds: freePlants.map(p => p._id),
-            coins: devMode ? 10000 : 0
+            favouritePlantIds: [],
+            coins: 0
         });
 
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -199,20 +198,39 @@ router.post('/google', async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      user = new User({
-        username: name || email.split('@')[0],
-        email,
-        password: 'GOOGLE_AUTH',
-        provider: 'google',
-        googleId: payload.sub,
-        avatar: {
-            default: getRandomDefaultAvatar(),
-            custom: null,
-            google: payload.picture
-        }
-      });
+        user = new User({
+            username: name || email.split('@')[0],
+            email,
+            password: 'GOOGLE_AUTH',
+            provider: 'google',
+            googleId: payload.sub,
+            avatar: {
+                default: getRandomDefaultAvatar(),
+                custom: null,
+                google: payload.picture
+            },
+            isVerified: true
+        });
 
-      await user.save();
+        await user.save();
+
+        // Tagi domyślne
+        await UserTags.create({
+            userId: user._id,
+            tags: [
+                { name: 'Study', color: 'twitterBlue' },
+                { name: 'Work', color: 'harvestOrange' }
+            ]
+        });
+
+        const devMode = process.env.DEV_MODE === 'true';
+        const freePlants = await Plant.find({ price: 0 }).select('_id');
+        await UserWallet.create({
+            userId: user._id,
+            unlockedPlantIds: freePlants.map(p => p._id),
+            favouritePlantIds: [],
+            coins: 0
+        });
     }
 
     res.status(200).json({

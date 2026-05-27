@@ -1,6 +1,13 @@
 <resources>
 
+    <!-- General -->
     <string name="app_name">Jardinito</string>
+    <string name="focus_start">Start</string>
+    <string name="delete">Usuń</string>
+    <string name="confirm">Potwierdź</string>
+    <string name="cancel">Anuluj</string>
+    <string name="close">Zamknij</string>
+    <string name="ok">OK</string>
 
     <!-- Auth -->
     <string name="login">Zaloguj się</string>
@@ -90,7 +97,7 @@
     <string name="session_completed_title">Sesja ukończona!</string>
     <string name="session_completed_message">%1$s została zasadzona w Twoim ogrodzie. Zdobyłeś %2$d monet!</string>
     <string name="session_failed_title">Sesja przerwana!</string>
-    <string name="session_failed_message">%1$s uschła i trafiła do Twojego ogrodu.</string>
+    <string name="session_failed_message">Roślina uschła i trafiła do Twojego ogrodu.</string>
 
     <!-- Tags Screen -->
     <string name="tags_empty_title">Czas stworzyć nowy tag!</string>
@@ -111,7 +118,6 @@
     <string name="market_error_network_message">Nie udało się połączyć z serwerem. Spróbuj ponownie.</string>
     <string name="market_buy_success_title">Odblokowano!</string>
     <string name="market_buy_success_message">%s jest teraz dostępny w Twoim portfelu.</string>
-    <string name="ok">OK</string>
     <string name="market_plant_free">Darmowy</string>
 
     <!-- Plant names -->
@@ -128,17 +134,17 @@
     <string name="plant_orchid_name">Orchidea</string>
 
     <!-- Plant descriptions -->
-    <string name="plant_tulip_desc">Elegancki kwiat wiosenny, symbol miłości i odrodzenia.</string>
-    <string name="plant_poppy_desc">Delikatny kwiat polny, symbol wspomnień i spokoju.</string>
-    <string name="plant_sunflower_desc">Słoneczny olbrzym, który zawsze podąża za światłem.</string>
-    <string name="plant_daffodil_desc">Zwiastun wiosny o intensywnym, radosnym zapachu.</string>
-    <string name="plant_rose_desc">Królowa kwiatów, symbol miłości i piękna.</string>
-    <string name="plant_bloodroot_desc">Rzadki kwiat lasu, kwitnący tylko przez kilka dni.</string>
-    <string name="plant_gerbera_desc">Kolorowa i radosna, symbol entuzjazmu i radości życia.</string>
-    <string name="plant_pansy_desc">Mały kwiat o aksamitnych płatkach i wesołych barwach.</string>
-    <string name="plant_lavender_desc">Aromatyczna roślina znana z kojącego i relaksującego działania.</string>
-    <string name="plant_lily_desc">Majestatyczny kwiat symbolizujący czystość i niewinność.</string>
-    <string name="plant_orchid_desc">Egzotyczna piękność, jedna z najbardziej wyrafinowanych roślin świata.</string>
+    <string name="plant_tulip_desc">Elegancki kwiat wiosenny, symbol miłości i odrodzenia. Często pojawia się jako jeden z pierwszych znaków końca zimy.</string>
+    <string name="plant_poppy_desc">Delikatny kwiat polny, symbol wspomnień i spokoju. Rośnie dziko na łąkach i przy drogach, dodając krajobrazowi lekkości.</string>
+    <string name="plant_sunflower_desc">Słoneczny olbrzym, który zawsze podąża za światłem. Jego duże kwiaty potrafią osiągać imponujące rozmiary i dominować w ogrodzie.</string>
+    <string name="plant_daffodil_desc">Zwiastun wiosny o intensywnym, radosnym zapachu. Jego żółte kwiaty często pojawiają się jeszcze zanim w pełni stopnieje śnieg.</string>
+    <string name="plant_rose_desc">Królowa kwiatów, symbol miłości i piękna. Występuje w wielu odmianach i kolorach, z których każdy ma własne znaczenie.</string>
+    <string name="plant_bloodroot_desc">Rzadki kwiat lasu, kwitnący tylko przez kilka dni. Jego delikatne płatki rozwijają się bardzo wcześnie wiosną.</string>
+    <string name="plant_gerbera_desc">Kolorowa i radosna, symbol entuzjazmu i radości życia. Często wykorzystywana w bukietach dzięki swojej trwałości i intensywnym barwom.</string>
+    <string name="plant_pansy_desc">Mały kwiat o aksamitnych płatkach i wesołych barwach. Jest odporny na chłód i często kwitnie nawet wczesną wiosną.</string>
+    <string name="plant_lavender_desc">Aromatyczna roślina znana z kojącego i relaksującego działania. Jej zapach jest często wykorzystywany w kosmetykach i aromaterapii.</string>
+    <string name="plant_lily_desc">Majestatyczny kwiat symbolizujący czystość i niewinność. Jego duże, eleganckie płatki sprawiają, że jest często wybierany na uroczystości.</string>
+    <string name="plant_orchid_desc">Egzotyczna piękność, jedna z najbardziej wyrafinowanych roślin świata. Wymaga odpowiednich warunków, ale nagradza wyjątkowym kwitnieniem.</string>
 
     <!-- Plant colors -->
     <string name="plant_color_red">Czerwony</string>
@@ -154,9 +160,17 @@
     <string name="plant_size_medium">Średnia</string>
     <string name="plant_size_large">Duża</string>
 
+    <!-- Plant Screen -->
+    <string name="plant_detail_size">Rozmiar</string>
+    <string name="plant_detail_colors">Kolory</string>
+    <string name="plant_detail_min_duration">Min. czas skupienia</string>
+    <string name="plant_detail_min_duration_value">%d min</string>
+    <string name="plant_detail_price">Cena</string>
+    <string name="plant_detail_owned">Masz już tę roślinę</string>
+    <string name="plant_detail_buy">Kup</string>
+    <string name="plant_detail_about">O roślinie</string>
+
+
     <!-- Popups -->
-    <string name="delete">Usuń</string>
-    <string name="confirm">Potwierdź</string>
-    <string name="cancel">Anuluj</string>
     <string name="delete_account_message">Konto zostanie usunięte na zawsze.</string>
 </resources>

@@ -74,6 +74,10 @@ class FocusViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var sessionStartedAt: String? = null
 
+    private val _unlockedPlantIds = MutableStateFlow<Set<String>>(emptySet())
+    val unlockedPlantIds: StateFlow<Set<String>> = _unlockedPlantIds
+
+
     // =====================
     // INIT
     // =====================
@@ -96,6 +100,15 @@ class FocusViewModel @Inject constructor(
                     _selectedPlant.value = plant
                     updateDuration(if (devMode) plant.minDurationDev else plant.minDuration)
                 }
+            } catch (e: Exception) { }
+        }
+    }
+
+    fun loadUnlockedPlants(userId: String) {
+        viewModelScope.launch {
+            try {
+                val wallet = walletRepository.getWallet(userId)
+                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
             } catch (e: Exception) { }
         }
     }
@@ -193,7 +206,10 @@ class FocusViewModel @Inject constructor(
     private suspend fun saveSession(userId: String, plant: Plant, status: String) {
         try {
             val now = nowIso()
-            val actualDuration = (totalSeconds() - _remainingSeconds.value) / 60
+            val actualDuration = if (devMode)
+                totalSeconds() - _remainingSeconds.value  // sekundy w dev
+            else
+                (totalSeconds() - _remainingSeconds.value) / 60
             val response = sessionRepository.createSession(
                 userId = userId,
                 plantId = plant.plantId,

@@ -41,16 +41,16 @@ class MarketViewModel @Inject constructor(
     private val _buySuccess = MutableStateFlow<Plant?>(null)
     val buySuccess: StateFlow<Plant?> = _buySuccess
 
-    fun load(userId: String) {
+    private val _favouritePlantIds = MutableStateFlow<Set<String>>(emptySet())
+    val favouritePlantIds: StateFlow<Set<String>> = _favouritePlantIds
+
+    private var currentUserId: String = ""
+
+    fun loadPlants() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val plants = plantRepository.getPlants()
-                _plants.value = plants
-
-                val wallet = walletRepository.getWallet(userId)
-                _coins.value = wallet.coins
-                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
+                _plants.value = plantRepository.getPlants()
             } catch (e: Exception) {
                 _error.value = MarketError.NetworkError
             } finally {
@@ -59,11 +59,29 @@ class MarketViewModel @Inject constructor(
         }
     }
 
-    fun buyPlant(userId: String, plant: Plant) {
+    fun loadWallet(userId: String) {
+        currentUserId = userId
+        viewModelScope.launch {
+            try {
+                val wallet = walletRepository.getWallet(userId)
+                _coins.value = wallet.coins
+                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
+                _favouritePlantIds.value = wallet.favouritePlantIds.toSet()
+            } catch (e: Exception) {
+                _error.value = MarketError.NetworkError
+            }
+        }
+    }
+
+    fun getPlantById(plantId: String): Plant? {
+        return _plants.value.firstOrNull { it.plantId == plantId }
+    }
+
+    fun buyPlant(plant: Plant) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val wallet = walletRepository.buyPlant(userId, plant.plantId)
+                val wallet = walletRepository.buyPlant(currentUserId, plant.plantId)
                 _coins.value = wallet.coins
                 _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
                 _buySuccess.value = plant
@@ -80,6 +98,17 @@ class MarketViewModel @Inject constructor(
                 _error.value = MarketError.NetworkError
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun toggleFavourite(plantId: String) {
+        viewModelScope.launch {
+            try {
+                val wallet = walletRepository.toggleFavourite(currentUserId, plantId)
+                _favouritePlantIds.value = wallet.favouritePlantIds.toSet()
+            } catch (e: Exception) {
+                _error.value = MarketError.NetworkError
             }
         }
     }

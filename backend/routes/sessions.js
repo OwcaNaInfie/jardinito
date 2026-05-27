@@ -19,6 +19,18 @@ const calculateReward = (durationMinutes) => {
     return Math.ceil(reward);
 };
 
+const calculateRewardDev = (durationSeconds) => {
+    let reward = 0;
+    if (durationSeconds <= 5) {
+        reward = durationSeconds * 1;
+    } else if (durationSeconds <= 15) {
+        reward = 5 + (durationSeconds - 5) * 1.25;
+    } else {
+        reward = 5 + 10 * 1.25 + (durationSeconds - 15) * 1.5;
+    }
+    return Math.ceil(reward);
+};
+
 // =====================
 // ROUTES
 // =====================
@@ -32,7 +44,12 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const coinsEarned = status === 'completed' ? calculateReward(actualDuration) : 0;
+        const devMode = process.env.DEV_MODE === 'true';
+        const coinsEarned = status === 'completed'
+            ? devMode ? calculateRewardDev(actualDuration) : calculateReward(actualDuration)
+            : 0;
+
+        console.log('[SESSION] Creating session, coinsEarned:', coinsEarned);
 
         const session = await Session.create({
             userId,
@@ -45,6 +62,8 @@ router.post('/', async (req, res) => {
             startedAt,
             completedAt: completedAt || null
         });
+
+        console.log('[SESSION] Saved:', session._id);
 
         if (status === 'completed') {
             await UserWallet.findOneAndUpdate(

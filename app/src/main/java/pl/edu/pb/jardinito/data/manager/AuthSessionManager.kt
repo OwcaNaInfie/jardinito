@@ -1,14 +1,21 @@
 package pl.edu.pb.jardinito.data.manager
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import pl.edu.pb.jardinito.data.model.profile.Avatar
 import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.viewmodel.state.AuthState
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthSessionManager @Inject constructor() {
+class AuthSessionManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+
+    private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
     private val _uiState = MutableStateFlow<AuthState>(AuthState.Idle)
     val uiState: StateFlow<AuthState> = _uiState
@@ -22,16 +29,62 @@ class AuthSessionManager @Inject constructor() {
     private val _pendingEmail = MutableStateFlow<String?>(null)
     val pendingEmail: StateFlow<String?> = _pendingEmail
 
+    init {
+        val savedUser = restoreSession()
+        if (savedUser != null) {
+            _currentUser.value = savedUser
+            _uiState.value = AuthState.SessionRestored
+        }
+    }
+
+    // =====================
+    // SESSION PERSISTENCE
+    // =====================
+
+    private fun saveSession(user: User) {
+        prefs.edit()
+            .putString("userId", user.userId)
+            .putString("username", user.username)
+            .putString("email", user.email)
+            .putString("avatarDefault", user.avatar.default)
+            .putString("avatarCustom", user.avatar.custom)
+            .putString("avatarGoogle", user.avatar.google)
+            .apply()
+    }
+
+    private fun restoreSession(): User? {
+        val userId = prefs.getString("userId", null) ?: return null
+        val username = prefs.getString("username", null) ?: return null
+        val email = prefs.getString("email", null) ?: return null
+        return User(
+            userId = userId,
+            username = username,
+            email = email,
+            avatar = Avatar(
+                default = prefs.getString("avatarDefault", null) ?: "",
+                custom = prefs.getString("avatarCustom", null),
+                google = prefs.getString("avatarGoogle", null)
+            )
+        )
+    }
+
+    // =====================
+    // STATE MANAGEMENT
+    // =====================
+
     fun setUiState(state: AuthState) {
         _uiState.value = state
     }
 
     fun setCurrentUser(user: User?) {
         _currentUser.value = user
+        if (user != null) saveSession(user) else clearPrefs()
     }
 
     fun updateCurrentUser(update: (User?) -> User?) {
-        _currentUser.value = update(_currentUser.value)
+        val updated = update(_currentUser.value)
+        _currentUser.value = updated
+        if (updated != null) saveSession(updated)
     }
 
     fun setPendingUserId(userId: String?) {
@@ -50,11 +103,16 @@ class AuthSessionManager @Inject constructor() {
     fun clearSession() {
         _currentUser.value = null
         _uiState.value = AuthState.Idle
+        clearPrefs()
     }
 
     fun resetUiState() {
         if (_uiState.value !is AuthState.Loading) {
             _uiState.value = AuthState.Idle
         }
+    }
+
+    private fun clearPrefs() {
+        prefs.edit().clear().apply()
     }
 }

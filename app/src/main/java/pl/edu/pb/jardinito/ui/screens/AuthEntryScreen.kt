@@ -51,6 +51,7 @@ fun AuthEntryScreen(
 
     LaunchedEffect(uiState) {
         when (uiState) {
+            is AuthState.SessionRestored -> onLoginSuccess()
             is AuthState.VerificationRequired -> switchSheet(AuthSheetState.AccountVerification)
             is AuthState.UnverifiedAccount -> showUnverifiedDialog = true
             is AuthState.PasswordResetRequired -> showResetCodeSentDialog = true

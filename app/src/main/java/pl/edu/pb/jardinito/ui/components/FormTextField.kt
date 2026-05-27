@@ -42,7 +42,7 @@ fun FormTextField(
         Row {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = colors.neutralBlack
             )
             if (required) {

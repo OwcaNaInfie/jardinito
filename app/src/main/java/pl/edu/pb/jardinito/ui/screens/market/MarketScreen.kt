@@ -1,5 +1,7 @@
-package pl.edu.pb.jardinito.ui.screens
+package pl.edu.pb.jardinito.ui.screens.market
 
+import MarketErrorDialog
+import MarketSuccessDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,12 +11,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +31,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Toll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,13 +46,13 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.DialogConfig
-import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.rememberPlantName
@@ -66,13 +73,16 @@ data class MarketUiState(
 data class MarketData(
     val plants: List<Plant> = emptyList(),
     val coins: Int = 0,
-    val unlockedPlantIds: Set<String> = emptySet()
+    val unlockedPlantIds: Set<String> = emptySet(),
+    val favouritePlantIds: Set<String> = emptySet()
 )
 
 data class MarketActions(
     val onBuyPlant: (Plant) -> Unit,
     val onErrorDismissed: () -> Unit,
-    val onBuySuccessDismissed: () -> Unit
+    val onBuySuccessDismissed: () -> Unit,
+    val onPlantClick: (Plant) -> Unit,
+    val onToggleFavourite: (Plant) -> Unit
 )
 
 // =====================
@@ -82,24 +92,37 @@ data class MarketActions(
 @Composable
 fun MarketScreen(
     marketViewModel: MarketViewModel,
-    userId: String
+    userId: String,
+    onPlantClick: (Plant) -> Unit
 ) {
     val plants by marketViewModel.plants.collectAsState()
     val coins by marketViewModel.coins.collectAsState()
     val unlockedPlantIds by marketViewModel.unlockedPlantIds.collectAsState()
+    val favouritePlantIds by marketViewModel.favouritePlantIds.collectAsState()
     val error by marketViewModel.error.collectAsState()
     val buySuccess by marketViewModel.buySuccess.collectAsState()
     val isLoading by marketViewModel.isLoading.collectAsState()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Rośliny ładujemy raz
     LaunchedEffect(userId) {
-        if (userId.isNotBlank()) marketViewModel.load(userId)
+        if (userId.isNotBlank()) marketViewModel.loadPlants()
+    }
+
+    // Portfel ładujemy przy każdym wejściu na ekran
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            if (userId.isNotBlank()) marketViewModel.loadWallet(userId)
+        }
     }
 
     MarketScreenContent(
         data = MarketData(
             plants = plants,
             coins = coins,
-            unlockedPlantIds = unlockedPlantIds
+            unlockedPlantIds = unlockedPlantIds,
+            favouritePlantIds = favouritePlantIds
         ),
         uiState = MarketUiState(
             isLoading = isLoading,
@@ -107,9 +130,11 @@ fun MarketScreen(
             buySuccess = buySuccess
         ),
         actions = MarketActions(
-            onBuyPlant = { marketViewModel.buyPlant(userId, it) },
+            onBuyPlant = { marketViewModel.buyPlant(it) },
             onErrorDismissed = { marketViewModel.clearError() },
-            onBuySuccessDismissed = { marketViewModel.clearBuySuccess() }
+            onBuySuccessDismissed = { marketViewModel.clearBuySuccess() },
+            onPlantClick = onPlantClick,
+            onToggleFavourite = { marketViewModel.toggleFavourite(it.plantId) }
         )
     )
 }
@@ -147,7 +172,10 @@ fun MarketScreenContent(
                     MarketPlantCard(
                         plant = plant,
                         isUnlocked = data.unlockedPlantIds.contains(plant.plantId),
-                        onBuy = { actions.onBuyPlant(plant) }
+                        isFavourite = data.favouritePlantIds.contains(plant.plantId),
+                        onBuy = { actions.onBuyPlant(plant) },
+                        onPlantClick = actions.onPlantClick,
+                        onToggleFavourite = { actions.onToggleFavourite(plant) }
                     )
                 }
             }
@@ -179,13 +207,13 @@ private fun CoinBalanceRow(coins: Int) {
         Text(
             text = coins.toString(),
             style = MaterialTheme.typography.titleMedium,
-            color = colors.primary900
+            color = colors.primary500
         )
         Spacer(modifier = Modifier.width(4.dp))
         Icon(
-            imageVector = Icons.Default.MonetizationOn,
+            imageVector = Icons.Default.Toll,
             contentDescription = null,
-            tint = Color.Unspecified,
+            tint = colors.primary500,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -197,8 +225,8 @@ private fun PlantPriceChip(price: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(colors.primary50)
+            .clip(RoundedCornerShape(roundedCorner_s))
+            .background(colors.neutralLight)
             .padding(horizontal = 6.dp, vertical = 3.dp)
     ) {
         Text(
@@ -230,7 +258,7 @@ private fun PlantActionButton(isUnlocked: Boolean, onBuy: () -> Unit) {
         Icon(
             imageVector = if (isUnlocked) Icons.Default.Check else Icons.Default.Add,
             contentDescription = null,
-            tint = Color.White,
+            tint = colors.neutralLight,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -240,33 +268,56 @@ private fun PlantActionButton(isUnlocked: Boolean, onBuy: () -> Unit) {
 private fun MarketPlantCard(
     plant: Plant,
     isUnlocked: Boolean,
-    onBuy: () -> Unit
+    isFavourite: Boolean,
+    onBuy: () -> Unit,
+    onPlantClick: (Plant) -> Unit,
+    onToggleFavourite: () -> Unit
 ) {
     val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${plant.images.large}")
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(roundedCorner_s))
             .background(colors.primary100)
-            .padding(PaddingValues(start = 10.dp, end = 10.dp, bottom = 8.dp))
+            .padding(8.dp)
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = plant.name,
-            contentScale = ContentScale.Fit,
-            filterQuality = FilterQuality.None,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-        )
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = plant.name,
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clickable { onPlantClick(plant) }
+            )
+            IconButton(
+                onClick = onToggleFavourite,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(30.dp)
+            ) {
+                Icon(
+                    imageVector = if (isFavourite) Icons.Default.Favorite
+                    else Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    tint = if (isFavourite) colors.error else colors.neutralLight,
+                    modifier = Modifier.size(25.dp)
+                )
+            }
+        }
         Text(
             text = rememberPlantName(plant),
             style = MaterialTheme.typography.headlineMedium,
             color = colors.neutralBlack,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 4.dp)
         )
         Row(
             modifier = Modifier
@@ -279,69 +330,4 @@ private fun MarketPlantCard(
             PlantActionButton(isUnlocked = isUnlocked, onBuy = onBuy)
         }
     }
-}
-
-// =====================
-// DIALOGS
-// =====================
-
-@Composable
-private fun MarketErrorDialog(error: MarketError, onDismiss: () -> Unit) {
-    val (title, message) = when (error) {
-        is MarketError.InsufficientCoins -> Pair(
-            stringResource(R.string.market_error_insufficient_title),
-            stringResource(R.string.market_error_insufficient_message)
-        )
-        is MarketError.AlreadyUnlocked -> Pair(
-            stringResource(R.string.market_error_unlocked_title),
-            stringResource(R.string.market_error_unlocked_message)
-        )
-        is MarketError.NetworkError -> Pair(
-            stringResource(R.string.market_error_network_title),
-            stringResource(R.string.market_error_network_message)
-        )
-    }
-    ConfirmDialog(
-        config = DialogConfig(
-            title = title,
-            message = message,
-            variant = DialogVariant.Error,
-            singleButton = true,
-            confirmText = stringResource(R.string.ok)
-        ),
-        onConfirm = onDismiss,
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
-private fun MarketSuccessDialog(plant: Plant, onDismiss: () -> Unit) {
-    val imageUrl = rememberSvgImageRequest("${RetrofitInstance.BASE_URL}plants/${plant.images.medium}")
-    ConfirmDialog(
-        config = DialogConfig(
-            title = stringResource(R.string.market_buy_success_title),
-            message = stringResource(R.string.market_buy_success_message, rememberPlantName(plant)),
-            variant = DialogVariant.Success,
-            singleButton = true,
-            confirmText = stringResource(R.string.ok)
-        ),
-        content = {
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    filterQuality = FilterQuality.None,
-                    modifier = Modifier.size(100.dp)
-                )
-            }
-        },
-        onConfirm = onDismiss,
-        onDismiss = onDismiss
-    )
 }

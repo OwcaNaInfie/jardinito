@@ -9,6 +9,7 @@ sealed class AuthState {
     object UnverifiedAccount : AuthState()
     object PasswordResetRequired : AuthState()
     object PasswordResetSuccess : AuthState()
+    object SessionRestored : AuthState()
     data class Success(val message: String) : AuthState()
     data class Error(@StringRes val messageRes: Int) : AuthState()
 }

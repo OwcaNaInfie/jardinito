@@ -56,7 +56,10 @@ class MainActivity : ComponentActivity() {
                             .build()
 
                         val googleSignInClient = GoogleSignIn.getClient(this, gso)
-                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+
+                        googleSignInClient.signOut().addOnCompleteListener {
+                            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                        }
                     }
                 )
             }

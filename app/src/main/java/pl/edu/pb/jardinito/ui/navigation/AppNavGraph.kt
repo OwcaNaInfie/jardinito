@@ -1,5 +1,6 @@
 package pl.edu.pb.jardinito.ui.navigation
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +31,9 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
-import pl.edu.pb.jardinito.ui.screens.FocusScreen
+import pl.edu.pb.jardinito.ui.screens.focus.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
-import pl.edu.pb.jardinito.ui.screens.MarketScreen
+import pl.edu.pb.jardinito.ui.screens.market.MarketScreen
 import pl.edu.pb.jardinito.ui.screens.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
@@ -43,6 +44,13 @@ import pl.edu.pb.jardinito.viewmodel.PasswordResetViewModel
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
 import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import pl.edu.pb.jardinito.ui.screens.market.PlantDetailScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +155,23 @@ fun AppNavGraph(
                     composable(Routes.MARKET) {
                         MarketScreen(
                             marketViewModel = marketViewModel,
-                            userId = userId
+                            userId = userId,
+                            onPlantClick = { plant ->
+                                navController.navigate(Routes.plantDetail(plant.plantId))
+                            }
+                        )
+                    }
+                    composable(
+                        route = Routes.PLANT_DETAIL,
+                        arguments = listOf(navArgument("plantId") { type = NavType.StringType }),
+                        enterTransition = { slideUpEnter() },
+                        exitTransition = { slideUpExit() }
+                    ) { backStackEntry ->
+                        val plantId = backStackEntry.arguments?.getString("plantId") ?: return@composable
+                        PlantDetailScreen(
+                            marketViewModel = marketViewModel,
+                            plantId = plantId,
+                            onBack = { navController.popBackStack() }
                         )
                     }
                     composable(Routes.FOCUS) {

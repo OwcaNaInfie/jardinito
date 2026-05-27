@@ -13,12 +13,21 @@ interface WalletApiService {
     @POST("api/wallet/buy")
     suspend fun buyPlant(@Body request: BuyPlantRequest): WalletResponse
 
+    @POST("api/wallet/favourite")
+    suspend fun toggleFavourite(@Body request: FavouriteRequest): WalletResponse
+
     data class WalletResponse(
         val coins: Int,
-        val unlockedPlantIds: List<String>
+        val unlockedPlantIds: List<String>,
+        val favouritePlantIds: List<String>
     )
 
     data class BuyPlantRequest(
+        val userId: String,
+        val plantId: String
+    )
+
+    data class FavouriteRequest(
         val userId: String,
         val plantId: String
     )

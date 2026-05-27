@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.components
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,9 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Tag
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
 
@@ -49,6 +52,7 @@ fun TagPickerDrawer(
     fun selectAndDismiss(tag: Tag?) {
         onConfirm(tag)
         scope.launch {
+            delay(300)
             sheetState.hide()
         }.invokeOnCompletion {
             onDismiss()
@@ -58,18 +62,18 @@ fun TagPickerDrawer(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.primary100,
+        containerColor = colors.neutralLight,
         windowInsets = WindowInsets(0)
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = screenPadding_s)
                 .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
         ) {
             Text(
                 text = stringResource(R.string.focus_pick_tags),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 

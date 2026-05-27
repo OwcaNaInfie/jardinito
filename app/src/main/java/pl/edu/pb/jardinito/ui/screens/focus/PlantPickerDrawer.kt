@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.components
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,9 +34,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import pl.edu.pb.jardinito.ui.theme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +46,7 @@ import pl.edu.pb.jardinito.ui.theme.colors
 fun PlantPickerDrawer(
     plants: List<Plant>,
     selectedPlant: Plant?,
+    unlockedPlantIds: Set<String>,
     onPlantSelected: (Plant) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -53,7 +56,7 @@ fun PlantPickerDrawer(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = colors.primary100,
+        containerColor = colors.primary50,
         windowInsets = WindowInsets(0)
     ) {
         LazyVerticalGrid(
@@ -67,9 +70,11 @@ fun PlantPickerDrawer(
                 PlantPickerItem(
                     plant = plant,
                     isSelected = plant.plantId == selectedPlant?.plantId,
+                    isLocked = !unlockedPlantIds.contains(plant.plantId),
                     onSelected = {
                         onPlantSelected(plant)
                         scope.launch {
+                            delay(300)
                             sheetState.hide()
                         }.invokeOnCompletion {
                             onDismiss()
@@ -85,21 +90,19 @@ fun PlantPickerDrawer(
 fun PlantPickerItem(
     plant: Plant,
     isSelected: Boolean,
+    isLocked: Boolean,
     onSelected: () -> Unit
 ) {
-    val isLocked = plant.price > 0
     val imageUrl = "${RetrofitInstance.BASE_URL}plants/${plant.images.large}"
     val context = LocalContext.current
-
-
 
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.primary50)
+            .background(colors.primary100)
             .then(
-                if (isSelected) Modifier.border(2.dp, colors.primary500, RoundedCornerShape(12.dp))
+                if (isSelected) Modifier.border(2.dp, colors.primary500, RoundedCornerShape(roundedCorner_s))
                 else Modifier
             )
             .clickable(enabled = !isLocked) { onSelected() },
@@ -115,13 +118,8 @@ fun PlantPickerItem(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth()
-                .then(
-                    if (isLocked) Modifier.background(Color.Gray.copy(alpha = 0.5f))
-                    else Modifier
-                )
         )
 
-        // Wyszarzenie dla niedostępnych roślin
         if (isLocked) {
             Box(
                 modifier = Modifier
@@ -131,11 +129,10 @@ fun PlantPickerItem(
             )
         }
 
-        // Zielony tick dla wybranej rośliny
         if (isSelected) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.BottomEnd)
                     .padding(4.dp)
                     .size(20.dp)
                     .clip(CircleShape)

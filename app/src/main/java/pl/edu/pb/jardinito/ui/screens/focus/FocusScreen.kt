@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.screens
+package pl.edu.pb.jardinito.ui.screens.focus
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import pl.edu.pb.jardinito.ui.components.CircularTimer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,12 +42,13 @@ import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.PlantPickerDrawer
-import pl.edu.pb.jardinito.ui.components.TagPickerDrawer
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_m
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.rememberPlantName
@@ -143,9 +143,13 @@ fun FocusScreen(
     val tags by tagViewModel.tags.collectAsState()
     val sessionResult by focusViewModel.sessionResult.collectAsState()
     val showStopConfirmDialog by focusViewModel.showStopConfirmDialog.collectAsState()
+    val unlockedPlantIds by focusViewModel.unlockedPlantIds.collectAsState()
 
     LaunchedEffect(userId) {
-        if (userId.isNotBlank()) tagViewModel.loadTags(userId)
+        if (userId.isNotBlank()) {
+            tagViewModel.loadTags(userId)
+            focusViewModel.loadUnlockedPlants(userId)
+        }
     }
 
     val config = TimerConfig.forPlant(selectedPlant, focusViewModel.devMode)
@@ -176,7 +180,8 @@ fun FocusScreen(
         showStopConfirmDialog = showStopConfirmDialog,
         onSessionResultDismissed = { focusViewModel.clearSessionResult() },
         onStopConfirmed = { focusViewModel.confirmStop(userId) },
-        onStopDismissed = { focusViewModel.dismissStop(userId) }
+        onStopDismissed = { focusViewModel.dismissStop(userId) },
+        unlockedPlantIds = unlockedPlantIds,
     )
 }
 
@@ -197,8 +202,10 @@ fun FocusScreenContent(
     showStopConfirmDialog: Boolean,
     onSessionResultDismissed: () -> Unit,
     onStopConfirmed: () -> Unit,
-    onStopDismissed: () -> Unit
-) {
+    onStopDismissed: () -> Unit,
+    unlockedPlantIds: Set<String>,
+
+    ) {
     val isIdle = timerUiState.timerState is TimerState.Idle
     val isRunning = timerUiState.timerState is TimerState.Running
     val isPaused = timerUiState.timerState is TimerState.Paused
@@ -214,9 +221,9 @@ fun FocusScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.primary50)
-            .padding(top = Dimensions.topBarHeight, bottom = 16.dp),
+            .padding(top = Dimensions.topBarHeight, bottom = 16.dp, start = screenPadding_s, end = screenPadding_s),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Bottom
     ) {
         CircularTimer(
             progress = timerUiState.progress,
@@ -234,7 +241,6 @@ fun FocusScreenContent(
             text = if (isIdle) "${timerUiState.selectedDuration} $unit" else timeText,
             style = MaterialTheme.typography.headlineLarge,
             color = colors.neutralGray,
-            modifier = Modifier.padding(top = 24.dp)
         )
 
         SelectedTagChip(
@@ -255,6 +261,7 @@ fun FocusScreenContent(
         PlantPickerDrawer(
             plants = plantUiState.plants,
             selectedPlant = plantUiState.selectedPlant,
+            unlockedPlantIds = unlockedPlantIds,
             onPlantSelected = onPlantSelected,
             onDismiss = { showPlantPicker = false }
         )
@@ -266,7 +273,6 @@ fun FocusScreenContent(
             selectedTag = tagUiState.selectedTag,
             onConfirm = { selected ->
                 onTagSelected(selected)
-                showTagPicker = false
             },
             onDismiss = { showTagPicker = false }
         )
@@ -304,13 +310,16 @@ private fun TimerControls(
     actions: TimerActions
 ) {
     Row(
-        modifier = Modifier.padding(top = 32.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s, Alignment.CenterHorizontally)
     ) {
         when {
             isIdle -> AppButton(
                 text = stringResource(R.string.focus_start),
-                size = ButtonSize.Large,
+                size = ButtonSize.Max,
                 variant = ButtonVariant.Tertiary,
                 onClick = actions.onStart
             )
@@ -382,7 +391,7 @@ private fun SelectedTagChip(
                     painter = painterResource(R.drawable.pushpin),
                     contentDescription = null,
                     tint = colors.neutralGray,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = stringResource(R.string.focus_add_tag),
