@@ -21,4 +21,8 @@ class WalletRepository @Inject constructor() {
     suspend fun buyPlant(userId: String, plantId: String): WalletApiService.WalletResponse {
         return api.buyPlant(WalletApiService.BuyPlantRequest(userId, plantId))
     }
+
+    suspend fun toggleFavourite(userId: String, plantId: String): WalletApiService.WalletResponse {
+        return api.toggleFavourite(WalletApiService.FavouriteRequest(userId, plantId))
+    }
 }

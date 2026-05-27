@@ -1,6 +1,7 @@
 package pl.edu.pb.jardinito.ui.screens.market
 
 import MarketErrorDialog
+import MarketSuccessDialog
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,8 +16,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -102,13 +105,6 @@ fun PlantDetailScreen(
 
     val plant = plants.firstOrNull { it.plantId == plantId } ?: return
 
-    LaunchedEffect(buySuccess) {
-        if (buySuccess != null) {
-            marketViewModel.clearBuySuccess()
-            onBack()
-        }
-    }
-
     BackHandler { onBack() }
 
     PlantDetailContent(
@@ -122,10 +118,10 @@ fun PlantDetailScreen(
             onErrorDismissed = { marketViewModel.clearError() },
             onBuySuccessDismissed = {
                 marketViewModel.clearBuySuccess()
-                onBack()
             }
         ),
-        error = error
+        error = error,
+        buySuccess = buySuccess
     )
 }
 
@@ -137,7 +133,8 @@ fun PlantDetailScreen(
 fun PlantDetailContent(
     data: PlantDetailData,
     actions: PlantDetailActions,
-    error: MarketError?
+    error: MarketError?,
+    buySuccess: Plant?
 ) {
     val imageUrl = rememberSvgImageRequest(
         "${RetrofitInstance.BASE_URL}plants/${data.plant.images.large}"
@@ -205,33 +202,39 @@ fun PlantDetailContent(
                         color = colors.neutralLightGray
                     )
                 }
-                if (data.isUnlocked) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = colors.primary500,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.plant_detail_owned),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = colors.primary500
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (data.isUnlocked) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = colors.primary500,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.plant_detail_owned),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colors.primary500
+                            )
+                        }
+                    } else {
+                        AppButton(
+                            text = stringResource(R.string.plant_detail_buy),
+                            size = ButtonSize.Max,
+                            variant = ButtonVariant.Tertiary,
+                            onClick = { actions.onBuy(data.plant) }
                         )
                     }
-                } else {
-                    AppButton(
-                        text = stringResource(R.string.plant_detail_buy),
-                        size = ButtonSize.Large,
-                        variant = ButtonVariant.Tertiary,
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { actions.onBuy(data.plant) }
-                    )
                 }
             }
         }
@@ -252,6 +255,9 @@ fun PlantDetailContent(
 
         error?.let {
             MarketErrorDialog(error = it, onDismiss = actions.onErrorDismissed)
+        }
+        buySuccess?.let {
+            MarketSuccessDialog(plant = it, onDismiss = actions.onBuySuccessDismissed)
         }
     }
 }
@@ -294,15 +300,17 @@ private fun PlantTagsRow(plant: Plant) {
         size?.let {
             PlantTag(
                 text = stringResource(it.labelRes).replaceFirstChar { it.lowercase() },
-                background = colors.primary50,
-                textColor = colors.neutralGray
+                background = Color.Transparent,
+                textColor = colors.neutralGray,
+                borderColor = colors.neutralGray
             )
         }
-            PlantTag(
-                text = "${plant.minDuration} min",
-                background = colors.primary50,
-                textColor = colors.neutralGray
-            )
+        PlantTag(
+            text = "${plant.minDuration} min",
+            background = Color.Transparent,
+            textColor = colors.neutralGray,
+            borderColor = colors.neutralGray
+        )
 
         // Color tags
         plant.colors.forEach { colorKey ->
@@ -322,12 +330,14 @@ private fun PlantTagsRow(plant: Plant) {
 private fun PlantTag(
     text: String,
     background: Color,
-    textColor: Color
+    textColor: Color,
+    borderColor: Color = Color.Transparent
 ) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(roundedCorner_s))
             .background(background)
+            .border(1.dp, borderColor, RoundedCornerShape(roundedCorner_s))
             .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
         Text(
