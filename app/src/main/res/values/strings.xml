@@ -101,6 +101,31 @@
     <string name="session_failed_title">Session interrupted!</string>
     <string name="session_failed_message">The %1$s has withered and ended up in your garden.</string>
 
+    <!-- Focus Overlay -->
+    <string name="focus_overlay_title">You are leaving the session</string>
+    <string name="focus_overlay_message">If you don\'t come back, the timer will stop\on the plant it will wither.</string>
+    <string name="focus_overlay_countdown">Session will end at %1$ds</string>
+    <string name="focus_overlay_return">Return to app</string>
+
+    <!-- Overlay permission dialogue -->
+    <string name="focus_overlay_permission_title">Permission required</string>
+    <string name="focus_overlay_permission_message">To warn you when you leave a session, the application needs permission to display over other applications.</string>
+    <string name="focus_overlay_permission_confirm">Go to settings</string>
+    <string name="focus_overlay_permission_later">Later</string>
+
+    <!-- Notifications -->
+    <string name="notif_focus_channel_name">Focus timer</string>
+    <string name="notif_focus_channel_desc">Active focus session</string>
+    <string name="notif_alert_channel_name">Session Alerts</string>
+    <string name="notif_alert_channel_desc">Session Abort Notifications</string>
+    <string name="notif_focus_title">Focus session continues 🌱</string>
+    <string name="notif_focus_text">Stay in the app for the plant to grow</string>
+    <string name="notif_fail_title">Session ended 🥀</string>
+    <string name="notif_fail_text">You left the app — the plant died.</string>
+    <string name="focus_notif_permission_title">Enable notifications</string>
+    <string name="focus_notif_permission_message">Notifications will let you know when your session ends when you leave the application.</string>
+    <string name="focus_notif_permission_confirm">Enable</string>
+
     <!-- Tags Screen -->
     <string name="tags_empty_title">Time to create a new tag!</string>
     <string name="tags_search_placeholder">Search for tags…</string>

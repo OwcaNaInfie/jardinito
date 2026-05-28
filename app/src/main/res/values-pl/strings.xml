@@ -102,6 +102,31 @@
     <string name="session_failed_title">Sesja przerwana!</string>
     <string name="session_failed_message">Roślina uschła i trafiła do Twojego ogrodu.</string>
 
+    <!-- Focus Overlay -->
+    <string name="focus_overlay_title">Opuszczasz sesję</string>
+    <string name="focus_overlay_message">Jeśli nie wrócisz, timer się zatrzyma\na roślina uschnie.</string>
+    <string name="focus_overlay_countdown">Sesja zakończy się za %1$d s</string>
+    <string name="focus_overlay_return">Wróć do aplikacji</string>
+
+    <!-- Overlay permission dialog -->
+    <string name="focus_overlay_permission_title">Wymagane uprawnienie</string>
+    <string name="focus_overlay_permission_message">Aby ostrzegać Cię gdy opuścisz sesję, aplikacja potrzebuje uprawnienia do wyświetlania nad innymi aplikacjami.</string>
+    <string name="focus_overlay_permission_confirm">Przejdź do ustawień</string>
+    <string name="focus_overlay_permission_later">Później</string>
+
+    <!-- Notifications -->
+    <string name="notif_focus_channel_name">Timer skupienia</string>
+    <string name="notif_focus_channel_desc">Aktywna sesja skupienia</string>
+    <string name="notif_alert_channel_name">Alerty sesji</string>
+    <string name="notif_alert_channel_desc">Powiadomienia o przerwaniu sesji</string>
+    <string name="notif_focus_title">Sesja skupienia trwa 🌱</string>
+    <string name="notif_focus_text">Pozostań w aplikacji, żeby roślina rosła</string>
+    <string name="notif_fail_title">Sesja zakończona 🥀</string>
+    <string name="notif_fail_text">Opuściłaś aplikację — roślina uschła.</string>
+    <string name="focus_notif_permission_title">Włącz powiadomienia</string>
+    <string name="focus_notif_permission_message">Powiadomienia pozwolą Ci dowiedzieć się o zakończeniu sesji gdy opuścisz aplikację.</string>
+    <string name="focus_notif_permission_confirm">Włącz</string>
+
     <!-- Tags Screen -->
     <string name="tags_empty_title">Czas stworzyć nowy tag!</string>
     <string name="tags_search_placeholder">Szukaj tagów…</string>

@@ -25,7 +25,7 @@ fun TopBar(
         windowInsets = WindowInsets(0),
         modifier = Modifier
             .padding(vertical = 4.dp)
-            .padding(top = 14.dp),
+            .padding(top = 18.dp),
         title = { Text(title, style = MaterialTheme.typography.headlineMedium) },
 
         navigationIcon = {

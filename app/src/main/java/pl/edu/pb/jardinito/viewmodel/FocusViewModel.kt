@@ -19,6 +19,13 @@ import pl.edu.pb.jardinito.data.repository.SessionRepository
 import pl.edu.pb.jardinito.data.repository.WalletRepository
 import pl.edu.pb.jardinito.viewmodel.state.TimerState
 import javax.inject.Inject
+import android.content.Context
+import android.content.Intent
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableSharedFlow
+import pl.edu.pb.jardinito.data.manager.FocusSessionManager
+import pl.edu.pb.jardinito.ui.service.FocusOverlayService
 
 sealed class SessionResult {
     data class Completed(val plant: Plant, val coinsEarned: Int) : SessionResult()
@@ -29,7 +36,9 @@ sealed class SessionResult {
 class FocusViewModel @Inject constructor(
     private val plantRepository: PlantRepository,
     private val sessionRepository: SessionRepository,
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val sessionManager: FocusSessionManager,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     // =====================
@@ -77,6 +86,7 @@ class FocusViewModel @Inject constructor(
     private val _unlockedPlantIds = MutableStateFlow<Set<String>>(emptySet())
     val unlockedPlantIds: StateFlow<Set<String>> = _unlockedPlantIds
 
+    private var currentUserId: String = ""
 
     // =====================
     // INIT
@@ -84,6 +94,17 @@ class FocusViewModel @Inject constructor(
 
     init {
         loadPlants()
+        observeBackgroundFail()
+    }
+
+    private fun observeBackgroundFail() {
+        viewModelScope.launch {
+            sessionManager.failSessionEvent.collect {
+                if (currentUserId.isNotBlank()) {
+                    stop(currentUserId)
+                }
+            }
+        }
     }
 
     // =====================
@@ -136,23 +157,30 @@ class FocusViewModel @Inject constructor(
 
     fun start(userId: String) {
         if (_selectedPlant.value == null) return
+        currentUserId = userId
         sessionStartedAt = nowIso()
         _timerState.value = TimerState.Running
+        sessionManager.setTimerRunning(true)
+        startFocusService()
         runTimer(userId)
     }
 
     fun pause() {
         timerJob?.cancel()
         _timerState.value = TimerState.Paused
+        sessionManager.setTimerRunning(false)
     }
 
     fun resume(userId: String) {
         _timerState.value = TimerState.Running
+        sessionManager.setTimerRunning(true)
         runTimer(userId)
     }
 
     fun stop(userId: String) {
         timerJob?.cancel()
+        sessionManager.setTimerRunning(false)
+        stopFocusService()
         val plant = _selectedPlant.value
         if (plant != null && sessionStartedAt != null) {
             viewModelScope.launch {
@@ -252,4 +280,23 @@ class FocusViewModel @Inject constructor(
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
             .format(Date())
+
+
+    private fun startFocusService() {
+        Intent(context, FocusOverlayService::class.java).apply {
+            action = FocusOverlayService.ACTION_START
+        }.also { context.startForegroundService(it) }
+    }
+
+    private fun stopFocusService() {
+        Intent(context, FocusOverlayService::class.java).apply {
+            action = FocusOverlayService.ACTION_STOP
+        }.also { context.startService(it) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        sessionManager.setTimerRunning(false)
+        stopFocusService()
+    }
 }
