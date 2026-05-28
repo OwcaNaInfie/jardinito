@@ -89,6 +89,9 @@
     <string name="profile_wallet">Wallet</string>
     <string name="profile_favourites">Favourites</string>
     <string name="profile_favourites_empty">No favourites</string>
+    <string name="profile_permissions">Permissions</string>
+    <string name="permission_notifications">Notifications</string>
+    <string name="permission_overlay">Displaying over applications</string>
 
     <!-- Focus Screen -->
     <string name="focus_add_tag">Add tag</string>

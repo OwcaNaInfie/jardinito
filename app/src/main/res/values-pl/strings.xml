@@ -90,6 +90,9 @@
     <string name="profile_wallet">Portfel</string>
     <string name="profile_favourites">Ulubione</string>
     <string name="profile_favourites_empty">Brak ulubionych roślin</string>
+    <string name="profile_permissions">Uprawnienia</string>
+    <string name="permission_notifications">Powiadomienia</string>
+    <string name="permission_overlay">Wyświetlanie nad aplikacjami</string>
 
     <!-- Focus Screen -->
     <string name="focus_add_tag">Dodaj tag</string>
