@@ -103,6 +103,10 @@ fun PlantDetailScreen(
     val error by marketViewModel.error.collectAsState()
     val buySuccess by marketViewModel.buySuccess.collectAsState()
 
+    LaunchedEffect(Unit) {
+        if (plants.isEmpty()) marketViewModel.loadPlants()
+    }
+
     val plant = plants.firstOrNull { it.plantId == plantId } ?: return
 
     BackHandler { onBack() }
@@ -169,7 +173,6 @@ fun PlantDetailContent(
                     .offset(y = 40.dp)
             )
 
-            // Treść — nachodzi na obraz o 24dp
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

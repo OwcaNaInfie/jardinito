@@ -214,7 +214,6 @@ router.post('/google', async (req, res) => {
 
         await user.save();
 
-        // Tagi domyślne
         await UserTags.create({
             userId: user._id,
             tags: [

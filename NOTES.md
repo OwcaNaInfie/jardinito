@@ -165,3 +165,9 @@ avatar {
   custom: "adres_customowego_zdjęcia.png"
   google: ""
 }
+
+
+Do zrobienia:
+-dodać trass bg do ekranu tagów
+-widok portfela w FocusScreen
+-dodać serduszko ulubiony do DetailsPlantScreen

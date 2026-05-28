@@ -51,6 +51,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import pl.edu.pb.jardinito.ui.screens.market.PlantDetailScreen
+import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +75,7 @@ fun AppNavGraph(
     val tagViewModel: TagViewModel = hiltViewModel()
     val focusViewModel: FocusViewModel = hiltViewModel()
     val marketViewModel: MarketViewModel = hiltViewModel()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
 
     val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
 
@@ -195,19 +197,23 @@ fun AppNavGraph(
                     composable(Routes.PROFILE) {
                         val user by authViewModel.currentUser.collectAsState(initial = null)
                         user?.let {
-                                ProfileScreen(
-                                    user = it,
-                                    onLogout = {
-                                        authViewModel.logout()
-                                        navController.navigate(Routes.ENTRY) {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                    },
-                                    authViewModel = authViewModel,
-                                    userViewModel = userViewModel,
-                                    isEditing = isEditingProfile
-                                )
-                            }
+                            ProfileScreen(
+                                user = it,
+                                onLogout = {
+                                    authViewModel.logout()
+                                    navController.navigate(Routes.ENTRY) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                authViewModel = authViewModel,
+                                userViewModel = userViewModel,
+                                profileViewModel = profileViewModel,
+                                isEditing = isEditingProfile,
+                                onPlantClick = { plant ->
+                                    navController.navigate(Routes.plantDetail(plant.plantId))
+                                }
+                            )
+                        }
                     }
                 }
             }
