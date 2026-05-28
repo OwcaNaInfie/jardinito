@@ -171,4 +171,4 @@ Do zrobienia:
 -dodać trass bg do ekranu tagów
 -widok portfela w FocusScreen
 -dodać serduszko ulubiony do DetailsPlantScreen
--dodać permission do settings
+-pamięć podręczna kiedy nie mamy połączenia z internetem?
