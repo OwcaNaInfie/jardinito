@@ -1,6 +1,5 @@
 package pl.edu.pb.jardinito.ui.navigation
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +33,7 @@ import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.focus.FocusScreen
 import pl.edu.pb.jardinito.ui.screens.HomeScreen
 import pl.edu.pb.jardinito.ui.screens.market.MarketScreen
-import pl.edu.pb.jardinito.ui.screens.ProfileScreen
+import pl.edu.pb.jardinito.ui.screens.profile.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
 import pl.edu.pb.jardinito.ui.screens.TagsScreen
 import pl.edu.pb.jardinito.ui.theme.colors
@@ -46,10 +45,6 @@ import pl.edu.pb.jardinito.viewmodel.UserViewModel
 import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import pl.edu.pb.jardinito.ui.screens.market.PlantDetailScreen
 import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
 

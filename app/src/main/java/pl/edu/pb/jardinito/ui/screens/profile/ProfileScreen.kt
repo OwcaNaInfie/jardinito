@@ -1,4 +1,4 @@
-package pl.edu.pb.jardinito.ui.screens
+package pl.edu.pb.jardinito.ui.screens.profile
 
 import android.app.Activity
 import android.net.Uri
@@ -12,17 +12,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -35,57 +32,44 @@ import androidx.compose.material.icons.filled.Toll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
-import kotlinx.coroutines.delay
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.DialogConfig
-import pl.edu.pb.jardinito.ui.components.DialogVariant
-import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.UserAvatar
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
-import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_m
-import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
-import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_l
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
-import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
@@ -107,7 +91,7 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var showAccountDeletedDialog by remember { mutableStateOf(false) }
+    var showAccountDeletedSuccessDialog by remember { mutableStateOf(false) }
     var showUsernameDialog by remember { mutableStateOf(false) }
     var showEmailDialog by remember { mutableStateOf(false) }
     var showEmailVerificationDialog by remember { mutableStateOf(false) }
@@ -165,7 +149,7 @@ fun ProfileScreen(
         onDeleteAccount = {
             val userId = user.userId ?: return@ProfileScreenContent
             userViewModel.deleteAccount(userId) {
-                showAccountDeletedDialog = true
+                showAccountDeletedSuccessDialog = true
             }
         },
         onUsernameClick = { showUsernameDialog = true },
@@ -239,22 +223,10 @@ fun ProfileScreen(
         )
     }
 
-    if (showAccountDeletedDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-                title = stringResource(R.string.account_deleted_title),
-                message = stringResource(R.string.account_deleted_message),
-                confirmText = "OK",
-                singleButton = true,
-                variant = DialogVariant.Success
-            ),
-            onConfirm = {
-                showAccountDeletedDialog = false
-                authViewModel.clearUserSession()
-                onLogout()
-            },
+    if (showAccountDeletedSuccessDialog) {
+        AccountDeletedSuccessDialog(
             onDismiss = {
-                showAccountDeletedDialog = false
+                showAccountDeletedSuccessDialog = false
                 authViewModel.clearUserSession()
                 onLogout()
             }
@@ -284,20 +256,18 @@ fun ProfileScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.primary50)
-            .verticalScroll(rememberScrollState())
             .padding(top = Dimensions.topBarHeight),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-            ProfileHeader(
-                user = user,
-                isEditing = isEditing,
-                galleryLauncher = galleryLauncher,
-                onDeleteAvatar = onDeleteAvatar,
-                onUsernameClick = onUsernameClick,
-                onEmailClick = onEmailClick
-            )
-
+        ProfileHeader(
+            user = user,
+            isEditing = isEditing,
+            galleryLauncher = galleryLauncher,
+            onDeleteAvatar = onDeleteAvatar,
+            onUsernameClick = onUsernameClick,
+            onEmailClick = onEmailClick
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -305,19 +275,14 @@ fun ProfileScreenContent(
                 .verticalScroll(rememberScrollState())
                 .clip(RoundedCornerShape(topStart = roundedCorner_m, topEnd = roundedCorner_m))
                 .background(colors.neutralLight)
-                .padding(
-                    start = screenPadding_s,
-                    end = screenPadding_s,
-                    top = screenPadding_m
-                ),
+                .padding(start = screenPadding_s, end = screenPadding_s, top = screenPadding_m),
             verticalArrangement = Arrangement.spacedBy(itemsSpacing_m)
         ) {
             WalletTile(coins = coins)
             FavouritesTile(favouritePlants = favouritePlants, onPlantClick = onPlantClick)
-
-            Spacer(modifier = Modifier.weight(1f))
-
+            Spacer(modifier = Modifier.height(16.dp))
             if (isEditing) {
+                PermissionsTile()
                 ProfileActions(
                     onLogout = onLogout,
                     onDeleteAccount = onDeleteAccount
@@ -340,20 +305,15 @@ fun ProfileHeader(
     onUsernameClick: () -> Unit,
     onEmailClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AvatarSection(
             user = user,
             isEditing = isEditing,
             galleryLauncher = galleryLauncher,
             onDeleteAvatar = onDeleteAvatar
         )
-
-        // Nazwa użytkownika
         Row(
             modifier = Modifier.padding(start = 16.dp),
-
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -373,11 +333,8 @@ fun ProfileHeader(
                     .clickable(enabled = isEditing) { onUsernameClick() }
             )
         }
-
-// Email
         Row(
             modifier = Modifier.padding(start = 16.dp),
-
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -405,14 +362,11 @@ fun ProfileHeader(
 // =====================
 
 @Composable
-private fun ProfileTile(
+fun ProfileTile(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
@@ -420,23 +374,22 @@ private fun ProfileTile(
         )
         Row(
             modifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp),
-        verticalAlignment = Alignment.CenterVertically
-        ){
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 56.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             content()
         }
-
     }
 }
 
 @Composable
 private fun WalletTile(coins: Int) {
     ProfileTile(title = stringResource(R.string.profile_wallet)) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp),
-
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s)
         ) {
@@ -548,239 +501,12 @@ fun AvatarSection(
     }
 
     if (showDeleteAvatarDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-                title = stringResource(R.string.delete_avatar_title),
-                message = stringResource(R.string.delete_avatar_message),
-                confirmText = stringResource(R.string.delete_avatar_confirm),
-                variant = DialogVariant.Warning
-            ),
+        DeleteAvatarDialog(
             onConfirm = {
                 showDeleteAvatarDialog = false
                 onDeleteAvatar()
             },
             onDismiss = { showDeleteAvatarDialog = false }
         )
-    }
-}
-
-// =====================
-// ACTIONS
-// =====================
-
-@Composable
-fun ProfileActions(
-    onLogout: () -> Unit,
-    onDeleteAccount: () -> Unit
-) {
-    var showDeleteAccountDialog by remember { mutableStateOf(false) }
-    var showLogOutDialog by remember { mutableStateOf(false) }
-
-    val borderColor = colors.primary50
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .drawBehind {
-                drawLine(
-                    color = borderColor,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
-    ) {
-
-
-    TextButton(onClick = { showLogOutDialog = true }) {
-            Text(
-                text = stringResource(R.string.log_out),
-                color = colors.neutralBlack,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-        TextButton(onClick = { showDeleteAccountDialog = true }) {
-            Text(
-                text = stringResource(R.string.delete_account),
-                color = colors.error,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-    }
-
-    if (showLogOutDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-                title = stringResource(R.string.log_out),
-                message = stringResource(R.string.logout_message),
-                confirmText = stringResource(R.string.log_out),
-                variant = DialogVariant.Warning
-            ),
-            onConfirm = {
-                showLogOutDialog = false
-                onLogout()
-            },
-            onDismiss = { showLogOutDialog = false }
-        )
-    }
-
-    if (showDeleteAccountDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-                title = stringResource(R.string.delete_account),
-                message = stringResource(R.string.delete_account_message),
-                confirmText = stringResource(R.string.delete_account)
-            ),
-            onConfirm = {
-                showDeleteAccountDialog = false
-                onDeleteAccount()
-            },
-            onDismiss = { showDeleteAccountDialog = false }
-        )
-    }
-}
-
-// =====================
-// DIALOGS
-// =====================
-
-@Composable
-fun EditFieldDialog(
-    title: String,
-    currentValue: String,
-    label: String,
-    confirmText: String = stringResource(R.string.confirm),
-    isValid: Boolean = true,
-    errorRes: Int? = null,
-    onValueChange: (String) -> Unit,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var value by remember { mutableStateOf(currentValue) }
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .clip(RoundedCornerShape(roundedCorner_s))
-                .background(colors.primary50)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            FormTextField(
-                label = label,
-                value = value,
-                onValueChange = {
-                    value = it
-                    onValueChange(it)
-                },
-                required = true,
-                errorRes = errorRes,
-                isValid = isValid && value.isNotBlank()
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                AppButton(
-                    text = stringResource(R.string.cancel),
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Primary,
-                    onClick = onDismiss
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                AppButton(
-                    text = confirmText,
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Secondary,
-                    enabled = isValid && value.isNotBlank(),
-                    onClick = { onConfirm(value) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun EmailVerificationDialog(
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var code by remember { mutableStateOf("") }
-    var timeLeft by remember { mutableIntStateOf(120) }
-
-    LaunchedEffect(timeLeft) {
-        if (timeLeft > 0) {
-            delay(1000L)
-            timeLeft--
-        }
-    }
-
-    val minutes = timeLeft / 60
-    val seconds = timeLeft % 60
-    val timerText = "%d:%02d".format(minutes, seconds)
-    val timerColor = if (timeLeft <= 30) colors.error else colors.neutralGray
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .clip(RoundedCornerShape(roundedCorner_s))
-                .background(colors.primary50)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.verification_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = timerText,
-                style = MaterialTheme.typography.headlineSmall,
-                color = timerColor
-            )
-            FormTextField(
-                label = stringResource(R.string.verification_code_hint),
-                value = code,
-                onValueChange = {
-                    if (validateVerificationCode(it)) code = it
-                },
-                required = true,
-                keyboardType = KeyboardType.Number
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                AppButton(
-                    text = stringResource(R.string.cancel),
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Primary,
-                    onClick = onDismiss
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                AppButton(
-                    text = stringResource(R.string.verify),
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Secondary,
-                    enabled = code.length == 6 && timeLeft > 0,
-                    onClick = { onConfirm(code) }
-                )
-            }
-        }
     }
 }
