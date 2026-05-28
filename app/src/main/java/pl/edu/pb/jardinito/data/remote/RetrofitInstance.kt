@@ -7,9 +7,17 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
-    const val BASE_URL = "http://192.168.0.28:5000/"
-//    Dołubowo
-//const val BASE_URL = "http://192.168.1.27:5000/"
+    // Dom (router WiFi)
+     const val BASE_URL = "http://192.168.0.28:5000/"
+
+    // Dołubowo
+    // const val BASE_URL = "http://192.168.1.27:5000/"
+
+    // eduroam
+    // const val BASE_URL = "http://10.16.3.17:5000/"
+
+    // Hotspot z telefonu hostname -I
+    // const val BASE_URL = "http://10.51.26.240:5000/"
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->

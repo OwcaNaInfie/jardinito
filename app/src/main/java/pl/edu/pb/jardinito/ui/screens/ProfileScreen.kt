@@ -2,30 +2,43 @@ package pl.edu.pb.jardinito.ui.screens
 
 import android.app.Activity
 import android.net.Uri
-import androidx.compose.material3.Icon
-import androidx.compose.ui.unit.dp
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Toll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -35,37 +48,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.yalantis.ucrop.UCrop
-import pl.edu.pb.jardinito.R
-import pl.edu.pb.jardinito.data.model.profile.User
-import pl.edu.pb.jardinito.ui.components.ConfirmDialog
-import pl.edu.pb.jardinito.ui.components.DialogVariant
-import pl.edu.pb.jardinito.ui.components.appButton.AppButton
-import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
-import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.viewmodel.AuthViewModel
-import pl.edu.pb.jardinito.viewmodel.UserViewModel
-import java.io.File
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import coil.compose.AsyncImage
+import com.yalantis.ucrop.UCrop
+import kotlinx.coroutines.delay
+import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.data.model.Plant
+import pl.edu.pb.jardinito.data.model.profile.User
+import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogConfig
-import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
+import pl.edu.pb.jardinito.ui.components.DialogVariant
 import pl.edu.pb.jardinito.ui.components.FormTextField
 import pl.edu.pb.jardinito.ui.components.UserAvatar
+import pl.edu.pb.jardinito.ui.components.appButton.AppButton
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
+import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
-import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_l
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_m
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_l
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_m
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
+import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
+import pl.edu.pb.jardinito.viewmodel.AuthViewModel
+import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
+import pl.edu.pb.jardinito.viewmodel.UserViewModel
+import java.io.File
+
+// =====================
+// SCREEN
+// =====================
 
 @Composable
 fun ProfileScreen(
@@ -74,12 +102,24 @@ fun ProfileScreen(
     isEditing: Boolean,
     authViewModel: AuthViewModel,
     userViewModel: UserViewModel,
+    profileViewModel: ProfileViewModel,
+    onPlantClick: (Plant) -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     var showAccountDeletedDialog by remember { mutableStateOf(false) }
     var showUsernameDialog by remember { mutableStateOf(false) }
     var showEmailDialog by remember { mutableStateOf(false) }
     var showEmailVerificationDialog by remember { mutableStateOf(false) }
+
+    val coins by profileViewModel.coins.collectAsState()
+    val favouritePlants by profileViewModel.favouritePlants.collectAsState()
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            user.userId.let { profileViewModel.load(it) }
+        }
+    }
 
     val cropLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -112,6 +152,8 @@ fun ProfileScreen(
     ProfileScreenContent(
         user = user,
         isEditing = isEditing,
+        coins = coins,
+        favouritePlants = favouritePlants,
         galleryLauncher = galleryLauncher,
         onDeleteAvatar = {
             val userId = user.userId ?: return@ProfileScreenContent
@@ -127,12 +169,12 @@ fun ProfileScreen(
             }
         },
         onUsernameClick = { showUsernameDialog = true },
-        onEmailClick = { showEmailDialog = true }
+        onEmailClick = { showEmailDialog = true },
+        onPlantClick = onPlantClick
     )
 
     if (showUsernameDialog) {
         val form by userViewModel.profileFormState.collectAsState()
-
         EditFieldDialog(
             title = stringResource(R.string.edit_username),
             currentValue = user.username,
@@ -158,7 +200,6 @@ fun ProfileScreen(
 
     if (showEmailDialog) {
         val form by userViewModel.profileFormState.collectAsState()
-
         EditFieldDialog(
             title = stringResource(R.string.edit_email),
             currentValue = user.email,
@@ -201,11 +242,11 @@ fun ProfileScreen(
     if (showAccountDeletedDialog) {
         ConfirmDialog(
             config = DialogConfig(
-            title = stringResource(R.string.account_deleted_title),
-            message = stringResource(R.string.account_deleted_message),
-            confirmText = "OK",
-            singleButton = true,
-            variant = DialogVariant.Success,
+                title = stringResource(R.string.account_deleted_title),
+                message = stringResource(R.string.account_deleted_message),
+                confirmText = "OK",
+                singleButton = true,
+                variant = DialogVariant.Success
             ),
             onConfirm = {
                 showAccountDeletedDialog = false
@@ -221,6 +262,75 @@ fun ProfileScreen(
     }
 }
 
+// =====================
+// CONTENT
+// =====================
+
+@Composable
+fun ProfileScreenContent(
+    user: User,
+    isEditing: Boolean,
+    coins: Int,
+    favouritePlants: List<Plant>,
+    galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
+    onDeleteAvatar: () -> Unit,
+    onLogout: () -> Unit,
+    onDeleteAccount: () -> Unit,
+    onUsernameClick: () -> Unit,
+    onEmailClick: () -> Unit,
+    onPlantClick: (Plant) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.primary50)
+            .verticalScroll(rememberScrollState())
+            .padding(top = Dimensions.topBarHeight),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+            ProfileHeader(
+                user = user,
+                isEditing = isEditing,
+                galleryLauncher = galleryLauncher,
+                onDeleteAvatar = onDeleteAvatar,
+                onUsernameClick = onUsernameClick,
+                onEmailClick = onEmailClick
+            )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .clip(RoundedCornerShape(topStart = roundedCorner_m, topEnd = roundedCorner_m))
+                .background(colors.neutralLight)
+                .padding(
+                    start = screenPadding_s,
+                    end = screenPadding_s,
+                    top = screenPadding_m
+                ),
+            verticalArrangement = Arrangement.spacedBy(itemsSpacing_m)
+        ) {
+            WalletTile(coins = coins)
+            FavouritesTile(favouritePlants = favouritePlants, onPlantClick = onPlantClick)
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (isEditing) {
+                ProfileActions(
+                    onLogout = onLogout,
+                    onDeleteAccount = onDeleteAccount
+                )
+            }
+        }
+    }
+}
+
+// =====================
+// HEADER
+// =====================
+
 @Composable
 fun ProfileHeader(
     user: User,
@@ -230,29 +340,167 @@ fun ProfileHeader(
     onUsernameClick: () -> Unit,
     onEmailClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AvatarSection(
+            user = user,
+            isEditing = isEditing,
+            galleryLauncher = galleryLauncher,
+            onDeleteAvatar = onDeleteAvatar
+        )
+
+        // Nazwa użytkownika
         Row(
+            modifier = Modifier.padding(start = 16.dp),
+
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            AvatarSection(
-                modifier = Modifier.weight(1f),
-                user = user,
-                isEditing = isEditing,
-                galleryLauncher = galleryLauncher,
-                onDeleteAvatar = onDeleteAvatar
+            Text(
+                text = user.username,
+                style = MaterialTheme.typography.headlineLarge,
+                color = colors.neutralBlack,
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            UserInfoSection(
-                modifier = Modifier.weight(1f),
-                user = user,
-                isEditing = isEditing,
-                onUsernameClick = onUsernameClick,
-                onEmailClick = onEmailClick
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null,
+                tint = colors.primary300,
+                modifier = Modifier
+                    .size(16.dp)
+                    .alpha(if (isEditing) 1f else 0f)
+                    .clickable(enabled = isEditing) { onUsernameClick() }
+            )
+        }
+
+// Email
+        Row(
+            modifier = Modifier.padding(start = 16.dp),
+
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = user.email,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.neutralLightGray,
+                textAlign = TextAlign.Center
+            )
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null,
+                tint = colors.primary300,
+                modifier = Modifier
+                    .size(14.dp)
+                    .alpha(if (isEditing) 1f else 0f)
+                    .clickable(enabled = isEditing) { onEmailClick() }
             )
         }
     }
 }
+
+// =====================
+// TILES
+// =====================
+
+@Composable
+private fun ProfileTile(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineMedium,
+            color = colors.neutralBlack
+        )
+        Row(
+            modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp),
+        verticalAlignment = Alignment.CenterVertically
+        ){
+            content()
+        }
+
+    }
+}
+
+@Composable
+private fun WalletTile(coins: Int) {
+    ProfileTile(title = stringResource(R.string.profile_wallet)) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp),
+
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s)
+        ) {
+            Text(
+                text = coins.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.neutralBlack
+            )
+            Icon(
+                imageVector = Icons.Default.Toll,
+                contentDescription = null,
+                tint = colors.neutralBlack,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun FavouritesTile(favouritePlants: List<Plant>, onPlantClick: (Plant) -> Unit) {
+    ProfileTile(title = stringResource(R.string.profile_favourites)) {
+        if (favouritePlants.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_favourites_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.neutralGray
+                )
+            }
+        } else {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(favouritePlants) { plant ->
+                    val imageUrl = rememberSvgImageRequest(
+                        "${RetrofitInstance.BASE_URL}plants/${plant.images.small}"
+                    )
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = plant.name,
+                        contentScale = ContentScale.Fit,
+                        filterQuality = FilterQuality.None,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(colors.primary50)
+                            .clickable { onPlantClick(plant) }
+                            .padding(4.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// =====================
+// AVATAR
+// =====================
 
 @Composable
 fun AvatarSection(
@@ -264,11 +512,11 @@ fun AvatarSection(
 ) {
     var showDeleteAvatarDialog by remember { mutableStateOf(false) }
 
-    Box (modifier = modifier.aspectRatio(1f))  {
+    Box(modifier = modifier.size(150.dp)) {
         UserAvatar(
             user = user,
-            size = 130.dp,
-            borderWidth = 5.dp,
+            size = 150.dp,
+            borderWidth = 4.dp,
             modifier = Modifier.fillMaxSize()
         )
         if (isEditing) {
@@ -281,7 +529,7 @@ fun AvatarSection(
                 buttonColor = colors.primary300,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = (-12).dp, y = (-12).dp)
+                    .offset(x = -8.dp, y = -8.dp)
             )
             if (user.avatar.custom != null) {
                 AppButton(
@@ -293,7 +541,7 @@ fun AvatarSection(
                     buttonColor = colors.error,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .offset(x = (5).dp, y = (-5).dp)
+                        .offset(x = 8.dp, y = (-8).dp)
                 )
             }
         }
@@ -302,10 +550,10 @@ fun AvatarSection(
     if (showDeleteAvatarDialog) {
         ConfirmDialog(
             config = DialogConfig(
-            title = stringResource(R.string.delete_avatar_title),
-            message = stringResource(R.string.delete_avatar_message),
-            confirmText = stringResource(R.string.delete_avatar_confirm),
-            variant = DialogVariant.Warning,
+                title = stringResource(R.string.delete_avatar_title),
+                message = stringResource(R.string.delete_avatar_message),
+                confirmText = stringResource(R.string.delete_avatar_confirm),
+                variant = DialogVariant.Warning
             ),
             onConfirm = {
                 showDeleteAvatarDialog = false
@@ -316,82 +564,9 @@ fun AvatarSection(
     }
 }
 
-@Composable
-fun UserInfoSection(
-    modifier: Modifier = Modifier,
-    user: User,
-    isEditing: Boolean,
-    onUsernameClick: () -> Unit,
-    onEmailClick: () -> Unit
-) {
-    val fieldModifier = Modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(roundedCorner_l))
-        .background(colors.neutralLight)
-        .padding(horizontal = 12.dp, vertical = 6.dp)
-
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = stringResource(R.string.gardeners_name),
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.primary300
-            )
-            Box(
-                modifier = fieldModifier
-                    .then(if (isEditing) Modifier.clickable { onUsernameClick() } else Modifier),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = user.username,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = colors.neutralBlack
-                )
-                if (isEditing) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = "Edit username",
-                        tint = colors.primary300,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .size(16.dp)
-                    )
-                }
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = stringResource(R.string.email),
-                style = MaterialTheme.typography.titleMedium,
-                color = colors.primary300
-            )
-            Box(
-                modifier = fieldModifier
-                    .then(if (isEditing) Modifier.clickable { onEmailClick() } else Modifier),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = user.email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = colors.primary300
-                )
-                if (isEditing) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = "Edit email",
-                        tint = colors.primary300,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
+// =====================
+// ACTIONS
+// =====================
 
 @Composable
 fun ProfileActions(
@@ -401,8 +576,23 @@ fun ProfileActions(
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     var showLogOutDialog by remember { mutableStateOf(false) }
 
-    Column {
-        TextButton(onClick = { showLogOutDialog = true }) {
+    val borderColor = colors.primary50
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawLine(
+                    color = borderColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+    ) {
+
+
+    TextButton(onClick = { showLogOutDialog = true }) {
             Text(
                 text = stringResource(R.string.log_out),
                 color = colors.neutralBlack,
@@ -421,10 +611,10 @@ fun ProfileActions(
     if (showLogOutDialog) {
         ConfirmDialog(
             config = DialogConfig(
-            title = stringResource(R.string.log_out),
-            message = stringResource(R.string.logout_message),
-            confirmText = stringResource(R.string.log_out),
-            variant = DialogVariant.Warning,
+                title = stringResource(R.string.log_out),
+                message = stringResource(R.string.logout_message),
+                confirmText = stringResource(R.string.log_out),
+                variant = DialogVariant.Warning
             ),
             onConfirm = {
                 showLogOutDialog = false
@@ -435,11 +625,12 @@ fun ProfileActions(
     }
 
     if (showDeleteAccountDialog) {
-        ConfirmDialog(config = DialogConfig(
-            title = stringResource(R.string.delete_account),
-            message = stringResource(R.string.delete_account_message),
-            confirmText = stringResource(R.string.delete_account),
-        ),
+        ConfirmDialog(
+            config = DialogConfig(
+                title = stringResource(R.string.delete_account),
+                message = stringResource(R.string.delete_account_message),
+                confirmText = stringResource(R.string.delete_account)
+            ),
             onConfirm = {
                 showDeleteAccountDialog = false
                 onDeleteAccount()
@@ -449,40 +640,9 @@ fun ProfileActions(
     }
 }
 
-@Composable
-fun ProfileScreenContent(
-    user: User,
-    isEditing: Boolean,
-    galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
-    onDeleteAvatar: () -> Unit,
-    onLogout: () -> Unit,
-    onDeleteAccount: () -> Unit,
-    onUsernameClick: () -> Unit,
-    onEmailClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colors.primary100)
-            .padding(top = Dimensions.topBarHeight, bottom = 16.dp, start = 16.dp, end = 16.dp)
-    ) {
-        ProfileHeader(
-            user = user,
-            isEditing = isEditing,
-            galleryLauncher = galleryLauncher,
-            onDeleteAvatar = onDeleteAvatar,
-            onUsernameClick = onUsernameClick,
-            onEmailClick = onEmailClick
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        if (isEditing) {
-            ProfileActions(
-                onLogout = onLogout,
-                onDeleteAccount = onDeleteAccount,
-            )
-        }
-    }
-}
+// =====================
+// DIALOGS
+// =====================
 
 @Composable
 fun EditFieldDialog(
@@ -514,7 +674,6 @@ fun EditFieldDialog(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
-
             FormTextField(
                 label = label,
                 value = value,
@@ -526,7 +685,6 @@ fun EditFieldDialog(
                 errorRes = errorRes,
                 isValid = isValid && value.isNotBlank()
             )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
