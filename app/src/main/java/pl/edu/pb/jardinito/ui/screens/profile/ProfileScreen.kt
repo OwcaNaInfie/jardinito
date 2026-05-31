@@ -91,7 +91,6 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var showAccountDeletedSuccessDialog by remember { mutableStateOf(false) }
     var showUsernameDialog by remember { mutableStateOf(false) }
     var showEmailDialog by remember { mutableStateOf(false) }
     var showEmailVerificationDialog by remember { mutableStateOf(false) }
@@ -146,15 +145,12 @@ fun ProfileScreen(
             }
         },
         onLogout = onLogout,
-        onDeleteAccount = {
-            val userId = user.userId ?: return@ProfileScreenContent
-            userViewModel.deleteAccount(userId) {
-                showAccountDeletedSuccessDialog = true
-            }
-        },
         onUsernameClick = { showUsernameDialog = true },
         onEmailClick = { showEmailDialog = true },
-        onPlantClick = onPlantClick
+        onPlantClick = onPlantClick,
+        authViewModel = authViewModel,
+        userViewModel = userViewModel,
+        userId = user.userId ?: ""
     )
 
     if (showUsernameDialog) {
@@ -222,16 +218,6 @@ fun ProfileScreen(
             }
         )
     }
-
-    if (showAccountDeletedSuccessDialog) {
-        AccountDeletedSuccessDialog(
-            onDismiss = {
-                showAccountDeletedSuccessDialog = false
-                authViewModel.clearUserSession()
-                onLogout()
-            }
-        )
-    }
 }
 
 // =====================
@@ -247,10 +233,12 @@ fun ProfileScreenContent(
     galleryLauncher: ManagedActivityResultLauncher<String, Uri?>,
     onDeleteAvatar: () -> Unit,
     onLogout: () -> Unit,
-    onDeleteAccount: () -> Unit,
     onUsernameClick: () -> Unit,
     onEmailClick: () -> Unit,
-    onPlantClick: (Plant) -> Unit
+    onPlantClick: (Plant) -> Unit,
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel,
+    userId: String
 ) {
     Column(
         modifier = Modifier
@@ -282,10 +270,11 @@ fun ProfileScreenContent(
             FavouritesTile(favouritePlants = favouritePlants, onPlantClick = onPlantClick)
             Spacer(modifier = Modifier.height(16.dp))
             if (isEditing) {
-                PermissionsTile()
-                ProfileActions(
+                ProfileSettings(
                     onLogout = onLogout,
-                    onDeleteAccount = onDeleteAccount
+                    authViewModel = authViewModel,
+                    userViewModel = userViewModel,
+                    userId = userId
                 )
             }
         }

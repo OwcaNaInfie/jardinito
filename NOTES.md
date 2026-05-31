@@ -172,3 +172,4 @@ Do zrobienia:
 -widok portfela w FocusScreen
 -dodać serduszko ulubiony do DetailsPlantScreen
 -pamięć podręczna kiedy nie mamy połączenia z internetem?
+-ładniejsze permissions
