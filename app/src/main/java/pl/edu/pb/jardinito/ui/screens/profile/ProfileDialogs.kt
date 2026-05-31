@@ -47,9 +47,9 @@ import pl.edu.pb.jardinito.ui.utils.validateVerificationCode
 fun DeleteAvatarDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     ConfirmDialog(
         config = DialogConfig(
-            title = stringResource(R.string.delete_avatar_title),
-            message = stringResource(R.string.delete_avatar_message),
-            confirmText = stringResource(R.string.delete_avatar_confirm),
+            title = stringResource(R.string.dialog_delete_avatar_title),
+            message = stringResource(R.string.dialog_delete_avatar_message),
+            confirmText = stringResource(R.string.dialog_delete_avatar_confirm),
             variant = DialogVariant.Warning
         ),
         onConfirm = onConfirm,
@@ -216,9 +216,10 @@ fun LogOutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 fun DeleteAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     ConfirmDialog(
         config = DialogConfig(
-            title = stringResource(R.string.delete_account),
-            message = stringResource(R.string.delete_account_message),
-            confirmText = stringResource(R.string.delete)
+            title = stringResource(R.string.dialog_delete_account_title),
+            message = stringResource(R.string.dialog_delete_account_message),
+            confirmText = stringResource(R.string.delete),
+            variant = DialogVariant.Warning
         ),
         onConfirm = onConfirm,
         onDismiss = onDismiss
@@ -226,11 +227,11 @@ fun DeleteAccountDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun AccountDeletedSuccessDialog(onDismiss: () -> Unit) {
+fun DeleteAccountSuccessDialog(onDismiss: () -> Unit) {
     ConfirmDialog(
         config = DialogConfig(
-            title = stringResource(R.string.account_deleted_title),
-            message = stringResource(R.string.account_deleted_message),
+            title = stringResource(R.string.dialog_account_deleted_title),
+            message = stringResource(R.string.dialog_account_deleted_message),
             confirmText = stringResource(R.string.ok),
             singleButton = true,
             variant = DialogVariant.Success

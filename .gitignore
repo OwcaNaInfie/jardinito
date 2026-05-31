@@ -37,6 +37,6 @@ Thumbs.db
 backend/node_modules/
 backend/.env
 
-PROGRESS.md
+NOTES.md
 GIT-RULES.md
 node_modules/

@@ -53,8 +53,8 @@ import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.ui.utils.rememberPlantName
-import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
+import pl.edu.pb.jardinito.ui.utils.formatIdleTime
+import pl.edu.pb.jardinito.ui.utils.formatTime
 import pl.edu.pb.jardinito.viewmodel.FocusViewModel
 import pl.edu.pb.jardinito.viewmodel.SessionResult
 import pl.edu.pb.jardinito.viewmodel.TagViewModel
@@ -73,7 +73,8 @@ data class TimerUiState(
 
 data class PlantUiState(
     val plants: List<Plant>,
-    val selectedPlant: Plant?
+    val selectedPlant: Plant?,
+    val unlockedPlantIds: Set<String>
 )
 
 data class TagUiState(
@@ -86,7 +87,10 @@ data class TimerActions(
     val onStart: () -> Unit,
     val onPause: () -> Unit,
     val onResume: () -> Unit,
-    val onStopClick: () -> Unit
+    val onStopClick: () -> Unit,
+    val onStopConfirmed: () -> Unit,
+    val onStopDismissed: () -> Unit,
+    val onSessionResultDismissed: () -> Unit
 )
 
 data class TimerCallbacks(
@@ -123,6 +127,16 @@ data class TimerCanvasColors(
     val selectionColor: Color,
     val timerColor: Color,
     val trackColor: Color
+)
+
+data class SessionUiState(
+    val sessionResult: SessionResult?,
+    val showStopConfirmDialog: Boolean
+)
+
+data class PickerCallbacks(
+    val onPlantSelected: (Plant) -> Unit,
+    val onTagSelected: (Tag?) -> Unit
 )
 
 // =====================
@@ -170,6 +184,7 @@ fun FocusScreen(
         if (userId.isNotBlank()) {
             tagViewModel.loadTags(userId)
             focusViewModel.loadUnlockedPlants(userId)
+            focusViewModel.loadPlants()
         }
     }
 
@@ -182,7 +197,11 @@ fun FocusScreen(
             remainingSeconds = remainingSeconds,
             progress = progress
         ),
-        plantUiState = PlantUiState(plants = plants, selectedPlant = selectedPlant),
+        plantUiState = PlantUiState(
+            plants = plants,
+            selectedPlant = selectedPlant,
+            unlockedPlantIds = unlockedPlantIds
+        ),
         tagUiState = TagUiState(tags = tags, selectedTag = selectedTag),
         timerActions = TimerActions(
             onDurationChange = {
@@ -192,17 +211,20 @@ fun FocusScreen(
             onStart = { focusViewModel.start(userId) },
             onPause = { focusViewModel.pause() },
             onResume = { focusViewModel.resume(userId) },
-            onStopClick = { focusViewModel.requestStop(userId) }
+            onStopClick = { focusViewModel.requestStop(userId) },
+            onStopConfirmed = { focusViewModel.confirmStop(userId) },
+            onStopDismissed = { focusViewModel.dismissStop(userId) },
+            onSessionResultDismissed = { focusViewModel.clearSessionResult() }
+        ),
+        sessionUiState = SessionUiState(
+            sessionResult = sessionResult,
+            showStopConfirmDialog = showStopConfirmDialog
         ),
         config = config,
-        onPlantSelected = { focusViewModel.selectPlant(it) },
-        onTagSelected = { focusViewModel.selectTag(it) },
-        sessionResult = sessionResult,
-        showStopConfirmDialog = showStopConfirmDialog,
-        onSessionResultDismissed = { focusViewModel.clearSessionResult() },
-        onStopConfirmed = { focusViewModel.confirmStop(userId) },
-        onStopDismissed = { focusViewModel.dismissStop(userId) },
-        unlockedPlantIds = unlockedPlantIds,
+        pickerCallbacks = PickerCallbacks(
+            onPlantSelected = { focusViewModel.selectPlant(it) },
+            onTagSelected = { focusViewModel.selectTag(it) }
+        )
     )
 
     if (showOverlayPermissionDialog) {
@@ -230,26 +252,15 @@ fun FocusScreenContent(
     plantUiState: PlantUiState,
     tagUiState: TagUiState,
     timerActions: TimerActions,
+    sessionUiState: SessionUiState,
     config: TimerConfig,
-    onPlantSelected: (Plant) -> Unit,
-    onTagSelected: (Tag?) -> Unit,
-    sessionResult: SessionResult?,
-    showStopConfirmDialog: Boolean,
-    onSessionResultDismissed: () -> Unit,
-    onStopConfirmed: () -> Unit,
-    onStopDismissed: () -> Unit,
-    unlockedPlantIds: Set<String>,
+    pickerCallbacks: PickerCallbacks
 ) {
     val isIdle = timerUiState.timerState is TimerState.Idle
     val isRunning = timerUiState.timerState is TimerState.Running
     val isPaused = timerUiState.timerState is TimerState.Paused
     var showPlantPicker by remember { mutableStateOf(false) }
     var showTagPicker by remember { mutableStateOf(false) }
-
-    val minutes = timerUiState.remainingSeconds / 60
-    val seconds = timerUiState.remainingSeconds % 60
-    val timeText = "%d:%02d".format(minutes, seconds)
-    val unit = if (config.devMode) "s" else "min"
 
     Column(
         modifier = Modifier
@@ -271,7 +282,8 @@ fun FocusScreenContent(
             config = config
         )
         Text(
-            text = if (isIdle) "${timerUiState.selectedDuration} $unit" else timeText,
+            text = if (isIdle) formatIdleTime(timerUiState.selectedDuration, config.devMode)
+            else formatTime(timerUiState.remainingSeconds),
             style = MaterialTheme.typography.headlineLarge,
             color = colors.neutralGray,
         )
@@ -292,8 +304,8 @@ fun FocusScreenContent(
         PlantPickerDrawer(
             plants = plantUiState.plants,
             selectedPlant = plantUiState.selectedPlant,
-            unlockedPlantIds = unlockedPlantIds,
-            onPlantSelected = onPlantSelected,
+            unlockedPlantIds = plantUiState.unlockedPlantIds,
+            onPlantSelected = pickerCallbacks.onPlantSelected,
             onDismiss = { showPlantPicker = false }
         )
     }
@@ -302,24 +314,24 @@ fun FocusScreenContent(
         TagPickerDrawer(
             tags = tagUiState.tags,
             selectedTag = tagUiState.selectedTag,
-            onConfirm = { onTagSelected(it) },
+            onConfirm = { pickerCallbacks.onTagSelected(it) },
             onDismiss = { showTagPicker = false }
         )
     }
 
-    if (showStopConfirmDialog) {
-        StopConfirmDialog(onConfirm = onStopConfirmed, onDismiss = onStopDismissed)
+    if (sessionUiState.showStopConfirmDialog) {
+        StopConfirmDialog(onConfirm = timerActions.onStopConfirmed, onDismiss = timerActions.onStopDismissed)
     }
 
-    sessionResult?.let { result ->
+    sessionUiState.sessionResult?.let { result ->
         when (result) {
             is SessionResult.Completed -> SessionCompletedDialog(
                 result = result,
-                onDismiss = onSessionResultDismissed
+                onDismiss = timerActions.onSessionResultDismissed
             )
             is SessionResult.Failed -> SessionFailedDialog(
                 result = result,
-                onDismiss = onSessionResultDismissed
+                onDismiss = timerActions.onSessionResultDismissed
             )
         }
     }

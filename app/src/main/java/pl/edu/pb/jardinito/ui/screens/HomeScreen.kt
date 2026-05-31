@@ -38,6 +38,7 @@ fun HomeScreen() {
 
         TypographyItem("titleLarge", MaterialTheme.typography.titleLarge)
         TypographyItem("titleMedium", MaterialTheme.typography.titleMedium)
+        TypographyItem("titleSmall", MaterialTheme.typography.titleSmall)
 
         TypographyItem("bodyLarge", MaterialTheme.typography.bodyLarge)
         TypographyItem("bodyMedium", MaterialTheme.typography.bodyMedium)

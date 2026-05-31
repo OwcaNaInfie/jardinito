@@ -78,21 +78,24 @@
     <!-- Profile Screen -->
     <string name="log_out">Wyloguj</string>
     <string name="delete_account">Usuń konto</string>
+    <string name="dialog_delete_account_title">Usuń konto?</string>
     <string name="edit_username">Edytuj nazwę użytkownika</string>
     <string name="edit_email">Edytuj adres email</string>
     <string name="gardeners_name">Ogrodnik</string>
-    <string name="delete_avatar_title">Usuń zdjęcie profilowe</string>
-    <string name="delete_avatar_message">Czy na pewno chcesz usunąć swoje zdjęcie profilowe?</string>
-    <string name="delete_avatar_confirm">Usuń</string>
+    <string name="dialog_delete_avatar_title">Usuń zdjęcie profilowe</string>
+    <string name="dialog_delete_avatar_message">Czy na pewno chcesz usunąć swoje zdjęcie profilowe?</string>
+    <string name="dialog_delete_avatar_confirm">Usuń</string>
     <string name="logout_message">Czy na pewno chcesz się wylogować?</string>
-    <string name="account_deleted_title">Konto usunięte</string>
-    <string name="account_deleted_message">Twoje konto zostało pomyślnie usunięte.</string>
+    <string name="dialog_account_deleted_title">Konto usunięte</string>
+    <string name="dialog_account_deleted_message">Twoje konto zostało pomyślnie usunięte.</string>
     <string name="profile_wallet">Portfel</string>
     <string name="profile_favourites">Ulubione</string>
     <string name="profile_favourites_empty">Brak ulubionych roślin</string>
     <string name="profile_permissions">Uprawnienia</string>
     <string name="permission_notifications">Powiadomienia</string>
     <string name="permission_overlay">Wyświetlanie nad aplikacjami</string>
+    <string name="profile_settings">Ustawienia</string>
+
 
     <!-- Focus Screen -->
     <string name="focus_add_tag">Dodaj tag</string>
@@ -109,7 +112,7 @@
     <string name="focus_overlay_title">Opuszczasz sesję</string>
     <string name="focus_overlay_message">Jeśli nie wrócisz, timer się zatrzyma\na roślina uschnie.</string>
     <string name="focus_overlay_countdown">Sesja zakończy się za %1$d s</string>
-    <string name="focus_overlay_return">Wróć do aplikacji</string>
+    <string name="focus_overlay_return">Wróć</string>
 
     <!-- Overlay permission dialog -->
     <string name="focus_overlay_permission_title">Wymagane uprawnienie</string>
@@ -203,5 +206,5 @@
 
 
     <!-- Popups -->
-    <string name="delete_account_message">Konto zostanie usunięte na zawsze.</string>
+    <string name="dialog_delete_account_message">Konto zostanie usunięte na zawsze.</string>
 </resources>

@@ -111,7 +111,7 @@ class FocusViewModel @Inject constructor(
     // ACTIONS
     // =====================
 
-    private fun loadPlants() {
+    fun loadPlants() {
         viewModelScope.launch {
             try {
                 val result = plantRepository.getPlants()
@@ -121,7 +121,9 @@ class FocusViewModel @Inject constructor(
                     _selectedPlant.value = plant
                     updateDuration(if (devMode) plant.minDurationDev else plant.minDuration)
                 }
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+                android.util.Log.e("FocusViewModel", "loadPlants failed: ${e.message}", e)
+            }
         }
     }
 
