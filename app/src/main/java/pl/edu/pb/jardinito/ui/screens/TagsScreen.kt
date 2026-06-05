@@ -46,6 +46,7 @@ import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
 import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
+import pl.edu.pb.jardinito.ui.components.SearchInput
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
@@ -124,20 +125,10 @@ fun TagsScreenContent(
             .padding(top = Dimensions.topBarHeight, bottom = 16.dp, start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextField(
+        SearchInput(
             value = searchQuery,
             onValueChange = onSearchQueryChanged,
-            placeholder = { Text(stringResource(R.string.tags_search_placeholder)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(6.dp)),
-            singleLine = true,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = colors.neutralLight,
-                unfocusedContainerColor = colors.neutralLight,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
+            placeholder = stringResource(R.string.tags_search_placeholder)
         )
 
         if (filteredTags.isEmpty()) {

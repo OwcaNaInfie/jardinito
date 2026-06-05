@@ -49,7 +49,7 @@ import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
-import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
@@ -353,7 +353,7 @@ private fun TimerControls(
             .fillMaxWidth()
             .height(48.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs, Alignment.CenterHorizontally)
     ) {
         when {
             isIdle -> AppButton(

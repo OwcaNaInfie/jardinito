@@ -3,45 +3,37 @@ package pl.edu.pb.jardinito.ui.screens.focus
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.ui.platform.LocalContext
-import coil.decode.SvgDecoder
-import coil.request.ImageRequest
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
+import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.BasePickerSheet
+import pl.edu.pb.jardinito.ui.components.PickerSheetContent
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import pl.edu.pb.jardinito.ui.theme.colors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantPickerDrawer(
     plants: List<Plant>,
@@ -50,22 +42,11 @@ fun PlantPickerDrawer(
     onPlantSelected: (Plant) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val scope = rememberCoroutineScope()
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
+    BasePickerSheet(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.focus_pick_plant),
         containerColor = colors.primary50,
-        windowInsets = WindowInsets(0)
-    ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(bottom = 32.dp)
-        ) {
+        content = PickerSheetContent.Grid(columns = 3) { hideAndDismiss ->
             items(plants) { plant ->
                 PlantPickerItem(
                     plant = plant,
@@ -73,17 +54,12 @@ fun PlantPickerDrawer(
                     isLocked = !unlockedPlantIds.contains(plant.plantId),
                     onSelected = {
                         onPlantSelected(plant)
-                        scope.launch {
-                            delay(300)
-                            sheetState.hide()
-                        }.invokeOnCompletion {
-                            onDismiss()
-                        }
+                        hideAndDismiss()
                     }
                 )
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -93,8 +69,8 @@ fun PlantPickerItem(
     isLocked: Boolean,
     onSelected: () -> Unit
 ) {
-    val imageUrl = "${RetrofitInstance.BASE_URL}plants/${plant.images.large}"
     val context = LocalContext.current
+    val imageUrl = "${RetrofitInstance.BASE_URL}plants/${plant.images.large}"
 
     Box(
         modifier = Modifier
@@ -119,7 +95,6 @@ fun PlantPickerItem(
                 .padding(8.dp)
                 .fillMaxWidth()
         )
-
         if (isLocked) {
             Box(
                 modifier = Modifier
@@ -128,7 +103,6 @@ fun PlantPickerItem(
                     .background(Color.Gray.copy(alpha = 0.5f))
             )
         }
-
         if (isSelected) {
             Box(
                 modifier = Modifier

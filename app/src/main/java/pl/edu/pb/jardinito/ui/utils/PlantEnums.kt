@@ -4,6 +4,10 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import pl.edu.pb.jardinito.R
 
+// ============================================================================
+// Enums
+// ============================================================================
+
 enum class PlantColor(
     @StringRes val labelRes: Int,
     val color: Color
@@ -32,3 +36,35 @@ enum class PlantSize(@StringRes val labelRes: Int) {
             entries.firstOrNull { it.name == key.uppercase() }
     }
 }
+
+enum class PlantOwnershipStatus(@StringRes val labelRes: Int) {
+    ALL(R.string.filter_status_all),
+    UNLOCKED(R.string.filter_status_unlocked),
+    LOCKED(R.string.filter_status_locked)
+}
+
+enum class PriceSortOrder(@StringRes val labelRes: Int, val arrow: String) {
+    ASCENDING(R.string.filter_price_ascending, "↑"),
+    DESCENDING(R.string.filter_price_descending, "↓")
+}
+
+// ============================================================================
+// Extension Functions
+// ============================================================================
+
+@JvmName("plantColorSetToChipLabelRes")
+fun Set<PlantColor>.toChipLabelRes(): Int? =
+    if (size == 1) first().labelRes else null
+
+@JvmName("plantSizeSetToChipLabelRes")
+fun Set<PlantSize>.toChipLabelRes(): Int? =
+    if (size == 1) first().labelRes else null
+
+fun PriceSortOrder?.toChipLabel(base: String): String =
+    this?.let { "$base ${it.arrow}" } ?: base
+
+fun PlantOwnershipStatus?.isActiveFilter(): Boolean =
+    this != null && this != PlantOwnershipStatus.ALL
+
+fun PlantOwnershipStatus?.toChipLabelRes(): Int? =
+    if (isActiveFilter()) this?.labelRes else null

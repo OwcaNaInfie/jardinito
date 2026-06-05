@@ -1,31 +1,30 @@
 package pl.edu.pb.jardinito.viewmodel
 
+import pl.edu.pb.jardinito.data.repository.WalletRepository
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.data.manager.FocusSessionManager
+import pl.edu.pb.jardinito.data.manager.WalletManager
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.data.repository.PlantRepository
 import pl.edu.pb.jardinito.data.repository.SessionRepository
-import pl.edu.pb.jardinito.data.repository.WalletRepository
-import pl.edu.pb.jardinito.viewmodel.state.TimerState
-import javax.inject.Inject
-import android.content.Context
-import android.content.Intent
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableSharedFlow
-import pl.edu.pb.jardinito.data.manager.FocusSessionManager
 import pl.edu.pb.jardinito.ui.service.FocusOverlayService
+import pl.edu.pb.jardinito.viewmodel.state.TimerState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
+import javax.inject.Inject
 
 sealed class SessionResult {
     data class Completed(val plant: Plant, val coinsEarned: Int) : SessionResult()
@@ -38,6 +37,7 @@ class FocusViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val walletRepository: WalletRepository,
     private val sessionManager: FocusSessionManager,
+    private val walletManager: WalletManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -68,9 +68,6 @@ class FocusViewModel @Inject constructor(
     private val _selectedTag = MutableStateFlow<Tag?>(null)
     val selectedTag: StateFlow<Tag?> = _selectedTag
 
-    private val _coins = MutableStateFlow(0)
-    val coins: StateFlow<Int> = _coins
-
     private val _lastEarnedCoins = MutableStateFlow(0)
     val lastEarnedCoins: StateFlow<Int> = _lastEarnedCoins
 
@@ -87,6 +84,8 @@ class FocusViewModel @Inject constructor(
     val unlockedPlantIds: StateFlow<Set<String>> = _unlockedPlantIds
 
     private var currentUserId: String = ""
+
+    val coins: StateFlow<Int> = walletManager.coinsFlow
 
     // =====================
     // INIT
@@ -132,14 +131,6 @@ class FocusViewModel @Inject constructor(
             try {
                 val wallet = walletRepository.getWallet(userId)
                 _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
-            } catch (e: Exception) { }
-        }
-    }
-
-    fun loadCoins(userId: String) {
-        viewModelScope.launch {
-            try {
-                _coins.value = walletRepository.getCoins(userId)
             } catch (e: Exception) { }
         }
     }
@@ -252,7 +243,7 @@ class FocusViewModel @Inject constructor(
             )
             if (status == "completed") {
                 _lastEarnedCoins.value = response.coinsEarned
-                _coins.value += response.coinsEarned
+                walletManager.addCoins(response.coinsEarned)
                 _sessionResult.value = SessionResult.Completed(plant, response.coinsEarned)
             } else {
                 _sessionResult.value = SessionResult.Failed(plant)
