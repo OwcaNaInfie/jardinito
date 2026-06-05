@@ -56,8 +56,8 @@ import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
-import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_l
@@ -184,7 +184,7 @@ fun PlantDetailContent(
                         top = screenPadding_s,
                         bottom = screenPadding_l
                     ),
-                verticalArrangement = Arrangement.spacedBy(itemsSpacing_m)
+                verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
             ) {
                 Text(
                     text = rememberPlantName(data.plant),
@@ -193,7 +193,7 @@ fun PlantDetailContent(
                 )
                 PlantPriceChip(price = data.plant.price)
                 PlantTagsRow(plant = data.plant)
-                Column(verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)) {
+                Column(verticalArrangement = Arrangement.spacedBy(itemsSpacing_xs)) {
                     Text(
                         text = stringResource(R.string.plant_detail_about),
                         style = MaterialTheme.typography.titleMedium,
@@ -296,8 +296,8 @@ private fun PlantPriceChip(price: Int) {
 @Composable
 private fun PlantTagsRow(plant: Plant) {
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s),
-        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
+        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs),
+        verticalArrangement = Arrangement.spacedBy(itemsSpacing_xs)
     ) {
         val size = PlantSize.fromKey(plant.size)
         size?.let {

@@ -107,6 +107,7 @@
     <string name="session_completed_message">The %1$s has been planted in your garden. You have earned %2$d coins!</string>
     <string name="session_failed_title">Session interrupted!</string>
     <string name="session_failed_message">The %1$s has withered and ended up in your garden.</string>
+    <string name="focus_pick_plant">Pick a plant</string>
 
     <!-- Focus Overlay -->
     <string name="focus_overlay_title">You are leaving the session</string>
@@ -155,13 +156,27 @@
     <string name="ok">OK</string>
     <string name="market_plant_free">Free</string>
 
+    <!-- Market Filters -->
+    <string name="filter_search_hint">Search plants…</string>
+    <string name="filter_color">Color</string>
+    <string name="filter_size">Size</string>
+    <string name="filter_status">Status</string>
+    <string name="filter_price">Price</string>
+    <string name="filter_clear">Clear</string>
+    <string name="filter_status_all">All</string>
+    <string name="filter_status_unlocked">Unlocked</string>
+    <string name="filter_status_locked">Locked</string>
+    <string name="filter_price_ascending">Ascending</string>
+    <string name="filter_price_descending">Descending</string>
+    <string name="market_empty_filtered">No plants match your filters</string>
+
     <!-- Plant names -->
     <string name="plant_tulip_name">Tulip</string>
     <string name="plant_poppy_name">Poppy</string>
     <string name="plant_sunflower_name">Sunflower</string>
     <string name="plant_daffodil_name">Daffodil</string>
     <string name="plant_rose_name">Rose</string>
-    <string name="plant_bloodroot_name">Yarrow</string>
+    <string name="plant_bloodroot_name">Bloodroot</string>
     <string name="plant_gerbera_name">Gerbera</string>
     <string name="plant_pansy_name">Pansy</string>
     <string name="plant_lavender_name">Lavender</string>

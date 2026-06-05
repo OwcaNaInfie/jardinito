@@ -107,6 +107,7 @@
     <string name="session_completed_message">%1$s została zasadzona w Twoim ogrodzie. Zdobyłeś %2$d monet!</string>
     <string name="session_failed_title">Sesja przerwana!</string>
     <string name="session_failed_message">Roślina uschła i trafiła do Twojego ogrodu.</string>
+    <string name="focus_pick_plant">Wybierz roślinę</string>
 
     <!-- Focus Overlay -->
     <string name="focus_overlay_title">Opuszczasz sesję</string>
@@ -154,13 +155,27 @@
     <string name="market_buy_success_message">%s jest teraz dostępny w Twoim portfelu.</string>
     <string name="market_plant_free">Darmowy</string>
 
+    <!-- Market Filters -->
+    <string name="filter_search_hint">Szukaj rośliny…</string>
+    <string name="filter_color">Kolor</string>
+    <string name="filter_size">Rozmiar</string>
+    <string name="filter_status">Status</string>
+    <string name="filter_price">Cena</string>
+    <string name="filter_clear">Wyczyść</string>
+    <string name="filter_status_all">Wszystkie</string>
+    <string name="filter_status_unlocked">Odblokowane</string>
+    <string name="filter_status_locked">Zablokowane</string>
+    <string name="filter_price_ascending">Rosnąco</string>
+    <string name="filter_price_descending">Malejąco</string>
+    <string name="market_empty_filtered">Brak roślin spełniających kryteria</string>
+
     <!-- Plant names -->
     <string name="plant_tulip_name">Tulipan</string>
     <string name="plant_poppy_name">Mak</string>
     <string name="plant_sunflower_name">Słonecznik</string>
     <string name="plant_daffodil_name">Żonkil</string>
     <string name="plant_rose_name">Róża</string>
-    <string name="plant_bloodroot_name">Krwawnik</string>
+    <string name="plant_bloodroot_name">Krwiowiec</string>
     <string name="plant_gerbera_name">Gerbera</string>
     <string name="plant_pansy_name">Bratek</string>
     <string name="plant_lavender_name">Lawenda</string>

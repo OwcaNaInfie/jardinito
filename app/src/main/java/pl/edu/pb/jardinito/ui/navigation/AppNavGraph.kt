@@ -73,6 +73,8 @@ fun AppNavGraph(
     val profileViewModel: ProfileViewModel = hiltViewModel()
 
     val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
+    val marketCoins by marketViewModel.coins.collectAsState()
+    val focusCoins by focusViewModel.coins.collectAsState()
 
     val bottomBarRoutes = listOf(
         Routes.HOME,
@@ -220,6 +222,11 @@ fun AppNavGraph(
                         Routes.PROFILE -> listOf(Icons.Default.Settings to { isEditingProfile = !isEditingProfile })
                         Routes.TAGS -> listOf(Icons.Default.Add to { showAddTagDialog = true })
                         else -> emptyList()
+                    },
+                    coins = when (currentRoute) {
+                        Routes.MARKET -> marketCoins
+                        Routes.FOCUS  -> focusCoins
+                        else          -> null
                     }
                 )
             }

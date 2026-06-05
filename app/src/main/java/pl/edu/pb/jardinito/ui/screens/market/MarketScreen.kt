@@ -11,16 +11,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -28,12 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Toll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -54,10 +53,17 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.theme.Dimensions
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.colors
+import pl.edu.pb.jardinito.ui.utils.PlantColor
+import pl.edu.pb.jardinito.ui.utils.PlantOwnershipStatus
+import pl.edu.pb.jardinito.ui.utils.PlantSize
 import pl.edu.pb.jardinito.ui.utils.rememberPlantName
 import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 import pl.edu.pb.jardinito.viewmodel.MarketError
+import pl.edu.pb.jardinito.viewmodel.MarketFilterState
 import pl.edu.pb.jardinito.viewmodel.MarketViewModel
 
 // =====================
@@ -71,10 +77,11 @@ data class MarketUiState(
 )
 
 data class MarketData(
-    val plants: List<Plant> = emptyList(),
+    val plants: List<Plant> = emptyList(),          // receives filteredPlants from VM
     val coins: Int = 0,
     val unlockedPlantIds: Set<String> = emptySet(),
-    val favouritePlantIds: Set<String> = emptySet()
+    val favouritePlantIds: Set<String> = emptySet(),
+    val filterState: MarketFilterState = MarketFilterState()
 )
 
 data class MarketActions(
@@ -82,7 +89,14 @@ data class MarketActions(
     val onErrorDismissed: () -> Unit,
     val onBuySuccessDismissed: () -> Unit,
     val onPlantClick: (Plant) -> Unit,
-    val onToggleFavourite: (Plant) -> Unit
+    val onToggleFavourite: (Plant) -> Unit,
+    // Filtry
+    val onSearchQueryChange: (String) -> Unit = {},
+    val onColorFilterChange: (Set<PlantColor>) -> Unit = {},
+    val onSizeFilterChange: (Set<PlantSize>) -> Unit = {},
+    val onStatusFilterChange: (PlantOwnershipStatus?) -> Unit = {},
+    val onPriceSortOrderToggle: () -> Unit = {},
+    val onClearFilters: () -> Unit = {}
 )
 
 // =====================
@@ -95,22 +109,20 @@ fun MarketScreen(
     userId: String,
     onPlantClick: (Plant) -> Unit
 ) {
-    val plants by marketViewModel.plants.collectAsState()
-    val coins by marketViewModel.coins.collectAsState()
-    val unlockedPlantIds by marketViewModel.unlockedPlantIds.collectAsState()
+    val filteredPlants by marketViewModel.filteredPlants.collectAsState()
+    val filterState    by marketViewModel.filterState.collectAsState()
+    val coins          by marketViewModel.coins.collectAsState()
+    val unlockedPlantIds  by marketViewModel.unlockedPlantIds.collectAsState()
     val favouritePlantIds by marketViewModel.favouritePlantIds.collectAsState()
-    val error by marketViewModel.error.collectAsState()
+    val error      by marketViewModel.error.collectAsState()
     val buySuccess by marketViewModel.buySuccess.collectAsState()
-    val isLoading by marketViewModel.isLoading.collectAsState()
+    val isLoading  by marketViewModel.isLoading.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Rośliny ładujemy raz
     LaunchedEffect(userId) {
         if (userId.isNotBlank()) marketViewModel.loadPlants()
     }
-
-    // Portfel ładujemy przy każdym wejściu na ekran
     LaunchedEffect(lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             if (userId.isNotBlank()) marketViewModel.loadWallet(userId)
@@ -119,22 +131,29 @@ fun MarketScreen(
 
     MarketScreenContent(
         data = MarketData(
-            plants = plants,
-            coins = coins,
+            plants           = filteredPlants,
+            coins            = coins,
             unlockedPlantIds = unlockedPlantIds,
-            favouritePlantIds = favouritePlantIds
+            favouritePlantIds = favouritePlantIds,
+            filterState      = filterState
         ),
         uiState = MarketUiState(
-            isLoading = isLoading,
-            error = error,
+            isLoading  = isLoading,
+            error      = error,
             buySuccess = buySuccess
         ),
         actions = MarketActions(
-            onBuyPlant = { marketViewModel.buyPlant(it) },
-            onErrorDismissed = { marketViewModel.clearError() },
+            onBuyPlant            = { marketViewModel.buyPlant(it) },
+            onErrorDismissed      = { marketViewModel.clearError() },
             onBuySuccessDismissed = { marketViewModel.clearBuySuccess() },
-            onPlantClick = onPlantClick,
-            onToggleFavourite = { marketViewModel.toggleFavourite(it.plantId) }
+            onPlantClick          = onPlantClick,
+            onToggleFavourite     = { marketViewModel.toggleFavourite(it.plantId) },
+            onSearchQueryChange   = { marketViewModel.updateSearchQuery(it) },
+            onColorFilterChange   = { marketViewModel.updateFilterColors(it) },
+            onSizeFilterChange    = { marketViewModel.updateFilterSizes(it) },
+            onStatusFilterChange  = { marketViewModel.updateFilterStatus(it) },
+            onPriceSortOrderToggle = { marketViewModel.togglePriceSortOrder() },
+            onClearFilters        = { marketViewModel.clearFilters() }
         )
     )
 }
@@ -158,25 +177,46 @@ fun MarketScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = Dimensions.topBarHeight)
+//                .padding(horizontal = screenPadding_s)
         ) {
-            CoinBalanceRow(coins = data.coins)
+            MarketFilterBar(
+                filterState           = data.filterState,
+                onSearchQueryChange   = actions.onSearchQueryChange,
+                onColorFilterChange   = actions.onColorFilterChange,
+                onSizeFilterChange    = actions.onSizeFilterChange,
+                onStatusFilterChange  = actions.onStatusFilterChange,
+                onPriceSortOrderToggle = actions.onPriceSortOrderToggle,
+                onClearFilters        = actions.onClearFilters
+            )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(data.plants) { plant ->
-                    MarketPlantCard(
-                        plant = plant,
-                        isUnlocked = data.unlockedPlantIds.contains(plant.plantId),
-                        isFavourite = data.favouritePlantIds.contains(plant.plantId),
-                        onBuy = { actions.onBuyPlant(plant) },
-                        onPlantClick = actions.onPlantClick,
-                        onToggleFavourite = { actions.onToggleFavourite(plant) }
-                    )
+            if (data.plants.isEmpty() && !uiState.isLoading && data.filterState.hasActiveFilters) {
+                MarketEmptyFiltered(
+                    onClearFilters = actions.onClearFilters,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s),
+                    verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
+                    contentPadding = PaddingValues(
+                        bottom = screenPadding_s
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = screenPadding_s)
+
+                ) {
+                    items(data.plants) { plant ->
+                        MarketPlantCard(
+                            plant           = plant,
+                            isUnlocked      = data.unlockedPlantIds.contains(plant.plantId),
+                            isFavourite     = data.favouritePlantIds.contains(plant.plantId),
+                            onBuy           = { actions.onBuyPlant(plant) },
+                            onPlantClick    = actions.onPlantClick,
+                            onToggleFavourite = { actions.onToggleFavourite(plant) }
+                        )
+                    }
                 }
             }
         }
@@ -184,7 +224,6 @@ fun MarketScreenContent(
         uiState.error?.let { err ->
             MarketErrorDialog(error = err, onDismiss = actions.onErrorDismissed)
         }
-
         uiState.buySuccess?.let { plant ->
             MarketSuccessDialog(plant = plant, onDismiss = actions.onBuySuccessDismissed)
         }
@@ -195,27 +234,31 @@ fun MarketScreenContent(
 // COMPONENTS
 // =====================
 
+
 @Composable
-private fun CoinBalanceRow(coins: Int) {
-    Row(
-        modifier = Modifier
+private fun MarketEmptyFiltered(
+    onClearFilters: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = coins.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            color = colors.primary500
+            text = stringResource(R.string.market_empty_filtered),
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.neutralGray,
+            textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            imageVector = Icons.Default.Toll,
-            contentDescription = null,
-            tint = colors.primary500,
-            modifier = Modifier.size(20.dp)
-        )
+        TextButton(onClick = onClearFilters) {
+            Text(
+                text = stringResource(R.string.filter_clear),
+                color = colors.primary500
+            )
+        }
     }
 }
 
@@ -304,8 +347,7 @@ private fun MarketPlantCard(
                     .size(30.dp)
             ) {
                 Icon(
-                    imageVector = if (isFavourite) Icons.Default.Favorite
-                    else Icons.Default.FavoriteBorder,
+                    imageVector = if (isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = null,
                     tint = if (isFavourite) colors.error else colors.neutralLight,
                     modifier = Modifier.size(25.dp)
@@ -316,8 +358,7 @@ private fun MarketPlantCard(
             text = rememberPlantName(plant),
             style = MaterialTheme.typography.headlineMedium,
             color = colors.neutralBlack,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
         Row(
             modifier = Modifier

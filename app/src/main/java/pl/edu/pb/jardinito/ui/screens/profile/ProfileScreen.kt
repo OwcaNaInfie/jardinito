@@ -63,8 +63,8 @@ import pl.edu.pb.jardinito.ui.components.UserAvatar
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.theme.Dimensions
-import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_m
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
@@ -264,7 +264,7 @@ fun ProfileScreenContent(
                 .clip(RoundedCornerShape(topStart = roundedCorner_m, topEnd = roundedCorner_m))
                 .background(colors.neutralLight)
                 .padding(start = screenPadding_s, end = screenPadding_s, top = screenPadding_m),
-            verticalArrangement = Arrangement.spacedBy(itemsSpacing_m)
+            verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
         ) {
             WalletTile(coins = coins)
             FavouritesTile(favouritePlants = favouritePlants, onPlantClick = onPlantClick)
@@ -380,7 +380,7 @@ private fun WalletTile(coins: Int) {
                 .fillMaxWidth()
                 .padding(start = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s)
+            horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs)
         ) {
             Text(
                 text = coins.toString(),
