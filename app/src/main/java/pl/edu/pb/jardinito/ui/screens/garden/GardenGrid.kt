@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -31,6 +32,8 @@ import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Session
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_l
+import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_xs
 import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 
 // =====================
@@ -81,7 +84,9 @@ fun GardenGrid(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(totalHeightDp)
+                .height(totalHeightDp + screenPadding_l)
+                .padding(top = screenPadding_l)
+
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val corners = RhombusCorners(
@@ -152,8 +157,11 @@ private fun IsometricFlowers(
                 val centerY = (uJittered + vJittered) / 2f * rhombusHeightPx +
                         jitterV * cellWidth * 0.1f
 
-                val imageFile = if (useSmall) session.plant.images.small
-                else         session.plant.images.medium
+                val imageFile = if (session.status == "failed") {
+                    if (useSmall) session.plant.witheredImages.small else session.plant.witheredImages.medium
+                } else {
+                    if (useSmall) session.plant.images.small else session.plant.images.medium
+                }
                 val imageUrl  = "${RetrofitInstance.BASE_URL}plants/$imageFile"
                 val request   = rememberSvgImageRequest(imageUrl)
 

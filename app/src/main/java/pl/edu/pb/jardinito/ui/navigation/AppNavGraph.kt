@@ -8,12 +8,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
 import pl.edu.pb.jardinito.viewmodel.FocusViewModel
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,10 +46,11 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import pl.edu.pb.jardinito.ui.screens.GardenScreen
 import pl.edu.pb.jardinito.ui.screens.market.PlantDetailScreen
+import pl.edu.pb.jardinito.ui.screens.session.SessionDetailScreen
 import pl.edu.pb.jardinito.viewmodel.GardenViewModel
 import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
+import pl.edu.pb.jardinito.viewmodel.StatisticsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(
     onGoogleSignInClick: () -> Unit
@@ -72,6 +73,7 @@ fun AppNavGraph(
     val tagViewModel: TagViewModel = hiltViewModel()
     val focusViewModel: FocusViewModel = hiltViewModel()
     val marketViewModel: MarketViewModel = hiltViewModel()
+    val statisticsViewModel: StatisticsViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
 
     val userId = authViewModel.currentUser.collectAsState().value?.userId ?: ""
@@ -101,6 +103,12 @@ fun AppNavGraph(
         NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
         NavRoute(Routes.PROFILE, R.drawable.rabbit, "Profile")
     )
+
+    LaunchedEffect(userId) {
+        if (userId.isNotEmpty()) {
+            tagViewModel.loadTags(userId)
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -153,7 +161,10 @@ fun AppNavGraph(
                     composable(Routes.GARDEN) {
                         GardenScreen(
                             viewModel = gardenViewModel,
-                            userId = userId
+                            userId = userId,
+                            onSessionClick = { sessionId ->
+                                navController.navigate(Routes.sessionDetail(sessionId))
+                            }
                         )
                     }
                     composable(Routes.MARKET) {
@@ -178,6 +189,29 @@ fun AppNavGraph(
                             onBack = { navController.popBackStack() }
                         )
                     }
+                    composable(
+                        route = Routes.SESSION_DETAIL,
+                        arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+                        enterTransition = { slideUpEnter() },
+                        exitTransition = { slideUpExit() }
+                    ) { backStackEntry ->
+                        val sessionId = backStackEntry.arguments?.getString("sessionId") ?: return@composable
+                        val sessions by gardenViewModel.sessions.collectAsState()
+                        val statisticsSessions by statisticsViewModel.sessions.collectAsState()
+                        val session = sessions.find { it.sessionId == sessionId }
+                            ?: statisticsSessions.find { it.sessionId == sessionId }
+                        val tags by tagViewModel.tags.collectAsState()
+                        if (session != null) {
+                            SessionDetailScreen(
+                                session = session,
+                                tags = tags,
+                                onBack = { navController.popBackStack() },
+                                onTagChange = { tag -> gardenViewModel.updateSessionTag(sessionId, tag) }
+                            )
+                        } else {
+                            LaunchedEffect(sessionId) { navController.popBackStack() }
+                        }
+                    }
                     composable(Routes.FOCUS) {
                         FocusScreen(
                             focusViewModel = focusViewModel,
@@ -194,7 +228,11 @@ fun AppNavGraph(
                         )
                     }
                     composable(Routes.STATISTICS) {
-                        StatisticsScreen()
+                        StatisticsScreen(
+                            viewModel = statisticsViewModel,
+                            userId  = userId,
+                            onSessionClick = { sessionId -> navController.navigate(Routes.sessionDetail(sessionId)) }
+                        )
                     }
                     composable(Routes.PROFILE) {
                         val user by authViewModel.currentUser.collectAsState(initial = null)

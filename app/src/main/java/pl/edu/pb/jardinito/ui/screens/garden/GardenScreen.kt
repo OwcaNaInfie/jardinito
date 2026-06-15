@@ -5,10 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +19,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,12 +27,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Session
-import pl.edu.pb.jardinito.ui.components.AppChip
-import pl.edu.pb.jardinito.ui.components.AppChipVariant
+import pl.edu.pb.jardinito.ui.components.ChipRow
+import pl.edu.pb.jardinito.ui.components.ChipRowItem
 import pl.edu.pb.jardinito.ui.components.LoadingOverlay
+import pl.edu.pb.jardinito.ui.components.SessionsListItem
 import pl.edu.pb.jardinito.ui.screens.garden.GardenGrid
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
-import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.topBarHeight
 import pl.edu.pb.jardinito.ui.theme.colors
@@ -41,7 +42,8 @@ import pl.edu.pb.jardinito.viewmodel.GardenViewModel
 @Composable
 fun GardenScreen(
     viewModel: GardenViewModel,
-    userId: String
+    userId: String,
+    onSessionClick: (String) -> Unit
 ) {
     val sessions by viewModel.sessions.collectAsState()
     val period by viewModel.period.collectAsState()
@@ -64,7 +66,8 @@ fun GardenScreen(
         positions = positions,
         gridSizeFor = viewModel::gridSizeFor,
         useSmallImage = viewModel::useSmallImage,
-        onPeriodChange = { viewModel.setPeriod(it, userId) }
+        onPeriodChange = { viewModel.setPeriod(it, userId) },
+        onSessionClick = onSessionClick
     )
 }
 
@@ -77,14 +80,15 @@ private fun GardenScreenContent(
     positions: Map<String, Int>,
     gridSizeFor: (Int) -> Int,
     useSmallImage: (Int) -> Boolean,
-    onPeriodChange: (GardenPeriod) -> Unit
+    onPeriodChange: (GardenPeriod) -> Unit,
+    onSessionClick: (String) -> Unit
 ) {
     val gridSize = gridSizeFor(sessions.size)
     val useSmall = useSmallImage(gridSize)
 
     Box(
-    modifier = Modifier
-        .fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(colors.primary100)
     ) {
         Image(
@@ -119,17 +123,33 @@ private fun GardenScreenContent(
                     )
                 }
             } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(
+                        bottom = screenPadding_s
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
                 ) {
-                    GardenGrid(
-                        sessions = sessions,
-                        gridSize = gridSize,
-                        useSmall = useSmall,
-                        positions = positions,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            GardenGrid(
+                                sessions = sessions,
+                                gridSize = gridSize,
+                                useSmall = useSmall,
+                                positions = positions,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                    items(sessions, key = { it.sessionId }) { session ->
+                        SessionsListItem(
+                            session = session,
+                            onClick = { onSessionClick(session.sessionId) }
+                        )
+                    }
                 }
             }
         }
@@ -141,22 +161,13 @@ private fun PeriodFilterRow(
     selected: GardenPeriod,
     onSelect: (GardenPeriod) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs, Alignment.End)
-    ) {
-        GardenPeriod.entries.forEach { period ->
-            val label = when (period) {
-                GardenPeriod.DAY   -> stringResource(R.string.garden_period_day)
-                GardenPeriod.WEEK  -> stringResource(R.string.garden_period_week)
-                GardenPeriod.MONTH -> stringResource(R.string.garden_period_month)
-            }
-            AppChip(
+    ChipRow(
+        items = GardenPeriod.entries.map { period ->
+            ChipRowItem(
+                text = stringResource(period.labelRes),
                 isActive = period == selected,
-                onClick = { onSelect(period) },
-                variant = AppChipVariant.Outlined,
-                text = label,
+                onClick = { onSelect(period) }
             )
-        }
-    }
+        },
+    )
 }

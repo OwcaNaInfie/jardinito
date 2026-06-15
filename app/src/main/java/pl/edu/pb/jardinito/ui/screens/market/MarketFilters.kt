@@ -1,5 +1,6 @@
 package pl.edu.pb.jardinito.ui.screens.market
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -34,6 +35,8 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.AppChip
 import pl.edu.pb.jardinito.ui.components.AppChipVariant
 import pl.edu.pb.jardinito.ui.components.BasePickerSheet
+import pl.edu.pb.jardinito.ui.components.ChipRow
+import pl.edu.pb.jardinito.ui.components.ChipRowItem
 import pl.edu.pb.jardinito.ui.components.PickerSheetContent
 import pl.edu.pb.jardinito.ui.components.SearchInput
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
@@ -49,10 +52,34 @@ import pl.edu.pb.jardinito.ui.utils.toChipLabelRes
 import pl.edu.pb.jardinito.viewmodel.MarketFilterState
 
 // =====================
-// FILTER BAR
+// DATA
 // =====================
 
-private enum class FilterDrawerType { COLOR, SIZE, STATUS }
+private enum class FilterDrawerType(
+    @StringRes val labelRes: Int,
+    val isActive: (MarketFilterState) -> Boolean,
+    val selectedLabelRes: (MarketFilterState) -> Int?
+) {
+    COLOR(
+        R.string.filter_color,
+        isActive = { it.filterColors.isNotEmpty() },
+        selectedLabelRes = { it.filterColors.toChipLabelRes() }
+    ),
+    SIZE(
+        R.string.filter_size,
+        isActive = { it.filterSizes.isNotEmpty() },
+        selectedLabelRes = { it.filterSizes.toChipLabelRes() }
+    ),
+    STATUS(
+        R.string.filter_status,
+        isActive = { it.filterStatus.isActiveFilter() },
+        selectedLabelRes = { it.filterStatus.toChipLabelRes() }
+    )
+}
+
+// =====================
+// FILTER BAR
+// =====================
 
 @Composable
 fun MarketFilterBar(
@@ -67,65 +94,43 @@ fun MarketFilterBar(
 ) {
     var activeDrawer by remember { mutableStateOf<FilterDrawerType?>(null) }
 
-    Column(modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
-    ) {
+    val priceLabel = filterState.priceSortOrder.toChipLabel(stringResource(R.string.filter_price))
+    val chips = buildList {
+        FilterDrawerType.entries.forEach { drawerType ->
+            val label = drawerType.selectedLabelRes(filterState)
+                ?.let { stringResource(it) }
+                ?: stringResource(drawerType.labelRes)
+            add(ChipRowItem(
+                text = label,
+                isActive = drawerType.isActive(filterState),
+                onClick = { activeDrawer = drawerType }
+            ))
+        }
+        add(ChipRowItem(
+            text = priceLabel,
+            isActive = filterState.priceSortOrder != null,
+            onClick = onPriceSortOrderToggle
+        ))
+    }
+
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)) {
         SearchInput(
-            modifier = Modifier.padding( horizontal = screenPadding_s),
+            modifier = Modifier.padding(horizontal = screenPadding_s),
             value = filterState.searchQuery,
             onValueChange = onSearchQueryChange,
             placeholder = stringResource(R.string.filter_search_hint)
         )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
                 .padding(bottom = itemsSpacing_s)
                 .padding(horizontal = screenPadding_s),
-            horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs)
         ) {
-            val colorLabel  = filterState.filterColors.toChipLabelRes()
-                ?.let { stringResource(it) } ?: stringResource(R.string.filter_color)
-
-            val sizeLabel   = filterState.filterSizes.toChipLabelRes()
-                ?.let { stringResource(it) } ?: stringResource(R.string.filter_size)
-
-            val statusActive = filterState.filterStatus.isActiveFilter()
-
-            val statusLabel  = filterState.filterStatus.toChipLabelRes()
-                ?.let { stringResource(it) } ?: stringResource(R.string.filter_status)
-
-            val priceLabel = filterState.priceSortOrder.toChipLabel(stringResource(R.string.filter_price))
-
-            AppChip(
-                text = colorLabel,
-                isActive = filterState.filterColors.isNotEmpty(),
-                variant = AppChipVariant.Outlined,
-                onClick = { activeDrawer = FilterDrawerType.COLOR }
+            ChipRow(
+                items = chips
             )
-            AppChip(
-                text = sizeLabel,
-                isActive = filterState.filterSizes.isNotEmpty(),
-                variant = AppChipVariant.Outlined,
-                onClick = { activeDrawer = FilterDrawerType.SIZE }
-            )
-
-            AppChip(
-                text = statusLabel,
-                isActive = statusActive,
-                variant = AppChipVariant.Outlined,
-                onClick = { activeDrawer = FilterDrawerType.STATUS }
-            )
-
-            AppChip(
-                text = priceLabel,
-                isActive = filterState.priceSortOrder != null,
-                variant = AppChipVariant.Outlined,
-                onClick = onPriceSortOrderToggle
-            )
-
             if (filterState.hasActiveFilters) {
                 AppChip(
                     text = stringResource(R.string.filter_clear),
@@ -138,17 +143,36 @@ fun MarketFilterBar(
         }
     }
 
-    // Drawery
-    when (activeDrawer) {
-        FilterDrawerType.COLOR -> ColorFilterDrawer(
-            selectedColors = filterState.filterColors,
-            onSelectionChange = onColorFilterChange,
-            onDismiss = { activeDrawer = null }
+    val drawer = activeDrawer
+    when (drawer) {
+        FilterDrawerType.COLOR -> MultiSelectFilterDrawer(
+            title = stringResource(drawer.labelRes),
+            values = PlantColor.values(),
+            isSelected = { it in filterState.filterColors },
+            onToggle = { color ->
+                onColorFilterChange(
+                    if (color in filterState.filterColors) filterState.filterColors - color
+                    else filterState.filterColors + color
+                )
+            },
+            onDismiss = { activeDrawer = null },
+            label = { stringResource(it.labelRes) },
+            indicator = { color ->
+                Box(modifier = Modifier.size(24.dp).clip(CircleShape).background(color.color))
+            }
         )
-        FilterDrawerType.SIZE -> SizeFilterDrawer(
-            selectedSizes = filterState.filterSizes,
-            onSelectionChange = onSizeFilterChange,
-            onDismiss = { activeDrawer = null }
+        FilterDrawerType.SIZE -> MultiSelectFilterDrawer(
+            title = stringResource(drawer.labelRes),
+            values = PlantSize.values(),
+            isSelected = { it in filterState.filterSizes },
+            onToggle = { size ->
+                onSizeFilterChange(
+                    if (size in filterState.filterSizes) filterState.filterSizes - size
+                    else filterState.filterSizes + size
+                )
+            },
+            onDismiss = { activeDrawer = null },
+            label = { stringResource(it.labelRes) }
         )
         FilterDrawerType.STATUS -> StatusFilterDrawer(
             selectedStatus = filterState.filterStatus,
@@ -160,64 +184,29 @@ fun MarketFilterBar(
 }
 
 // =====================
-// DRAWERYS
+// DRAWERS
 // =====================
 
 @Composable
-private fun ColorFilterDrawer(
-    selectedColors: Set<PlantColor>,
-    onSelectionChange: (Set<PlantColor>) -> Unit,
-    onDismiss: () -> Unit
+private fun <T : Enum<T>> MultiSelectFilterDrawer(
+    title: String,
+    values: Array<T>,
+    isSelected: (T) -> Boolean,
+    onToggle: (T) -> Unit,
+    onDismiss: () -> Unit,
+    label: @Composable (T) -> String,
+    indicator: (@Composable (T) -> Unit)? = null
 ) {
     BasePickerSheet(
         onDismiss = onDismiss,
-        title = stringResource(R.string.filter_color),
+        title = title,
         content = PickerSheetContent.List { _ ->
-            PlantColor.values().forEach { color ->
-                val isSelected = color in selectedColors
-                MultiSelectRow(
-                    label = stringResource(color.labelRes),
-                    isSelected = isSelected,
-                    indicator = {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(color.color)
-                        )
-                    },
-                    onToggle = {
-                        onSelectionChange(
-                            if (isSelected) selectedColors - color else selectedColors + color
-                        )
-                    }
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun SizeFilterDrawer(
-    selectedSizes: Set<PlantSize>,
-    onSelectionChange: (Set<PlantSize>) -> Unit,
-    onDismiss: () -> Unit
-) {
-    BasePickerSheet(
-        onDismiss = onDismiss,
-        title = stringResource(R.string.filter_size),
-        content = PickerSheetContent.List { _ ->
-            PlantSize.values().forEach { size ->
-                val isSelected = size in selectedSizes
-                MultiSelectRow(
-                    label = stringResource(size.labelRes),
-                    isSelected = isSelected,
-                    indicator = null,
-                    onToggle = {
-                        onSelectionChange(
-                            if (isSelected) selectedSizes - size else selectedSizes + size
-                        )
-                    }
+            values.forEach { value ->
+                FilterPickerRow(
+                    label = label(value),
+                    isSelected = isSelected(value),
+                    indicator = indicator?.let { { it(value) } },
+                    onClick = { onToggle(value) }
                 )
             }
         }
@@ -234,10 +223,10 @@ private fun StatusFilterDrawer(
         onDismiss = onDismiss,
         title = stringResource(R.string.filter_status),
         content = PickerSheetContent.List { hideAndDismiss ->
-            SingleSelectRow(
+            FilterPickerRow(
                 label = stringResource(R.string.filter_status_all),
                 isSelected = selectedStatus == null || selectedStatus == PlantOwnershipStatus.ALL,
-                onSelect = {
+                onClick = {
                     onStatusSelected(null)
                     hideAndDismiss()
                 }
@@ -245,10 +234,10 @@ private fun StatusFilterDrawer(
             PlantOwnershipStatus.values()
                 .filter { it != PlantOwnershipStatus.ALL }
                 .forEach { status ->
-                    SingleSelectRow(
+                    FilterPickerRow(
                         label = stringResource(status.labelRes),
                         isSelected = selectedStatus == status,
-                        onSelect = {
+                        onClick = {
                             onStatusSelected(status)
                             hideAndDismiss()
                         }
@@ -259,22 +248,22 @@ private fun StatusFilterDrawer(
 }
 
 // =====================
-// ROW COMPONENTS
+// COMPONENTS
 // =====================
 
 @Composable
-private fun MultiSelectRow(
+private fun FilterPickerRow(
     label: String,
     isSelected: Boolean,
-    indicator: (@Composable () -> Unit)?,
-    onToggle: () -> Unit
+    onClick: () -> Unit,
+    indicator: (@Composable () -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(if (isSelected) colors.primary500.copy(alpha = 0.12f) else Color.Transparent)
-            .clickable { onToggle() }
+            .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -284,44 +273,8 @@ private fun MultiSelectRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             indicator?.invoke()
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = colors.neutralBlack
-            )
+            Text(text = label, style = MaterialTheme.typography.bodyLarge, color = colors.neutralBlack)
         }
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = colors.primary500,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SingleSelectRow(
-    label: String,
-    isSelected: Boolean,
-    onSelect: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) colors.primary500.copy(alpha = 0.12f) else Color.Transparent)
-            .clickable { onSelect() }
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.neutralBlack
-        )
         if (isSelected) {
             Icon(
                 imageVector = Icons.Default.Check,

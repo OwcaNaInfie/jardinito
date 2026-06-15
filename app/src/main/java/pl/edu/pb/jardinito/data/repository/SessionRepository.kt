@@ -79,4 +79,11 @@ class SessionRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun updateSessionTag(sessionId: String, tag: Tag?) {
+        api.updateSessionTag(
+            sessionId = sessionId,
+            request = SessionApiService.UpdateSessionTagRequest(tag?.tagId)
+        )
+    }
 }
