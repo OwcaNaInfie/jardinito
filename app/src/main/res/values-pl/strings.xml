@@ -34,12 +34,22 @@
     <string name="login_success">Logowanie udane</string>
     <string name="register_success">Rejestracja udana</string>
 
-
-    <!-- Home Screen -->
+    <!-- Garden Screen -->
     <string name="garden_empty">Brak sesji w tym okresie</string>
     <string name="garden_period_day">dzisiaj</string>
     <string name="garden_period_week">tydzień</string>
     <string name="garden_period_month">miesiąc</string>
+    <string name="session_detail_status">Status</string>
+    <string name="session_detail_tag">Tag</string>
+    <string name="session_detail_no_tag">Brak tagu</string>
+    <string name="session_detail_planned_duration">Zaplanowany czas</string>
+    <string name="session_detail_actual_duration">Czas faktyczny</string>
+    <string name="session_detail_coins">Monety</string>
+    <string name="session_detail_started_at">Rozpoczęto</string>
+    <string name="session_detail_completed_at">Ukończono</string>
+    <string name="session_detail_title">Szczegóły sesji</string>
+    <string name="dialog_tag_update_title">Zmień tag</string>
+    <string name="dialog_tag_update_message">Czy chcesz zaktualizować ten tag?</string>
 
     <!-- Account verification -->
     <string name="verification_title">Weryfikacja emaila</string>
@@ -62,6 +72,25 @@
     <string name="password_reset_success">Hasło zostało zmienione pomyślnie</string>
     <string name="error_google_account">Konta Google nie mogą resetować hasła</string>
     <string name="reset_code_sent">Kod do resetu hasła został wysłany na Twój adres email.</string>
+
+    <!-- Statistics Screen -->
+    <string name="statistics_period_day">Dzień</string>
+    <string name="statistics_period_week">Tydzień</string>
+    <string name="statistics_period_month">Miesiąc</string>
+    <string name="statistics_period_year">Rok</string>
+    <string name="statistics_sessions_header">Sesje (%1$d)</string>
+    <string name="statistics_tab_garden">Ogród</string>
+    <string name="statistics_tab_tags">Tagi</string>
+    <string name="chart_type_bar">Słupkowy</string>
+    <string name="chart_type_pie">Kołowy</string>
+    <string name="statistics_tab_general">Ogólne</string>
+    <string name="statistics_total_focus">Łączny czas skupienia</string>
+    <string name="statistics_best_day">Najlepszy dzień</string>
+    <string name="statistics_focus_time_title">Czas skupienia</string>
+    <string name="statistics_status_title">Sesje</string>
+    <string name="statistics_status_completed">Ukończone</string>
+    <string name="statistics_status_uncompleted">Nieukończone</string>
+
     <!-- Validators -->
     <string name="validator_email_blank">Email jest wymagany.</string>
     <string name="validator_email_invalid">Niepoprawny adres email.</string>
@@ -98,7 +127,6 @@
     <string name="permission_notifications">Powiadomienia</string>
     <string name="permission_overlay">Wyświetlanie nad aplikacjami</string>
     <string name="profile_settings">Ustawienia</string>
-
 
     <!-- Focus Screen -->
     <string name="focus_add_tag">Dodaj tag</string>
@@ -221,7 +249,6 @@
     <string name="plant_detail_owned">Masz już tę roślinę</string>
     <string name="plant_detail_buy">Kup</string>
     <string name="plant_detail_about">O roślinie</string>
-
 
     <!-- Popups -->
     <string name="dialog_delete_account_message">Konto zostanie usunięte na zawsze.</string>

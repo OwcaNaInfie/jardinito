@@ -177,3 +177,8 @@ Do zrobienia:
 z jakiego filtra korzysta tagsScreen?
 ustawienia zapisywane w sharedPreferences?
 serduszko jako komponent żeby umieścić je w details
+zapisywanie pobranych danych w cache
+czy można połączyć funkcje ze statistics i garden? (SessionRepository)
+
+Dodać: ilość ukończonych i nieukończonych sesji w liczbie, procencie i wykresie, użyte tagi,
+ogólne statystyki - najbardziej aktywny dzień, najdłuższa sesja

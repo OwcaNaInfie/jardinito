@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Session = require('../models/Session');
 const UserWallet = require('../models/UserWallet');
+const UserTags = require('../models/UserTags');
 
 // =====================
 // HELPERS
@@ -134,6 +135,25 @@ router.get('/:userId', async (req, res) => {
     }).populate('plantId');
 
     res.json({ sessions });
+});
+
+router.patch('/:sessionId', async (req, res) => {
+    try {
+        const { tagId } = req.body;
+        let tagSnapshot = null;
+
+        if (tagId) {
+            const userTagsDoc = await UserTags.findOne({ 'tags._id': tagId });
+            const tag = userTagsDoc?.tags.id(tagId);
+            if (!tag) return res.status(404).json({ message: 'Tag not found' });
+            tagSnapshot = { tagId: tag._id, name: tag.name, color: tag.color };
+        }
+
+        await Session.findByIdAndUpdate(req.params.sessionId, { tag: tagSnapshot });
+        res.json({ message: 'Session updated' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 module.exports = router;

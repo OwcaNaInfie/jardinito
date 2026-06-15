@@ -61,6 +61,7 @@ fun JardinitoTheme(
         neutralBlack = AppColors.NeutralGray,
         neutralGray = AppColors.NeutralGray,
         neutralLightGray = AppColors.NeutralLightGray,
+        neutralInvisibleGray = AppColors.NeutralInvisibleGray,
         neutralLight = AppColors.NeutralLight,
         neutralWhite = AppColors.NeutralWhite,
         error = AppColors.Error,

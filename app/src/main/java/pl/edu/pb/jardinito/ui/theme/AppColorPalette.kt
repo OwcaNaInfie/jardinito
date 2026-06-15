@@ -27,6 +27,7 @@ data class AppColorPalette(
     val neutralBlack : Color,
     val neutralGray : Color,
     val neutralLightGray : Color,
+    val neutralInvisibleGray: Color,
     val neutralLight : Color,
     val neutralWhite : Color,
     /* ======================
@@ -52,6 +53,7 @@ val LocalAppColors = staticCompositionLocalOf {
         neutralBlack = Color.Unspecified,
         neutralGray = Color.Unspecified,
         neutralLightGray = Color.Unspecified,
+        neutralInvisibleGray = Color.Unspecified,
         neutralLight = Color.Unspecified,
         neutralWhite = Color.Unspecified,
         error = Color.Unspecified,

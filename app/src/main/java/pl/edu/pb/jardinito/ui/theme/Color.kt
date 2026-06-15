@@ -27,6 +27,7 @@ object AppColors {
     val NeutralBlack = Color(0xFF010101)
     val NeutralGray = Color(0xFF232227)
     val NeutralLightGray = Color(0xFF515156)
+    val NeutralInvisibleGray = Color(0xFFC5C5C5)
     val NeutralLight = Color(0xFFF8F8F8)
     val NeutralWhite = Color(0xFFFFFFFF)
 

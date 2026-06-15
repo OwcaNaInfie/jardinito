@@ -4,7 +4,9 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.PATCH
 import retrofit2.http.Query
+
 
 interface SessionApiService {
 
@@ -24,6 +26,15 @@ interface SessionApiService {
         @Path("userId") userId: String,
         @Query("period") period: String = "day"
     ): SessionsResponse
+
+    @PATCH("api/sessions/{sessionId}")
+    suspend fun updateSessionTag(
+        @Path("sessionId") sessionId: String,
+        @Body request: UpdateSessionTagRequest
+    ): UpdateSessionTagResponse
+
+    data class UpdateSessionTagRequest(val tagId: String?)
+    data class UpdateSessionTagResponse(val message: String)
 
     data class TagSnapshotDto(
         val tagId: String,

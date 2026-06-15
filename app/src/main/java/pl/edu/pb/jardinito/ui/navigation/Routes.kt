@@ -11,6 +11,8 @@ object Routes {
     const val STATISTICS = "statistics"
     const val MARKET = "market"
     const val PLANT_DETAIL = "plant_detail/{plantId}"
+    const val SESSION_DETAIL = "session_detail/{sessionId}"
 
     fun plantDetail(plantId: String) = "plant_detail/$plantId"
+    fun sessionDetail(sessionId: String) = "session_detail/$sessionId"
 }

@@ -1,5 +1,6 @@
 package pl.edu.pb.jardinito.viewmodel
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,15 +10,17 @@ import kotlinx.coroutines.flow.update
 import kotlin.math.ceil
 import kotlin.math.sqrt
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.manager.GardenPositionsManager
 import pl.edu.pb.jardinito.data.model.Session
+import pl.edu.pb.jardinito.data.model.Tag
 import pl.edu.pb.jardinito.data.repository.SessionRepository
 import javax.inject.Inject
 
-enum class GardenPeriod(val apiValue: String) {
-    DAY("day"),
-    WEEK("week"),
-    MONTH("month")
+enum class GardenPeriod(val apiValue: String, @StringRes val labelRes: Int) {
+    DAY("day",   R.string.garden_period_day),
+    WEEK("week", R.string.garden_period_week),
+    MONTH("month", R.string.garden_period_month)
 }
 
 @HiltViewModel
@@ -60,6 +63,19 @@ class GardenViewModel @Inject constructor(
             } finally {
                 _isLoading.value = false
                 _isInitialized.value = true
+            }
+        }
+    }
+
+    fun updateSessionTag(sessionId: String, tag: Tag?) {
+        _sessions.update { list ->
+            list.map { if (it.sessionId == sessionId) it.copy(tag = tag) else it }
+        }
+        viewModelScope.launch {
+            try {
+                sessionRepository.updateSessionTag(sessionId, tag)
+            } catch (e: Exception) {
+                _error.value = e.message
             }
         }
     }

@@ -21,7 +21,7 @@ fun buttonColors(
         },
         contentColor = contentColor ?: when (variant) {
             ButtonVariant.Primary -> colors.primary300
-            ButtonVariant.Secondary -> colors.primary50
+            ButtonVariant.Secondary -> colors.neutralLight
             ButtonVariant.Tertiary -> colors.neutralDark
         },
         disabledContainerColor = buttonColor ?: when (variant) {

@@ -425,14 +425,14 @@ private fun FavouritesTile(favouritePlants: List<Plant>, onPlantClick: (Plant) -
                     AsyncImage(
                         model = imageUrl,
                         contentDescription = plant.name,
-                        contentScale = ContentScale.Fit,
+                        contentScale = ContentScale.FillHeight,
                         filterQuality = FilterQuality.None,
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(64.dp)
                             .clip(RoundedCornerShape(6.dp))
                             .background(colors.primary50)
                             .clickable { onPlantClick(plant) }
-                            .padding(4.dp)
+//                            .padding(4.dp)
                     )
                 }
             }
