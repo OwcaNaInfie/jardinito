@@ -414,7 +414,7 @@ private fun SelectedTagChip(
                 else TagColors.colorCompose(selectedTag.color).copy(alpha = 0.15f)
             )
             .then(if (isIdle) Modifier.clickable { onClick() } else Modifier)
-            .padding(horizontal = 12.dp),
+            .padding(start = 12.dp, end = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         if (selectedTag == null) {

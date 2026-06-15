@@ -52,6 +52,8 @@ import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.AppChip
+import pl.edu.pb.jardinito.ui.components.AppChipVariant
 import pl.edu.pb.jardinito.ui.theme.Dimensions
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
@@ -177,7 +179,6 @@ fun MarketScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = Dimensions.topBarHeight)
-//                .padding(horizontal = screenPadding_s)
         ) {
             MarketFilterBar(
                 filterState           = data.filterState,
@@ -263,32 +264,6 @@ private fun MarketEmptyFiltered(
 }
 
 @Composable
-private fun PlantPriceChip(price: Int) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp),
-        modifier = Modifier
-            .clip(RoundedCornerShape(roundedCorner_s))
-            .background(colors.neutralLight)
-            .padding(horizontal = 6.dp, vertical = 3.dp)
-    ) {
-        Text(
-            text = if (price == 0) stringResource(R.string.market_plant_free) else price.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.primary500
-        )
-        if (price != 0) {
-            Icon(
-                imageVector = Icons.Default.Toll,
-                contentDescription = null,
-                tint = colors.primary500,
-                modifier = Modifier.size(12.dp)
-            )
-        }
-    }
-}
-
-@Composable
 private fun PlantActionButton(isUnlocked: Boolean, onBuy: () -> Unit) {
     Box(
         modifier = Modifier
@@ -367,7 +342,11 @@ private fun MarketPlantCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PlantPriceChip(price = plant.price)
+            AppChip(
+                text = if (plant.price == 0) stringResource(R.string.market_plant_free) else plant.price.toString(),
+                variant = AppChipVariant.Price,
+                trailingIcon = if (plant.price == 0) null else Icons.Default.Toll
+            )
             PlantActionButton(isUnlocked = isUnlocked, onBuy = onBuy)
         }
     }

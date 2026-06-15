@@ -1,18 +1,15 @@
 package pl.edu.pb.jardinito.ui.screens.market
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,18 +31,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import pl.edu.pb.jardinito.R
+import pl.edu.pb.jardinito.ui.components.AppChip
+import pl.edu.pb.jardinito.ui.components.AppChipVariant
 import pl.edu.pb.jardinito.ui.components.BasePickerSheet
 import pl.edu.pb.jardinito.ui.components.PickerSheetContent
 import pl.edu.pb.jardinito.ui.components.SearchInput
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
-import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.PlantColor
 import pl.edu.pb.jardinito.ui.utils.PlantOwnershipStatus
 import pl.edu.pb.jardinito.ui.utils.PlantSize
-import pl.edu.pb.jardinito.ui.utils.PriceSortOrder
 import pl.edu.pb.jardinito.ui.utils.isActiveFilter
 import pl.edu.pb.jardinito.ui.utils.toChipLabel
 import pl.edu.pb.jardinito.ui.utils.toChipLabelRes
@@ -102,32 +99,41 @@ fun MarketFilterBar(
 
             val priceLabel = filterState.priceSortOrder.toChipLabel(stringResource(R.string.filter_price))
 
-            MarketFilterChip(
-                label = colorLabel,
+            AppChip(
+                text = colorLabel,
                 isActive = filterState.filterColors.isNotEmpty(),
+                variant = AppChipVariant.Outlined,
                 onClick = { activeDrawer = FilterDrawerType.COLOR }
             )
-
-            MarketFilterChip(
-                label = sizeLabel,
+            AppChip(
+                text = sizeLabel,
                 isActive = filterState.filterSizes.isNotEmpty(),
+                variant = AppChipVariant.Outlined,
                 onClick = { activeDrawer = FilterDrawerType.SIZE }
             )
 
-            MarketFilterChip(
-                label = statusLabel,
+            AppChip(
+                text = statusLabel,
                 isActive = statusActive,
+                variant = AppChipVariant.Outlined,
                 onClick = { activeDrawer = FilterDrawerType.STATUS }
             )
 
-            MarketFilterChip(
-                label = priceLabel,
+            AppChip(
+                text = priceLabel,
                 isActive = filterState.priceSortOrder != null,
+                variant = AppChipVariant.Outlined,
                 onClick = onPriceSortOrderToggle
             )
 
             if (filterState.hasActiveFilters) {
-                ClearFiltersChip(onClick = onClearFilters)
+                AppChip(
+                    text = stringResource(R.string.filter_clear),
+                    variant = AppChipVariant.TintedColored(colors.error),
+                    iconSize = 14.dp,
+                    leadingIcon = Icons.Default.Close,
+                    onClick = onClearFilters
+                )
             }
         }
     }
@@ -150,58 +156,6 @@ fun MarketFilterBar(
             onDismiss = { activeDrawer = null }
         )
         null -> Unit
-    }
-}
-
-// =====================
-// CHIPS
-// =====================
-
-@Composable
-private fun MarketFilterChip(
-    label: String,
-    isActive: Boolean,
-    onClick: () -> Unit
-) {
-
-    val color = if (isActive) colors.primary500 else colors.neutralLightGray
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(roundedCorner_s))
-            .clickable(onClick = onClick)
-            .border(1.dp, color, RoundedCornerShape(roundedCorner_s))
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = color
-        )
-    }
-}
-
-@Composable
-private fun ClearFiltersChip(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(roundedCorner_s))
-            .background(colors.error.copy(alpha = 0.12f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = null,
-            tint = colors.error,
-            modifier = Modifier.size(14.dp)
-        )
-        Text(
-            text = stringResource(R.string.filter_clear),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.error
-        )
     }
 }
 

@@ -173,3 +173,7 @@ Do zrobienia:
 -dodać serduszko ulubiony do DetailsPlantScreen
 -pamięć podręczna kiedy nie mamy połączenia z internetem?
 -ładniejsze permissions
+
+z jakiego filtra korzysta tagsScreen?
+ustawienia zapisywane w sharedPreferences?
+serduszko jako komponent żeby umieścić je w details

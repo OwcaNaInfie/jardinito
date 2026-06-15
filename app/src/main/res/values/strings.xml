@@ -55,8 +55,12 @@
     <string name="password_reset_success">Password changed successfully!</string>
     <string name="error_google_account">Google accounts cannot reset password.</string>
     <string name="reset_code_sent">The password reset code has been sent to your email address.</string>
+
     <!-- Home Screen -->
-    <string name="welcome_message">Welcome to Jardinito 🌱</string>
+    <string name="garden_empty">No session in this period</string>
+    <string name="garden_period_day">today</string>
+    <string name="garden_period_week">week</string>
+    <string name="garden_period_month">month</string>
 
     <!-- Validators -->
     <string name="validator_email_blank">Email is required.</string>

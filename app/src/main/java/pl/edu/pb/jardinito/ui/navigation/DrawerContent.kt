@@ -82,11 +82,11 @@ fun DrawerContentPreview() {
     JardinitoTheme {
         DrawerContent(
             navRoutes = listOf(
-                NavRoute(Routes.HOME, R.drawable.windmill, "Home"),
+                NavRoute(Routes.GARDEN, R.drawable.windmill, "Garden"),
                 NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
                 NavRoute(Routes.PROFILE, R.drawable.rabbit, "Profile")
             ),
-            currentRoute = Routes.HOME,
+            currentRoute = Routes.GARDEN,
             onRouteClick = {},
             user = null
         )

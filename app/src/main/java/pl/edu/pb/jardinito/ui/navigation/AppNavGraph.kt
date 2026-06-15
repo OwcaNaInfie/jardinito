@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.screens.AuthEntryScreen
 import pl.edu.pb.jardinito.ui.screens.focus.FocusScreen
-import pl.edu.pb.jardinito.ui.screens.HomeScreen
 import pl.edu.pb.jardinito.ui.screens.market.MarketScreen
 import pl.edu.pb.jardinito.ui.screens.profile.ProfileScreen
 import pl.edu.pb.jardinito.ui.screens.StatisticsScreen
@@ -45,7 +44,9 @@ import pl.edu.pb.jardinito.viewmodel.UserViewModel
 import pl.edu.pb.jardinito.viewmodel.VerificationViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import pl.edu.pb.jardinito.ui.screens.GardenScreen
 import pl.edu.pb.jardinito.ui.screens.market.PlantDetailScreen
+import pl.edu.pb.jardinito.viewmodel.GardenViewModel
 import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,7 @@ fun AppNavGraph(
     val userViewModel: UserViewModel = hiltViewModel()
     val verificationViewModel: VerificationViewModel = hiltViewModel()
     val passwordResetViewModel: PasswordResetViewModel = hiltViewModel()
+    val gardenViewModel: GardenViewModel = hiltViewModel()
     val tagViewModel: TagViewModel = hiltViewModel()
     val focusViewModel: FocusViewModel = hiltViewModel()
     val marketViewModel: MarketViewModel = hiltViewModel()
@@ -77,7 +79,7 @@ fun AppNavGraph(
     val focusCoins by focusViewModel.coins.collectAsState()
 
     val bottomBarRoutes = listOf(
-        Routes.HOME,
+        Routes.GARDEN,
         Routes.FOCUS,
         Routes.PROFILE,
         Routes.MARKET,
@@ -86,7 +88,7 @@ fun AppNavGraph(
     )
 
     val navRoutes = listOf(
-        NavRoute(Routes.HOME, R.drawable.windmill, "Home"),
+        NavRoute(Routes.GARDEN, R.drawable.windmill, "Garden"),
         NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
         NavRoute(Routes.MARKET, R.drawable.market, "Market"),
         NavRoute(Routes.TAGS, R.drawable.signpost, "Tags"),
@@ -95,7 +97,7 @@ fun AppNavGraph(
     )
 
     val bottomNavRoutes = listOf(
-        NavRoute(Routes.HOME, R.drawable.windmill, "Home"),
+        NavRoute(Routes.GARDEN, R.drawable.windmill, "Garden"),
         NavRoute(Routes.FOCUS, R.drawable.pottedplant, "Plant"),
         NavRoute(Routes.PROFILE, R.drawable.rabbit, "Profile")
     )
@@ -111,7 +113,7 @@ fun AppNavGraph(
                     scope.launch { drawerState.close() }
                     if (currentRoute != route) {
                         navController.navigate(route) {
-                            popUpTo(Routes.HOME)
+                            popUpTo(Routes.GARDEN)
                             launchSingleTop = true
                         }
                     }
@@ -148,8 +150,11 @@ fun AppNavGraph(
                             onGoogleSignInClick = onGoogleSignInClick
                         )
                     }
-                    composable(Routes.HOME) {
-                        HomeScreen()
+                    composable(Routes.GARDEN) {
+                        GardenScreen(
+                            viewModel = gardenViewModel,
+                            userId = userId
+                        )
                     }
                     composable(Routes.MARKET) {
                         MarketScreen(

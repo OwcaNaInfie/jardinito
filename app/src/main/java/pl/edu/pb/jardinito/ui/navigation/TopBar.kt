@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -84,7 +85,7 @@ private fun CoinBalanceTopBar(coins: Int) {
 fun TopBarPreview() {
     JardinitoTheme {
         TopBar(
-            title = "Home",
+            title = "Garden",
             onMenuClick = {}
         )
     }

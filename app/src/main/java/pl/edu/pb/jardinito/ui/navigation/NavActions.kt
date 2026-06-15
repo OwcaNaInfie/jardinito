@@ -13,14 +13,14 @@ class NavActions(private val navController: NavController) {
     }
 
     val toHomeFromLogin: () -> Unit = {
-        navController.navigate(Routes.HOME) {
+        navController.navigate(Routes.GARDEN) {
             popUpTo(0) { inclusive = true }
             launchSingleTop = true
         }
     }
 
     val toHomeFromRegister: () -> Unit = {
-        navController.navigate(Routes.HOME) {
+        navController.navigate(Routes.GARDEN) {
             popUpTo(0) { inclusive = true }
             launchSingleTop = true
         }
