@@ -60,7 +60,7 @@ const tagSets = [
 ];
 
 // Daty sesji — rozkład dla prezentacji filtrów: dziś, kwiecień, grudzień 2024, styczeń 2024
-const getSessionDates = () => {
+const getSessionDates = (userIndex) => {
     const now = new Date();
 
     const today = (offsetMinutes) => {
@@ -69,29 +69,97 @@ const getSessionDates = () => {
         return d;
     };
 
-    const april = (day, hour) => new Date(now.getFullYear(), 3, day, hour, 0, 0);
-    const dec2024 = (day, hour) => new Date(2024, 11, day, hour, 0, 0);
-    const jan2024 = (day, hour) => new Date(2024, 0, day, hour, 0, 0);
+    const thisWeek = (daysAgo, hour) => {
+        const d = new Date(now);
+        d.setDate(d.getDate() - daysAgo);
+        d.setHours(hour, 0, 0, 0);
+        return d;
+    };
 
-    return [
-        // 3 sesje z dzisiaj
-        { startedAt: today(95),  completedAt: today(35),  status: 'completed', plannedDuration: 60, actualDuration: 60  },
-        { startedAt: today(185), completedAt: today(125), status: 'completed', plannedDuration: 60, actualDuration: 60  },
-        { startedAt: today(260), completedAt: today(230), status: 'failed',    plannedDuration: 60, actualDuration: 30  },
+    const thisMonth = (daysAgo, hour) => {
+        const d = new Date(now);
+        d.setDate(d.getDate() - daysAgo);
+        d.setHours(hour, 0, 0, 0);
+        return d;
+    };
 
-        // 3 sesje z kwietnia tego roku
-        { startedAt: april(14, 10), completedAt: april(14, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
-        { startedAt: april(20, 14), completedAt: april(20, 15), status: 'completed', plannedDuration: 60, actualDuration: 60 },
-        { startedAt: april(25, 9),  completedAt: april(25, 9),  status: 'failed',    plannedDuration: 90, actualDuration: 20 },
+    const older = (monthsAgo, day, hour) => {
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - monthsAgo);
+        d.setDate(day);
+        d.setHours(hour, 0, 0, 0);
+        return d;
+    };
 
-        // 2 sesje z grudnia 2024
-        { startedAt: dec2024(10, 11), completedAt: dec2024(10, 13), status: 'completed', plannedDuration: 90, actualDuration: 90 },
-        { startedAt: dec2024(22, 16), completedAt: dec2024(22, 17), status: 'completed', plannedDuration: 60, actualDuration: 60 },
-
-        // 2 sesje ze stycznia 2024
-        { startedAt: jan2024(5, 10),  completedAt: jan2024(5, 10),  status: 'failed',    plannedDuration: 30, actualDuration: 10 },
-        { startedAt: jan2024(18, 15), completedAt: jan2024(18, 16), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+    const sessionSets = [
+        // Koala — dużo sesji dziś, kilka w tygodniu, kilka w miesiącu
+        [
+            { startedAt: today(30),   completedAt: today(0),    status: 'completed', plannedDuration: 30,  actualDuration: 30  },
+            { startedAt: today(100),  completedAt: today(40),   status: 'completed', plannedDuration: 60,  actualDuration: 60  },
+            { startedAt: today(175),  completedAt: today(145),  status: 'failed',    plannedDuration: 60,  actualDuration: 30  },
+            { startedAt: today(250),  completedAt: today(160),  status: 'completed', plannedDuration: 90,  actualDuration: 90  },
+            { startedAt: thisWeek(2, 10), completedAt: thisWeek(2, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(3, 14), completedAt: thisWeek(3, 15), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(5, 9),  completedAt: thisWeek(5, 9),  status: 'failed',    plannedDuration: 90, actualDuration: 25 },
+            { startedAt: thisMonth(10, 11), completedAt: thisMonth(10, 12), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(18, 16), completedAt: thisMonth(18, 17), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(2, 5, 10), completedAt: older(2, 5, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+        ],
+        // Panda — brak sesji dziś, kilka w tygodniu, więcej w miesiącu
+        [
+            { startedAt: thisWeek(1, 8),  completedAt: thisWeek(1, 9),  status: 'completed', plannedDuration: 60,  actualDuration: 60  },
+            { startedAt: thisWeek(2, 13), completedAt: thisWeek(2, 14), status: 'failed',    plannedDuration: 90,  actualDuration: 40  },
+            { startedAt: thisWeek(4, 10), completedAt: thisWeek(4, 11), status: 'completed', plannedDuration: 60,  actualDuration: 60  },
+            { startedAt: thisWeek(6, 15), completedAt: thisWeek(6, 16), status: 'completed', plannedDuration: 60,  actualDuration: 60  },
+            { startedAt: thisMonth(8, 9),  completedAt: thisMonth(8, 10),  status: 'completed', plannedDuration: 30, actualDuration: 30 },
+            { startedAt: thisMonth(12, 11), completedAt: thisMonth(12, 12), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(15, 14), completedAt: thisMonth(15, 14), status: 'failed',    plannedDuration: 60, actualDuration: 15 },
+            { startedAt: thisMonth(20, 10), completedAt: thisMonth(20, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(1, 10, 12), completedAt: older(1, 10, 13), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(3, 15, 9),  completedAt: older(3, 15, 10), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+        ],
+        // Limon — jedna sesja dziś, dużo w tygodniu, mało w miesiącu
+        [
+            { startedAt: today(60),  completedAt: today(0),   status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(1, 9),  completedAt: thisWeek(1, 10),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(1, 14), completedAt: thisWeek(1, 15),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(2, 11), completedAt: thisWeek(2, 12),  status: 'failed',    plannedDuration: 90, actualDuration: 50 },
+            { startedAt: thisWeek(3, 10), completedAt: thisWeek(3, 11),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(4, 16), completedAt: thisWeek(4, 17),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(5, 9),  completedAt: thisWeek(5, 10),  status: 'completed', plannedDuration: 30, actualDuration: 30 },
+            { startedAt: thisMonth(12, 10), completedAt: thisMonth(12, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(22, 14), completedAt: thisMonth(22, 14), status: 'failed',    plannedDuration: 60, actualDuration: 20 },
+            { startedAt: older(2, 8, 11), completedAt: older(2, 8, 12),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+        ],
+        // Mango — kilka dziś, kilka w tygodniu, kilka w miesiącu (równomierny rozkład)
+        [
+            { startedAt: today(45),  completedAt: today(15),  status: 'completed', plannedDuration: 30, actualDuration: 30 },
+            { startedAt: today(150), completedAt: today(90),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(2, 10), completedAt: thisWeek(2, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisWeek(3, 15), completedAt: thisWeek(3, 15), status: 'failed',    plannedDuration: 60, actualDuration: 10 },
+            { startedAt: thisWeek(5, 11), completedAt: thisWeek(5, 12), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(9, 9),  completedAt: thisMonth(9, 10),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(14, 13), completedAt: thisMonth(14, 14), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(21, 10), completedAt: thisMonth(21, 10), status: 'failed',    plannedDuration: 90, actualDuration: 35 },
+            { startedAt: older(1, 12, 14), completedAt: older(1, 12, 15), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(4, 20, 10), completedAt: older(4, 20, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+        ],
+        // Breza — tylko sesje starsze niż tydzień i miesiąc (do testowania pustych stanów)
+        [
+            { startedAt: thisMonth(8, 10),  completedAt: thisMonth(8, 11),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: thisMonth(10, 14), completedAt: thisMonth(10, 15), status: 'failed',    plannedDuration: 60, actualDuration: 25 },
+            { startedAt: thisMonth(15, 9),  completedAt: thisMonth(15, 10), status: 'completed', plannedDuration: 30, actualDuration: 30 },
+            { startedAt: thisMonth(20, 11), completedAt: thisMonth(20, 12), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(2, 5, 10),  completedAt: older(2, 5, 11),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(2, 12, 14), completedAt: older(2, 12, 15), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(3, 8, 9),   completedAt: older(3, 8, 10),  status: 'failed',    plannedDuration: 90, actualDuration: 45 },
+            { startedAt: older(3, 20, 11), completedAt: older(3, 20, 12), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(5, 15, 10), completedAt: older(5, 15, 11), status: 'completed', plannedDuration: 60, actualDuration: 60 },
+            { startedAt: older(6, 3, 14),  completedAt: older(6, 3, 15),  status: 'completed', plannedDuration: 60, actualDuration: 60 },
+        ],
     ];
+
+    return sessionSets[userIndex % sessionSets.length];
 };
 
 const seed = async () => {
@@ -157,12 +225,12 @@ const seed = async () => {
             });
 
             // 10 sesji z różnymi datami
-            const sessionDates = getSessionDates();
+            const sessionDates = getSessionDates(i);
             const createdTags = userTagsDoc.tags;
 
             for (let s = 0; s < sessionDates.length; s++) {
                 const sd = sessionDates[s];
-                const plant = unlockedPlants[s % unlockedPlants.length];
+                const plant = unlockedPlants[Math.floor(Math.random() * unlockedPlants.length)];
                 const tag = s % 3 === 2 ? null : createdTags[s % createdTags.length];
 
                 const coinsEarned = sd.status === 'completed'

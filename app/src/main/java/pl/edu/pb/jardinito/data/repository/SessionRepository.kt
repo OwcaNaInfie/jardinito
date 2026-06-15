@@ -38,13 +38,33 @@ class SessionRepository @Inject constructor(
         )
     }
 
-    suspend fun getSessions(
+    suspend fun getSessionsByDateRange(
         userId: String,
         from: String? = null,
         to: String? = null,
         status: String? = null
     ): List<Session> {
-        return api.getSessions(userId, from, to, status).sessions.map { dto ->
+        return api.getSessionsByDateRange(userId, from, to, status).sessions.map { dto ->
+            Session(
+                sessionId = dto._id,
+                userId = dto.userId,
+                plant = plantRepository.getPlant(dto.plantId._id),
+                tag = dto.tag?.let { Tag(tagId = it.tagId, name = it.name, color = it.color) },
+                plannedDuration = dto.plannedDuration,
+                actualDuration = dto.actualDuration,
+                status = dto.status,
+                coinsEarned = dto.coinsEarned,
+                startedAt = dto.startedAt,
+                completedAt = dto.completedAt
+            )
+        }
+    }
+
+    suspend fun getSessionsByPreset(
+        userId: String,
+        period: String = "day"
+    ): List<Session> {
+        return api.getSessionsByPreset(userId, period).sessions.map { dto ->
             Session(
                 sessionId = dto._id,
                 userId = dto.userId,

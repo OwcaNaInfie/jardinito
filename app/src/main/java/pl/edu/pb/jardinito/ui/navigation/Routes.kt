@@ -4,7 +4,7 @@ object Routes {
     const val ENTRY = "entry"
     const val LOGIN = "login"
     const val REGISTER = "register"
-    const val HOME = "home"
+    const val GARDEN = "garden"
     const val FOCUS = "focus"
     const val PROFILE = "profile"
     const val TAGS = "tags"

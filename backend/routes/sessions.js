@@ -110,4 +110,30 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { period } = req.query; // 'day' | 'week' | 'month'
+
+    const now = new Date();
+    const from = new Date();
+    if (period === 'day') {
+        from.setHours(0, 0, 0, 0);
+    } else if (period === 'week') {
+        const day = now.getDay(); // 0=niedziela, 1=poniedziałek...
+        const diff = (day === 0) ? 6 : day - 1; // dni od poniedziałku
+        from.setDate(now.getDate() - diff);
+        from.setHours(0, 0, 0, 0);
+    } else if (period === 'month') {
+        from.setDate(1);
+        from.setHours(0, 0, 0, 0);
+    }
+
+    const sessions = await Session.find({
+        userId,
+        startedAt: { $gte: from }
+    }).populate('plantId');
+
+    res.json({ sessions });
+});
+
 module.exports = router;

@@ -36,7 +36,10 @@
 
 
     <!-- Home Screen -->
-    <string name="welcome_message">Witaj w Jardinito 🌱</string>
+    <string name="garden_empty">Brak sesji w tym okresie</string>
+    <string name="garden_period_day">dzisiaj</string>
+    <string name="garden_period_week">tydzień</string>
+    <string name="garden_period_month">miesiąc</string>
 
     <!-- Account verification -->
     <string name="verification_title">Weryfikacja emaila</string>

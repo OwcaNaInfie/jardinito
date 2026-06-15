@@ -3,6 +3,7 @@ package pl.edu.pb.jardinito.data.remote
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface SessionApiService {
@@ -11,11 +12,17 @@ interface SessionApiService {
     suspend fun createSession(@Body request: CreateSessionRequest): CreateSessionResponse
 
     @GET("api/sessions")
-    suspend fun getSessions(
+    suspend fun getSessionsByDateRange(
         @Query("userId") userId: String,
         @Query("from") from: String? = null,
         @Query("to") to: String? = null,
         @Query("status") status: String? = null
+    ): SessionsResponse
+
+    @GET("api/sessions/{userId}")
+    suspend fun getSessionsByPreset(
+        @Path("userId") userId: String,
+        @Query("period") period: String = "day"
     ): SessionsResponse
 
     data class TagSnapshotDto(

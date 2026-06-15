@@ -53,6 +53,8 @@ import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.AppChip
+import pl.edu.pb.jardinito.ui.components.AppChipVariant
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
@@ -301,53 +303,26 @@ private fun PlantTagsRow(plant: Plant) {
     ) {
         val size = PlantSize.fromKey(plant.size)
         size?.let {
-            PlantTag(
+            AppChip(
                 text = stringResource(it.labelRes).replaceFirstChar { it.lowercase() },
-                background = Color.Transparent,
-                textColor = colors.neutralGray,
-                borderColor = colors.neutralGray
+                variant = AppChipVariant.Outlined,
             )
         }
-        PlantTag(
+        AppChip(
             text = "${plant.minDuration} min",
-            background = Color.Transparent,
-            textColor = colors.neutralGray,
-            borderColor = colors.neutralGray
+            variant = AppChipVariant.Outlined,
         )
 
         // Color tags
         plant.colors.forEach { colorKey ->
             val plantColor = PlantColor.fromKey(colorKey)
             plantColor?.let {
-                PlantTag(
+                AppChip(
                     text = stringResource(it.labelRes).replaceFirstChar { it.lowercase() },
-                    background = it.color.copy(alpha = 0.2f),
-                    textColor = colors.neutralLightGray
+                    variant = AppChipVariant.Tinted(it.color),
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PlantTag(
-    text: String,
-    background: Color,
-    textColor: Color,
-    borderColor: Color = Color.Transparent
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(roundedCorner_s))
-            .background(background)
-            .border(1.dp, borderColor, RoundedCornerShape(roundedCorner_s))
-            .padding(horizontal = 10.dp, vertical = 5.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = textColor
-        )
     }
 }
 

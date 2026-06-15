@@ -35,7 +35,7 @@ fun BottomBar(
         onRouteClick = { route ->
             if (currentRoute != route) {
                 navController.navigate(route) {
-                    popUpTo(Routes.HOME)
+                    popUpTo(Routes.GARDEN)
                     launchSingleTop = true
                 }
             }
