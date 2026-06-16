@@ -68,16 +68,13 @@ fun TagsScreen(
     val searchQuery by tagViewModel.searchQuery.collectAsState()
     var tagToEdit by remember { mutableStateOf<Tag?>(null) }
 
-    LaunchedEffect(userId) {
-        if (userId.isNotBlank()) tagViewModel.loadTags(userId)
-    }
-
     TagsScreenContent(
         filteredTags = filteredTags,
         searchQuery = searchQuery,
         onSearchQueryChanged = { tagViewModel.onSearchQueryChanged(it) },
         onTagClick = { tagToEdit = it },
-        onReorder = { tagIds -> tagViewModel.reorderTags(userId, tagIds) }
+        onReorderLocal = { tagIds -> tagViewModel.reorderTagsLocally(tagIds) },
+        onReorderCommit = { tagIds -> tagViewModel.reorderTags(userId, tagIds) }
     )
 
     if (showAddTagDialog) {
@@ -116,7 +113,8 @@ fun TagsScreenContent(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
     onTagClick: (Tag) -> Unit,
-    onReorder: (List<String>) -> Unit
+    onReorderLocal: (List<String>) -> Unit,
+    onReorderCommit: (List<String>) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -137,48 +135,50 @@ fun TagsScreenContent(
             TagsReorderableList(
                 tags = filteredTags,
                 onTagClick = onTagClick,
-                onReorder = onReorder
+                onReorderLocal = onReorderLocal,
+                onReorderCommit = onReorderCommit
             )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TagsReorderableList(
     tags: List<Tag>,
     onTagClick: (Tag) -> Unit,
-    onReorder: (List<String>) -> Unit
+    onReorderLocal: (List<String>) -> Unit,
+    onReorderCommit: (List<String>) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
+    var pendingOrder by remember(tags) { mutableStateOf(tags.map { it.tagId }) }
+
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        val mutableList = tags.toMutableList()
-        mutableList.add(to.index, mutableList.removeAt(from.index))
-        onReorder(mutableList.map { it.tagId })
+        val mutable = pendingOrder.toMutableList()
+        mutable.add(to.index, mutable.removeAt(from.index))
+        pendingOrder = mutable
+        onReorderLocal(mutable)  // aktualizacja UI bez requestu
     }
 
-    LazyColumn(
-        state = lazyListState,
-    ) {
+    LazyColumn(state = lazyListState) {
         items(tags.size, key = { tags[it].tagId }) { index ->
             val tag = tags[index]
-            ReorderableItem(
-                state = reorderableLazyListState,
-                key = tag.tagId
-            ) { isDragging ->
+            ReorderableItem(state = reorderableLazyListState, key = tag.tagId) { isDragging ->
                 Column(
-                    modifier = Modifier
-                        .then(
-                            if (isDragging) Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .border(2.dp, colors.primary300, RoundedCornerShape(8.dp))
-                            else Modifier
-                        )
+                    modifier = Modifier.then(
+                        if (isDragging) Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(2.dp, colors.primary300, RoundedCornerShape(8.dp))
+                        else Modifier
+                    )
                 ) {
                     TagItem(
                         tag = tag,
                         onClick = { onTagClick(tag) },
-                        modifier = Modifier.longPressDraggableHandle()
+                        modifier = Modifier.longPressDraggableHandle(
+                            onDragStopped = {
+                                onReorderCommit(pendingOrder)  // request dopiero tu
+                            }
+                        )
                     )
                 }
             }

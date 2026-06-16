@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.edu.pb.jardinito.ui.theme.colors
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -32,9 +33,9 @@ fun BarChart(
 
     val total = entries.sumOf { it.value.toDouble() }.toFloat().takeIf { it > 0f } ?: 1f
     val maxValue = entries.maxOf { it.value }.takeIf { it > 0f } ?: 1f
+    val maxValueInt = maxValue.toInt().coerceAtLeast(1)
     val density = LocalDensity.current
     val textSizePx = with(density) { 10.sp.toPx() }
-    // Przy dużej liczbie słupków zmniejszamy font etykiet osi X
     val xLabelSizePx = with(density) {
         if (entries.size > ROTATED_LABELS_THRESHOLD) 8.sp.toPx() else 10.sp.toPx()
     }
@@ -55,8 +56,6 @@ fun BarChart(
         Paint().apply {
             color = neutralLightGrayArgb
             textSize = xLabelSizePx
-            // Obrócone etykiety wyrównujemy do prawej — tekst obraca się względem punktu
-            // zakotwiczenia, więc RIGHT daje efekt wyrównania do linii bazowej słupka
             textAlign = if (rotateLabels) Paint.Align.RIGHT else Paint.Align.CENTER
             isAntiAlias = true
         }
@@ -77,12 +76,16 @@ fun BarChart(
         val chartWidth = size.width - yAxisWidth
         val chartHeight = size.height - xAxisHeight - topPadding
         val chartTop = topPadding
-        val ySteps = 4
+
+        // Krok osi Y — ceil(maxValue / 4) gwarantuje unikalne liczby całkowite
+        val rawStep = maxValueInt.toFloat() / 4f
+        val step = ceil(rawStep).toInt().coerceAtLeast(1)
+        val adjustedSteps = (maxValueInt / step).coerceAtLeast(1)
 
         // Gridlines + etykiety osi Y
-        for (step in 0..ySteps) {
-            val value = maxValue * step / ySteps
-            val y = chartTop + chartHeight * (1f - step.toFloat() / ySteps)
+        for (i in 0..adjustedSteps) {
+            val value = step * i
+            val y = chartTop + chartHeight * (1f - value.toFloat() / maxValueInt)
             drawLine(
                 color = axisColor.copy(alpha = 0.7f),
                 start = Offset(yAxisWidth, y),
@@ -90,7 +93,7 @@ fun BarChart(
                 strokeWidth = 1f
             )
             drawContext.canvas.nativeCanvas.drawText(
-                value.roundToInt().toString(),
+                value.toString(),
                 yAxisWidth - 6.dp.toPx(),
                 y + textSizePx / 3f,
                 yLabelPaint
@@ -113,14 +116,11 @@ fun BarChart(
             strokeWidth = 1.5f
         )
 
-        // Słupki zawsze zaczynają się od lewej krawędzi wykresu (yAxisWidth),
-        // bez centrowania — barPadding tylko po prawej stronie słupka
         val slotWidth = chartWidth / entries.size
         val barWidth = min(slotWidth * 0.9f, maxBarWidthPx)
 
         entries.forEachIndexed { i, entry ->
             val barH = (entry.value / maxValue) * chartHeight
-            // Słupek wyrównany do lewej krawędzi slotu
             val x = 20 + yAxisWidth + slotWidth * i
             val barTop = chartTop + chartHeight - barH
 
@@ -145,7 +145,6 @@ fun BarChart(
                 val labelBaselineY = chartTop + chartHeight + xAxisHeight - 4.dp.toPx()
 
                 if (rotateLabels) {
-                    // Obracamy canvas o -45° względem punktu pod środkiem słupka
                     drawContext.canvas.nativeCanvas.save()
                     drawContext.canvas.nativeCanvas.rotate(-45f, labelX, labelBaselineY)
                     drawContext.canvas.nativeCanvas.drawText(

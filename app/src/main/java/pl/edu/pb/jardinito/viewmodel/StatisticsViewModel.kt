@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import kotlinx.coroutines.flow.map
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
+import pl.edu.pb.jardinito.data.repository.PlantRepository
 import pl.edu.pb.jardinito.ui.utils.formatSessionHour
 import java.util.Calendar
 import java.util.Locale
@@ -66,7 +67,8 @@ data class GeneralStats(
 
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val plantRepository: PlantRepository
 ) : ViewModel() {
 
     private val _period = MutableStateFlow(StatisticsPeriod.DAY)
@@ -171,6 +173,7 @@ class StatisticsViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                plantRepository.getPlants()
                 val result = sessionRepository.getSessionsByDateRange(
                     userId = currentUserId,
                     from = toIsoString(from),

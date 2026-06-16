@@ -56,11 +56,11 @@ class MarketViewModel @Inject constructor(
     private val _plants = MutableStateFlow<List<Plant>>(emptyList())
     val plants: StateFlow<List<Plant>> = _plants
 
-    private val _unlockedPlantIds = MutableStateFlow<Set<String>>(emptySet())
-    val unlockedPlantIds: StateFlow<Set<String>> = _unlockedPlantIds
+    val unlockedPlantIds: StateFlow<Set<String>> = walletManager.unlockedPlantIdsFlow
 
-    private val _favouritePlantIds = MutableStateFlow<Set<String>>(emptySet())
-    val favouritePlantIds: StateFlow<Set<String>> = _favouritePlantIds
+    val favouritePlantIds: StateFlow<Set<String>> = walletManager.favouritePlantIdsFlow
+
+    val coins: StateFlow<Int> = walletManager.coinsFlow
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -75,7 +75,7 @@ class MarketViewModel @Inject constructor(
     val filterState: StateFlow<MarketFilterState> = _filterState
 
     val filteredPlants: StateFlow<List<Plant>> = combine(
-        _plants, _unlockedPlantIds, _filterState
+        _plants, walletManager.unlockedPlantIdsFlow, _filterState
     ) { plants, unlockedIds, filters ->
         val resolvedNames = plants.associate {
             it.plantId to resolveString(context, it.nameKey)
@@ -93,9 +93,11 @@ class MarketViewModel @Inject constructor(
 
     private var currentUserId: String = ""
 
-    val coins: StateFlow<Int> = walletManager.coinsFlow
-
     // ---- Data loading ----
+
+    fun setUserId(userId: String) {
+        currentUserId = userId
+    }
 
     fun loadPlants() {
         viewModelScope.launch {
@@ -114,28 +116,22 @@ class MarketViewModel @Inject constructor(
         currentUserId = userId
         viewModelScope.launch {
             try {
-                val wallet = walletRepository.getWallet(userId)
-                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
-                _favouritePlantIds.value = wallet.favouritePlantIds.toSet()
+                walletRepository.getWallet(userId)
             } catch (e: Exception) {
                 _error.value = MarketError.NetworkError
             }
         }
     }
-
-    fun getPlantById(plantId: String): Plant? =
-        _plants.value.firstOrNull { it.plantId == plantId }
-
     // ---- Purchases ----
 
     fun buyPlant(plant: Plant) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val wallet = walletRepository.buyPlant(currentUserId, plant.plantId)
-                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
+                walletRepository.buyPlant(currentUserId, plant.plantId)
                 _buySuccess.value = plant
             } catch (e: retrofit2.HttpException) {
+                android.util.Log.e("MarketViewModel", "buyPlant HttpException: ${e.code()} ${e.message()}")
                 _error.value = when (e.code()) {
                     400 -> {
                         val body = e.response()?.errorBody()?.string() ?: ""
@@ -145,6 +141,7 @@ class MarketViewModel @Inject constructor(
                     else -> MarketError.NetworkError
                 }
             } catch (e: Exception) {
+                android.util.Log.e("MarketViewModel", "buyPlant Exception: ${e::class.simpleName} ${e.message}")
                 _error.value = MarketError.NetworkError
             } finally {
                 _isLoading.value = false
@@ -155,8 +152,7 @@ class MarketViewModel @Inject constructor(
     fun toggleFavourite(plantId: String) {
         viewModelScope.launch {
             try {
-                val wallet = walletRepository.toggleFavourite(currentUserId, plantId)
-                _favouritePlantIds.value = wallet.favouritePlantIds.toSet()
+                walletRepository.toggleFavourite(currentUserId, plantId)
             } catch (e: Exception) {
                 _error.value = MarketError.NetworkError
             }

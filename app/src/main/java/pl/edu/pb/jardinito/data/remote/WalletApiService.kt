@@ -18,8 +18,8 @@ interface WalletApiService {
 
     data class WalletResponse(
         val coins: Int,
-        val unlockedPlantIds: List<String>,
-        val favouritePlantIds: List<String>
+        val unlockedPlantIds: List<String>?,
+        val favouritePlantIds: List<String>?
     )
 
     data class BuyPlantRequest(

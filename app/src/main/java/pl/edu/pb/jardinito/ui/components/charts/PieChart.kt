@@ -77,7 +77,17 @@ fun PieChart(
                 center.y + (radius + 14.dp.toPx()) * sin(midAngleRad)
             )
             val isRight = lineEnd.x >= center.x
-            val horizLen = 10.dp.toPx()
+
+            val label = entry.legendLabel
+            val textWidth = labelPaint.measureText(label)
+
+            val availableSpace = if (isRight) {
+                size.width - lineEnd.x - 3.dp.toPx()
+            } else {
+                lineEnd.x - 3.dp.toPx()
+            }
+            val horizLen = (availableSpace - textWidth).coerceAtLeast(4.dp.toPx())
+
             val textAnchor = Offset(
                 lineEnd.x + if (isRight) horizLen else -horizLen,
                 lineEnd.y
@@ -87,7 +97,6 @@ fun PieChart(
             drawLine(color = neutralLightGray, start = lineEnd, end = textAnchor, strokeWidth = 1.5f)
 
             labelPaint.textAlign = if (isRight) Paint.Align.LEFT else Paint.Align.RIGHT
-            val label = entry.legendLabel
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 textAnchor.x + if (isRight) 3.dp.toPx() else -3.dp.toPx(),
@@ -98,7 +107,6 @@ fun PieChart(
             startAngle += sweepAngle
         }
 
-        // Białe separatory na granicach wycinków — pomijamy dla pojedynczego elementu
         if (!isSingleEntry) {
             boundaries.forEach { angle ->
                 val rad = angle * PI.toFloat() / 180f
@@ -111,7 +119,6 @@ fun PieChart(
             }
         }
 
-        // Donut hole
         drawCircle(color = Color.White, radius = radius * 0.4f, center = center)
     }
 }

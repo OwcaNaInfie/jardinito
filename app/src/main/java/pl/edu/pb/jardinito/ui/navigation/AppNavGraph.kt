@@ -107,6 +107,8 @@ fun AppNavGraph(
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
             tagViewModel.loadTags(userId)
+            marketViewModel.loadPlants()
+            marketViewModel.loadWallet(userId)
         }
     }
 

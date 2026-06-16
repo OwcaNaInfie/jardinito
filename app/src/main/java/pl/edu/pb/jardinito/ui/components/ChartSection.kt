@@ -12,10 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +26,7 @@ import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.colors
 import kotlin.math.roundToInt
 
-private enum class ChartType { Bar, Pie }
+enum class ChartType { Bar, Pie }
 
 data class ChartEntry(
     val label: String,
@@ -39,35 +35,22 @@ data class ChartEntry(
     val color: Color
 )
 
-// Opisuje pojedynczy wiersz na liście pod wykresem.
-// color odpowiada kolorowi użytemu w ChartEntry — kółeczko jest tym samym kolorem co
-// segment/słupek na wykresie.
 data class ChartLegendItem(
     val label: String,
     val count: Int,
     val percentage: Float,
-    val color: androidx.compose.ui.graphics.Color
+    val color: Color
 )
-
-// Główny komponent zastępujący ToggleChart.
-//
-// entries              — dane dla wykresów (label, value, color)
-// legendItems          — opcjonalna lista pod wykresem; null = lista ukryta
-// legendValueFormatter — opcjonalne formatowanie kolumny wartości w legendzie;
-//                        null = domyślne "${count}x" (np. liczba sesji)
-//                        podaj np. { formatIdleTime(it, devMode) } dla wykresu czasu skupienia
-// modifier             — przekazywany do Column
 @Composable
 fun ChartSection(
     entries: List<ChartEntry>,
     legendItems: List<ChartLegendItem>? = null,
     legendValueFormatter: ((Int) -> String)? = null,
-    modifier: Modifier = Modifier.fillMaxWidth()
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    chartType: ChartType = ChartType.Bar,
+    onChartTypeChange: (ChartType) -> Unit = {}
 ) {
     if (entries.isEmpty()) return
-
-    // rememberSaveable żeby wybór wykresu przeżył nawigację do SessionDetail i powrót
-    var chartType by rememberSaveable { mutableStateOf(ChartType.Bar) }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)) {
         ChipRow(
@@ -75,12 +58,12 @@ fun ChartSection(
                 ChipRowItem(
                     text = stringResource(R.string.chart_type_bar),
                     isActive = chartType == ChartType.Bar,
-                    onClick = { chartType = ChartType.Bar }
+                    onClick = { onChartTypeChange(ChartType.Bar) }
                 ),
                 ChipRowItem(
                     text = stringResource(R.string.chart_type_pie),
                     isActive = chartType == ChartType.Pie,
-                    onClick = { chartType = ChartType.Pie }
+                    onClick = { onChartTypeChange(ChartType.Pie) }
                 )
             )
         )
