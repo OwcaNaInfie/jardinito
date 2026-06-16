@@ -56,6 +56,7 @@ import pl.edu.pb.jardinito.ui.components.SessionsListItem
 import pl.edu.pb.jardinito.ui.components.charts.ChartEntry
 import pl.edu.pb.jardinito.ui.components.charts.ChartLegendItem
 import pl.edu.pb.jardinito.ui.components.charts.ChartSection
+import pl.edu.pb.jardinito.ui.components.charts.ChartType
 import pl.edu.pb.jardinito.ui.screens.garden.GardenGrid
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
@@ -64,7 +65,6 @@ import pl.edu.pb.jardinito.ui.theme.Dimensions.topBarHeight
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
 import pl.edu.pb.jardinito.ui.utils.PlantColor
-import pl.edu.pb.jardinito.ui.utils.formatFocusDuration
 import pl.edu.pb.jardinito.ui.utils.formatIdleTime
 import pl.edu.pb.jardinito.ui.utils.resolveString
 import pl.edu.pb.jardinito.viewmodel.GeneralStats
@@ -136,13 +136,12 @@ private fun StatisticsScreenContent(
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     onResetToToday: () -> Unit,
-    onSessionClick: (String) -> Unit
+    onSessionClick: (String) -> Unit,
 ) {
     val gridSize = gridSizeFor(sessions.size)
     val useSmall = useSmallImage(gridSize)
-
-    // rememberSaveable — przeżywa nawigację do SessionDetail i powrót
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    var chartType by rememberSaveable { mutableStateOf(ChartType.Bar) }
 
     val tabs = listOf(
         stringResource(R.string.statistics_tab_general),
@@ -155,10 +154,8 @@ private fun StatisticsScreenContent(
             .fillMaxSize()
             .background(colors.neutralLight)
             .padding(top = topBarHeight, start = screenPadding_s, end = screenPadding_s),
-//        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
     ) {
         PeriodSelector(selected = period, onSelect = onPeriodChange)
-//        Spacer(modifier = Modifier.height(itemsSpacing_s))
         DateNavigator(
             label = dateLabel,
             isAtCurrentPeriod = isAtCurrentPeriod,
@@ -166,7 +163,6 @@ private fun StatisticsScreenContent(
             onNext = onNextClick,
             onResetToToday = onResetToToday
         )
-//        Spacer(modifier = Modifier.height(itemsSpacing_s))
         TabRow(
             selectedTabIndex = selectedTab,
             modifier = Modifier.fillMaxWidth(),
@@ -201,7 +197,9 @@ private fun StatisticsScreenContent(
                 when (tab) {
                     0 -> GeneralTabContent(
                         generalStats = generalStats,
-                        period = period
+                        period = period,
+                        chartType = chartType,
+                        onChartTypeChange = { chartType = it }
                     )
                     1 -> GardenTabContent(
                         sessions = sessions,
@@ -209,9 +207,15 @@ private fun StatisticsScreenContent(
                         gridSize = gridSize,
                         useSmall = useSmall,
                         plantStats = plantStats,
+                        chartType = chartType,
+                        onChartTypeChange = { chartType = it },
                         onSessionClick = onSessionClick
                     )
-                    2 -> TagsTabContent(tagStats = tagStats)
+                    2 -> TagsTabContent(
+                        tagStats = tagStats,
+                        chartType = chartType,
+                        onChartTypeChange = { chartType = it }
+                    )
                 }
             }
         }
@@ -225,15 +229,16 @@ private fun StatisticsScreenContent(
 @Composable
 private fun GeneralTabContent(
     generalStats: GeneralStats,
-    period: StatisticsPeriod
+    period: StatisticsPeriod,
+    chartType: ChartType,
+    onChartTypeChange: (ChartType) -> Unit
 ) {
     val focusEntries = generalStats.focusTimeEntries.map { entry ->
-        ChartEntry(label = entry.label, value = entry.value.toFloat(), color = colors.primary500)
+        ChartEntry(label = entry.label, legendLabel = entry.legendLabel, value = entry.value.toFloat(), color = colors.primary500)
     }
 
     val hourAbbr = stringResource(R.string.time_hour_abbr)
 
-    // Legenda tylko dla wpisów z wartością > 0 — dni/miesiące bez sesji są pomijane
     val focusTotal = generalStats.focusTimeEntries.sumOf { it.value }.toFloat()
         .takeIf { it > 0f } ?: 1f
     val focusLegend = generalStats.focusTimeEntries
@@ -298,7 +303,9 @@ private fun GeneralTabContent(
                             hours > 0                 -> "$hours $hourAbbr"
                             else                      -> "$minutes min"
                         }
-                    }
+                    },
+                    chartType = chartType,
+                    onChartTypeChange = onChartTypeChange
                 )
             }
         }
@@ -307,7 +314,9 @@ private fun GeneralTabContent(
             item {
                 ChartSection(
                     entries = statusEntries,
-                    legendItems = statusLegend
+                    legendItems = statusLegend,
+                    chartType = chartType,
+                    onChartTypeChange = onChartTypeChange
                 )
             }
         }
@@ -321,6 +330,8 @@ private fun GardenTabContent(
     gridSize: Int,
     useSmall: Boolean,
     plantStats: List<PlantStat>,
+    chartType: ChartType,
+    onChartTypeChange: (ChartType) -> Unit,
     onSessionClick: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -364,7 +375,9 @@ private fun GardenTabContent(
         item {
             ChartSection(
                 entries = plantEntries,
-                legendItems = plantLegend
+                legendItems = plantLegend,
+                chartType = chartType,
+                onChartTypeChange = onChartTypeChange
             )
         }
         item {
@@ -374,7 +387,11 @@ private fun GardenTabContent(
 }
 
 @Composable
-private fun TagsTabContent(tagStats: List<TagStat>) {
+private fun TagsTabContent(
+    tagStats: List<TagStat>,
+    chartType: ChartType,
+    onChartTypeChange: (ChartType) -> Unit
+) {
     val tagEntries = tagStats.map { stat ->
         ChartEntry(
             label = stat.tag?.name ?: "-",
@@ -399,7 +416,9 @@ private fun TagsTabContent(tagStats: List<TagStat>) {
         item {
             ChartSection(
                 entries = tagEntries,
-                legendItems = tagLegend
+                legendItems = tagLegend,
+                chartType = chartType,
+                onChartTypeChange = onChartTypeChange
             )
         }
     }

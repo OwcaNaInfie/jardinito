@@ -180,14 +180,6 @@ fun FocusScreen(
         }
     }
 
-    LaunchedEffect(userId) {
-        if (userId.isNotBlank()) {
-            tagViewModel.loadTags(userId)
-            focusViewModel.loadUnlockedPlants(userId)
-            focusViewModel.loadPlants()
-        }
-    }
-
     val config = TimerConfig.forPlant(selectedPlant, focusViewModel.devMode)
 
     FocusScreenContent(
@@ -211,7 +203,7 @@ fun FocusScreen(
             onStart = { focusViewModel.start(userId) },
             onPause = { focusViewModel.pause() },
             onResume = { focusViewModel.resume(userId) },
-            onStopClick = { focusViewModel.requestStop(userId) },
+            onStopClick = { focusViewModel.requestStop() },
             onStopConfirmed = { focusViewModel.confirmStop(userId) },
             onStopDismissed = { focusViewModel.dismissStop(userId) },
             onSessionResultDismissed = { focusViewModel.clearSessionResult() }

@@ -1,5 +1,7 @@
 package pl.edu.pb.jardinito.data.repository
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.PlantImages
 import pl.edu.pb.jardinito.data.model.PlantWitheredImages
@@ -12,19 +14,21 @@ import javax.inject.Singleton
 class PlantRepository @Inject constructor() {
 
     private val api = RetrofitInstance.plants
-
-    // In-memory cache — wypełniany przy getPlants() lub pojedynczych getPlant().
-    // Singleton gwarantuje jeden cache na cały czas życia aplikacji.
     private val cache = mutableMapOf<String, Plant>()
+    private val fetchMutex = Mutex()
 
     suspend fun getPlants(): List<Plant> {
-        return api.getPlants().plants.map { dto ->
-            dto.toModel().also { cache[it.plantId] = it }
+        if (cache.isNotEmpty()) return cache.values.toList()
+        return fetchMutex.withLock {
+            if (cache.isNotEmpty()) cache.values.toList()
+            else api.getPlants().plants.map { dto ->
+                dto.toModel().also { cache[it.plantId] = it }
+            }
         }
     }
 
-    // internal — dostępne w całym module (data/repository).
-    // SessionRepository używa tego przez `with(plantRepository) { dto.plantId.toModel() }`.
+    fun getPlantById(plantId: String): Plant? = cache[plantId]
+
     internal fun PlantApiService.PlantDto.toModel() = Plant(
         plantId = _id,
         name = name,

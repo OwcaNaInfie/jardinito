@@ -130,8 +130,7 @@ private fun IsometricFlowers(
     val flowerSize: Dp = when {
         gridSize <= 3 -> 64.dp
         gridSize <= 4 -> 56.dp
-        gridSize <= 5 -> 48.dp
-        else          -> 32.dp
+        else          -> 48.dp
     }
     val flowerSizePx = with(density) { flowerSize.toPx() }
 

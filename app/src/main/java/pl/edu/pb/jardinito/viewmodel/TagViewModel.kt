@@ -64,10 +64,12 @@ class TagViewModel @Inject constructor(
         }
     }
 
-    fun reorderTags(userId: String, tagIds: List<String>) {
-        // local list instant actualization for better UX
+    fun reorderTagsLocally(tagIds: List<String>) {
         val reordered = tagIds.mapNotNull { id -> _tags.value.find { it.tagId == id } }
         _tags.value = reordered
+    }
+
+    fun reorderTags(userId: String, tagIds: List<String>) {
         viewModelScope.launch {
             try {
                 repository.reorderTags(userId, tagIds)

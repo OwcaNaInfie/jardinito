@@ -1,6 +1,5 @@
 package pl.edu.pb.jardinito.viewmodel
 
-import pl.edu.pb.jardinito.data.repository.WalletRepository
 import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
@@ -35,7 +34,6 @@ sealed class SessionResult {
 class FocusViewModel @Inject constructor(
     private val plantRepository: PlantRepository,
     private val sessionRepository: SessionRepository,
-    private val walletRepository: WalletRepository,
     private val sessionManager: FocusSessionManager,
     private val walletManager: WalletManager,
     @ApplicationContext private val context: Context
@@ -68,9 +66,6 @@ class FocusViewModel @Inject constructor(
     private val _selectedTag = MutableStateFlow<Tag?>(null)
     val selectedTag: StateFlow<Tag?> = _selectedTag
 
-    private val _lastEarnedCoins = MutableStateFlow(0)
-    val lastEarnedCoins: StateFlow<Int> = _lastEarnedCoins
-
     private val _sessionResult = MutableStateFlow<SessionResult?>(null)
     val sessionResult: StateFlow<SessionResult?> = _sessionResult
 
@@ -80,8 +75,7 @@ class FocusViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var sessionStartedAt: String? = null
 
-    private val _unlockedPlantIds = MutableStateFlow<Set<String>>(emptySet())
-    val unlockedPlantIds: StateFlow<Set<String>> = _unlockedPlantIds
+    val unlockedPlantIds: StateFlow<Set<String>> = walletManager.unlockedPlantIdsFlow
 
     private var currentUserId: String = ""
 
@@ -126,15 +120,6 @@ class FocusViewModel @Inject constructor(
         }
     }
 
-    fun loadUnlockedPlants(userId: String) {
-        viewModelScope.launch {
-            try {
-                val wallet = walletRepository.getWallet(userId)
-                _unlockedPlantIds.value = wallet.unlockedPlantIds.toSet()
-            } catch (e: Exception) { }
-        }
-    }
-
     fun selectPlant(plant: Plant) {
         if (_timerState.value !is TimerState.Idle) return
         _selectedPlant.value = plant
@@ -170,7 +155,7 @@ class FocusViewModel @Inject constructor(
         runTimer(userId)
     }
 
-    fun stop(userId: String) {
+    private fun stop(userId: String) {
         timerJob?.cancel()
         sessionManager.setTimerRunning(false)
         stopFocusService()
@@ -187,7 +172,7 @@ class FocusViewModel @Inject constructor(
         }
     }
 
-    fun requestStop(userId: String) {
+    fun requestStop() {
         pause()
         _showStopConfirmDialog.value = true
     }
@@ -242,7 +227,6 @@ class FocusViewModel @Inject constructor(
                 completedAt = if (status == "completed") now else null
             )
             if (status == "completed") {
-                _lastEarnedCoins.value = response.coinsEarned
                 walletManager.addCoins(response.coinsEarned)
                 _sessionResult.value = SessionResult.Completed(plant, response.coinsEarned)
             } else {

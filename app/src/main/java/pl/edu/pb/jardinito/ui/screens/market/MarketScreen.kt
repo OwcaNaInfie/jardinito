@@ -42,9 +42,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
@@ -117,14 +114,10 @@ fun MarketScreen(
     val buySuccess by marketViewModel.buySuccess.collectAsState()
     val isLoading by marketViewModel.isLoading.collectAsState()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
     LaunchedEffect(userId) {
-        if (userId.isNotBlank()) marketViewModel.loadPlants()
-    }
-    LaunchedEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            if (userId.isNotBlank()) marketViewModel.loadWallet(userId)
+        if (userId.isNotBlank()) {
+            marketViewModel.setUserId(userId)
+            marketViewModel.loadPlants()
         }
     }
 

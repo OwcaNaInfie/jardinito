@@ -14,6 +14,7 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.manager.GardenPositionsManager
 import pl.edu.pb.jardinito.data.model.Session
 import pl.edu.pb.jardinito.data.model.Tag
+import pl.edu.pb.jardinito.data.repository.PlantRepository
 import pl.edu.pb.jardinito.data.repository.SessionRepository
 import javax.inject.Inject
 
@@ -26,7 +27,8 @@ enum class GardenPeriod(val apiValue: String, @StringRes val labelRes: Int) {
 @HiltViewModel
 class GardenViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
-    private val gardenPositionsManager: GardenPositionsManager
+    private val gardenPositionsManager: GardenPositionsManager,
+    private val plantRepository: PlantRepository
 ) : ViewModel() {
 
     private val _sessions = MutableStateFlow<List<Session>>(emptyList())
@@ -52,13 +54,17 @@ class GardenViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
             try {
+                plantRepository.getPlants()
                 val result = sessionRepository.getSessionsByPreset(
                     userId = userId,
                     period = _period.value.apiValue
                 )
+                android.util.Log.d("GardenVM", "sessions: ${result.size}, plants: ${result.map { it.plant.plantId }}")
                 _sessions.value = result
                 assignPositions(result)
+                android.util.Log.d("GardenVM", "positions: ${_positions.value}")
             } catch (e: Exception) {
+                android.util.Log.e("GardenVM", "load failed: ${e::class.simpleName} ${e.message}")
                 _error.value = e.message
             } finally {
                 _isLoading.value = false
@@ -101,11 +107,12 @@ class GardenViewModel @Inject constructor(
         val gridSize = gridSizeFor(sessions.size)
         val totalCells = gridSize * gridSize
 
-        // Wczytaj zapisane pozycje dla tego rozmiaru grida
         val saved = gardenPositionsManager.getPositions(gridSize)
             ?.toMutableMap() ?: mutableMapOf()
 
-        // Znajdź sesje bez przypisanej pozycji
+        // Usuń zapisane pozycje które wychodzą poza aktualny grid
+        saved.entries.removeIf { it.value >= totalCells }
+
         val unassigned = sessions.filter { it.sessionId !in saved }
 
         if (unassigned.isEmpty()) {
@@ -113,14 +120,16 @@ class GardenViewModel @Inject constructor(
             return
         }
 
-        // Wylosuj wolne pozycje tylko dla nowych sesji
         val takenPositions = saved.values.toSet()
         val freePositions = (0 until totalCells)
             .filter { it !in takenPositions }
             .shuffled()
 
+        // Zabezpieczenie gdyby freePositions było krótsze niż unassigned
         unassigned.forEachIndexed { index, session ->
-            saved[session.sessionId] = freePositions[index]
+            if (index < freePositions.size) {
+                saved[session.sessionId] = freePositions[index]
+            }
         }
 
         gardenPositionsManager.savePositions(gridSize, saved)

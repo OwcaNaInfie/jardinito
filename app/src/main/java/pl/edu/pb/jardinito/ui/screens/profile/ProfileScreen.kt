@@ -90,19 +90,12 @@ fun ProfileScreen(
     onPlantClick: (Plant) -> Unit
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     var showUsernameDialog by remember { mutableStateOf(false) }
     var showEmailDialog by remember { mutableStateOf(false) }
     var showEmailVerificationDialog by remember { mutableStateOf(false) }
 
     val coins by profileViewModel.coins.collectAsState()
     val favouritePlants by profileViewModel.favouritePlants.collectAsState()
-
-    LaunchedEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            user.userId.let { profileViewModel.load(it) }
-        }
-    }
 
     val cropLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -432,7 +425,6 @@ private fun FavouritesTile(favouritePlants: List<Plant>, onPlantClick: (Plant) -
                             .clip(RoundedCornerShape(6.dp))
                             .background(colors.primary50)
                             .clickable { onPlantClick(plant) }
-//                            .padding(4.dp)
                     )
                 }
             }

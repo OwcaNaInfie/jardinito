@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import pl.edu.pb.jardinito.data.manager.WalletManager
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.repository.PlantRepository
 import pl.edu.pb.jardinito.data.repository.WalletRepository
@@ -13,32 +14,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val walletRepository: WalletRepository,
-    private val plantRepository: PlantRepository
+    private val plantRepository: PlantRepository,
+    private val walletManager: WalletManager
 ) : ViewModel() {
 
-    private val _coins = MutableStateFlow(0)
-    val coins: StateFlow<Int> = _coins
+    val coins: StateFlow<Int> = walletManager.coinsFlow
 
     private val _favouritePlants = MutableStateFlow<List<Plant>>(emptyList())
     val favouritePlants: StateFlow<List<Plant>> = _favouritePlants
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    fun load(userId: String) {
+    init {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                val wallet = walletRepository.getWallet(userId)
-                _coins.value = wallet.coins
-
-                val allPlants = plantRepository.getPlants()
-                _favouritePlants.value = allPlants.filter {
-                    wallet.favouritePlantIds.contains(it.plantId)
-                }
-            } catch (e: Exception) { } finally {
-                _isLoading.value = false
+            walletManager.favouritePlantIdsFlow.collect { ids ->
+                _favouritePlants.value = ids.mapNotNull { plantRepository.getPlantById(it) }
             }
         }
     }
