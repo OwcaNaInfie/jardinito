@@ -3,13 +3,6 @@ package pl.edu.pb.jardinito.ui.screens
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import pl.edu.pb.jardinito.ui.utils.formatIdleTime
-import pl.edu.pb.jardinito.viewmodel.GeneralStats
-import pl.edu.pb.jardinito.viewmodel.SessionStatusStat
-import androidx.compose.ui.platform.LocalContext
-import pl.edu.pb.jardinito.ui.utils.PlantColor
-import pl.edu.pb.jardinito.ui.utils.resolveString
-import pl.edu.pb.jardinito.viewmodel.PlantStat
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,16 +17,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.typography
@@ -47,30 +36,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
-import coil.compose.AsyncImage
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Session
-import pl.edu.pb.jardinito.data.remote.RetrofitInstance
-import pl.edu.pb.jardinito.ui.components.AppChip
-import pl.edu.pb.jardinito.ui.components.AppChipVariant
-import pl.edu.pb.jardinito.ui.components.ChartEntry
 import pl.edu.pb.jardinito.ui.components.ChipRow
 import pl.edu.pb.jardinito.ui.components.ChipRowItem
 import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.ui.components.SessionsListItem
-import pl.edu.pb.jardinito.ui.components.ToggleChart
+import pl.edu.pb.jardinito.ui.components.charts.ChartEntry
+import pl.edu.pb.jardinito.ui.components.charts.ChartLegendItem
+import pl.edu.pb.jardinito.ui.components.charts.ChartSection
 import pl.edu.pb.jardinito.ui.screens.garden.GardenGrid
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
@@ -78,11 +63,15 @@ import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.topBarHeight
 import pl.edu.pb.jardinito.ui.theme.TagColors
 import pl.edu.pb.jardinito.ui.theme.colors
-import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
+import pl.edu.pb.jardinito.ui.utils.PlantColor
+import pl.edu.pb.jardinito.ui.utils.formatFocusDuration
+import pl.edu.pb.jardinito.ui.utils.formatIdleTime
+import pl.edu.pb.jardinito.ui.utils.resolveString
+import pl.edu.pb.jardinito.viewmodel.GeneralStats
+import pl.edu.pb.jardinito.viewmodel.PlantStat
 import pl.edu.pb.jardinito.viewmodel.StatisticsPeriod
 import pl.edu.pb.jardinito.viewmodel.StatisticsViewModel
 import pl.edu.pb.jardinito.viewmodel.TagStat
-import kotlin.math.roundToInt
 
 @Composable
 fun StatisticsScreen(
@@ -151,7 +140,10 @@ private fun StatisticsScreenContent(
 ) {
     val gridSize = gridSizeFor(sessions.size)
     val useSmall = useSmallImage(gridSize)
-    var selectedTab by remember { mutableIntStateOf(0) }
+
+    // rememberSaveable — przeżywa nawigację do SessionDetail i powrót
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
     val tabs = listOf(
         stringResource(R.string.statistics_tab_general),
         stringResource(R.string.statistics_tab_garden),
@@ -163,9 +155,10 @@ private fun StatisticsScreenContent(
             .fillMaxSize()
             .background(colors.neutralLight)
             .padding(top = topBarHeight, start = screenPadding_s, end = screenPadding_s),
-        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
+//        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
     ) {
         PeriodSelector(selected = period, onSelect = onPeriodChange)
+//        Spacer(modifier = Modifier.height(itemsSpacing_s))
         DateNavigator(
             label = dateLabel,
             isAtCurrentPeriod = isAtCurrentPeriod,
@@ -173,6 +166,7 @@ private fun StatisticsScreenContent(
             onNext = onNextClick,
             onResetToToday = onResetToToday
         )
+//        Spacer(modifier = Modifier.height(itemsSpacing_s))
         TabRow(
             selectedTabIndex = selectedTab,
             modifier = Modifier.fillMaxWidth(),
@@ -183,7 +177,7 @@ private fun StatisticsScreenContent(
                 Tab(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
-                    text = { Text(title, style = typography.labelMedium) }
+                    text = { Text(title, style = typography.labelSmall) }
                 )
             }
         }
@@ -205,14 +199,17 @@ private fun StatisticsScreenContent(
                 modifier = Modifier.weight(1f)
             ) { tab ->
                 when (tab) {
-                    0 -> GeneralTabContent(generalStats = generalStats)
+                    0 -> GeneralTabContent(
+                        generalStats = generalStats,
+                        period = period
+                    )
                     1 -> GardenTabContent(
                         sessions = sessions,
                         positions = positions,
                         gridSize = gridSize,
                         useSmall = useSmall,
-                        onSessionClick = onSessionClick,
-                        plantStats = plantStats
+                        plantStats = plantStats,
+                        onSessionClick = onSessionClick
                     )
                     2 -> TagsTabContent(tagStats = tagStats)
                 }
@@ -221,12 +218,36 @@ private fun StatisticsScreenContent(
     }
 }
 
+// =====================
+// TABS
+// =====================
+
 @Composable
-private fun GeneralTabContent(generalStats: GeneralStats) {
-    val focusChartEntries = generalStats.focusTimeEntries.map { entry ->
+private fun GeneralTabContent(
+    generalStats: GeneralStats,
+    period: StatisticsPeriod
+) {
+    val focusEntries = generalStats.focusTimeEntries.map { entry ->
         ChartEntry(label = entry.label, value = entry.value.toFloat(), color = colors.primary500)
     }
-    val statusChartEntries = generalStats.statusStats.map { stat ->
+
+    val hourAbbr = stringResource(R.string.time_hour_abbr)
+
+    // Legenda tylko dla wpisów z wartością > 0 — dni/miesiące bez sesji są pomijane
+    val focusTotal = generalStats.focusTimeEntries.sumOf { it.value }.toFloat()
+        .takeIf { it > 0f } ?: 1f
+    val focusLegend = generalStats.focusTimeEntries
+        .filter { it.value > 0 }
+        .map { entry ->
+            ChartLegendItem(
+                label = entry.legendLabel,
+                count = entry.value,
+                percentage = entry.value / focusTotal * 100f,
+                color = colors.primary500
+            )
+        }
+
+    val statusEntries = generalStats.statusStats.map { stat ->
         ChartEntry(
             label = if (stat.status == "completed") stringResource(R.string.statistics_status_completed)
             else stringResource(R.string.statistics_status_uncompleted),
@@ -234,11 +255,20 @@ private fun GeneralTabContent(generalStats: GeneralStats) {
             color = if (stat.status == "completed") colors.primary500 else colors.error
         )
     }
+    val statusLegend = generalStats.statusStats.map { stat ->
+        ChartLegendItem(
+            label = if (stat.status == "completed") stringResource(R.string.statistics_status_completed)
+            else stringResource(R.string.statistics_status_uncompleted),
+            count = stat.count,
+            percentage = stat.percentage,
+            color = if (stat.status == "completed") colors.primary500 else colors.error
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
-        contentPadding = PaddingValues(bottom = itemsSpacing_s)
+        contentPadding = PaddingValues(vertical = itemsSpacing_s)
     ) {
         item {
             StatInfoRow(
@@ -254,26 +284,130 @@ private fun GeneralTabContent(generalStats: GeneralStats) {
                 )
             }
         }
-        if (focusChartEntries.isNotEmpty()) {
+        if (focusEntries.isNotEmpty()) {
             item { SectionLabel(stringResource(R.string.statistics_focus_time_title)) }
-            item { ToggleChart(entries = focusChartEntries, modifier = Modifier.fillMaxWidth()) }
-        }
-        if (statusChartEntries.isNotEmpty()) {
-            item { SectionLabel(stringResource(R.string.statistics_status_title)) }
-            item { ToggleChart(entries = statusChartEntries, modifier = Modifier.fillMaxWidth()) }
             item {
-                Column {
-                    generalStats.statusStats.forEachIndexed { index, stat ->
-                        StatusStatRow(stat = stat)
-                        if (index < generalStats.statusStats.lastIndex) {
-                            HorizontalDivider(color = colors.neutralInvisibleGray)
+                ChartSection(
+                    entries = focusEntries,
+                    legendItems = focusLegend,
+                    legendValueFormatter = { count ->
+                        val hours = count / 60
+                        val minutes = count % 60
+                        when {
+                            hours > 0 && minutes > 0 -> "$hours $hourAbbr $minutes min"
+                            hours > 0                 -> "$hours $hourAbbr"
+                            else                      -> "$minutes min"
                         }
                     }
-                }
+                )
+            }
+        }
+        if (statusEntries.isNotEmpty()) {
+            item { SectionLabel(stringResource(R.string.statistics_status_title)) }
+            item {
+                ChartSection(
+                    entries = statusEntries,
+                    legendItems = statusLegend
+                )
             }
         }
     }
 }
+
+@Composable
+private fun GardenTabContent(
+    sessions: List<Session>,
+    positions: Map<String, Int>,
+    gridSize: Int,
+    useSmall: Boolean,
+    plantStats: List<PlantStat>,
+    onSessionClick: (String) -> Unit
+) {
+    val context = LocalContext.current
+
+    val plantEntries = plantStats.map { stat ->
+        ChartEntry(
+            label = resolveString(context, stat.plant.nameKey),
+            value = stat.count.toFloat(),
+            color = PlantColor.fromKey(
+                stat.plant.colors.getOrElse(1) { stat.plant.colors.firstOrNull() ?: "" }
+            )?.color ?: colors.neutralGray
+        )
+    }
+    val plantLegend = plantStats.map { stat ->
+        ChartLegendItem(
+            label = resolveString(context, stat.plant.nameKey),
+            count = stat.count,
+            percentage = stat.percentage,
+            color = PlantColor.fromKey(
+                stat.plant.colors.getOrElse(1) { stat.plant.colors.firstOrNull() ?: "" }
+            )?.color ?: colors.neutralGray
+        )
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
+        contentPadding = PaddingValues(vertical = itemsSpacing_s)
+    ) {
+        item {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                GardenGrid(
+                    sessions = sessions,
+                    gridSize = gridSize,
+                    useSmall = useSmall,
+                    positions = positions,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+        item {
+            ChartSection(
+                entries = plantEntries,
+                legendItems = plantLegend
+            )
+        }
+        item {
+            CollapsibleSessionList(sessions = sessions, onSessionClick = onSessionClick)
+        }
+    }
+}
+
+@Composable
+private fun TagsTabContent(tagStats: List<TagStat>) {
+    val tagEntries = tagStats.map { stat ->
+        ChartEntry(
+            label = stat.tag?.name ?: "-",
+            value = stat.count.toFloat(),
+            color = stat.tag?.let { TagColors.colorCompose(it.color) } ?: colors.neutralGray
+        )
+    }
+    val tagLegend = tagStats.map { stat ->
+        ChartLegendItem(
+            label = stat.tag?.name ?: stringResource(R.string.session_detail_no_tag),
+            count = stat.count,
+            percentage = stat.percentage,
+            color = stat.tag?.let { TagColors.colorCompose(it.color) } ?: colors.neutralGray
+        )
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
+        contentPadding = PaddingValues(vertical = itemsSpacing_s)
+    ) {
+        item {
+            ChartSection(
+                entries = tagEntries,
+                legendItems = tagLegend
+            )
+        }
+    }
+}
+
+// =====================
+// HELPERS
+// =====================
 
 @Composable
 private fun SectionLabel(text: String) {
@@ -289,184 +423,6 @@ private fun StatInfoRow(label: String, value: String) {
     ) {
         Text(text = label, style = typography.bodyMedium, color = colors.neutralLightGray)
         Text(text = value, style = typography.bodyMedium, color = colors.neutralGray)
-    }
-}
-
-@Composable
-private fun StatusStatRow(stat: SessionStatusStat) {
-    val color = if (stat.status == "completed") colors.primary500 else colors.error
-    val label = if (stat.status == "completed") stringResource(R.string.statistics_status_completed)
-    else stringResource(R.string.statistics_status_uncompleted)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = itemsSpacing_xs),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s)
-    ) {
-        Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(color))
-        Text(text = label, style = typography.bodyMedium, color = colors.neutralGray, modifier = Modifier.weight(1f))
-        Text(text = "${stat.count}x", style = typography.bodyMedium, color = colors.neutralGray)
-        Text(text = "${stat.percentage.roundToInt()}%", style = typography.bodyMedium, color = colors.neutralGray)
-    }
-}
-
-@Composable
-private fun GardenTabContent(
-    sessions: List<Session>,
-    positions: Map<String, Int>,
-    gridSize: Int,
-    useSmall: Boolean,
-    plantStats: List<PlantStat>,
-    onSessionClick: (String) -> Unit
-) {
-    val context = LocalContext.current
-    val chartEntries = plantStats.map { stat ->
-        ChartEntry(
-            label = resolveString(context, stat.plant.nameKey),
-            value = stat.count.toFloat(),
-            color = PlantColor.fromKey(stat.plant.colors.getOrElse(1) {
-                stat.plant.colors.firstOrNull() ?: "" })?.color
-                ?: colors.neutralGray
-        )
-    }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
-        contentPadding = PaddingValues(bottom = itemsSpacing_s)
-    ) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                GardenGrid(
-                    sessions = sessions,
-                    gridSize = gridSize,
-                    useSmall = useSmall,
-                    positions = positions,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-        item {
-            ToggleChart(
-                entries = chartEntries,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-        item {
-            Column {
-                plantStats.forEachIndexed { index, stat ->
-                    PlantStatRow(stat = stat)
-                    if (index < plantStats.lastIndex) {
-                        HorizontalDivider(color = colors.neutralInvisibleGray.copy(alpha = 0.3f))
-                    }
-                }
-            }
-        }
-        item {
-            CollapsibleSessionList(sessions = sessions, onSessionClick = onSessionClick)
-        }
-    }
-}
-
-@Composable
-private fun PlantStatRow(stat: PlantStat) {
-    val context = LocalContext.current
-    val imageUrl = "${RetrofitInstance.BASE_URL}plants/${stat.plant.images.large}"
-    val request = rememberSvgImageRequest(imageUrl)
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = itemsSpacing_xs),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AsyncImage(
-                model = request,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                contentScale = ContentScale.Fit,
-                filterQuality = FilterQuality.None
-            )
-            Text(
-                text = resolveString(context, stat.plant.nameKey),
-                style = typography.bodyMedium,
-                color = colors.neutralGray
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(itemsSpacing_xs)) {
-            Text(
-                text = "${stat.count}x",
-                style = typography.bodyMedium,
-                color = colors.neutralGray
-            )
-            Text(
-                text = "${stat.percentage.roundToInt()}%",
-                style = typography.bodyMedium,
-                color = colors.neutralGray
-            )
-        }
-    }
-}
-
-@Composable
-private fun TagsTabContent(tagStats: List<TagStat>) {
-    val chartEntries = tagStats.map { stat ->
-        ChartEntry(
-            label = stat.tag?.name ?: "-",
-            value = stat.count.toFloat(),
-            color = stat.tag?.let { TagColors.colorCompose(it.color) } ?: colors.neutralGray
-        )
-    }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(itemsSpacing_s),
-        contentPadding = PaddingValues(bottom = itemsSpacing_s)
-    ) {
-        item {
-            ToggleChart(entries = chartEntries, modifier = Modifier.fillMaxWidth())
-        }
-        items(tagStats) { stat ->
-            TagStatRow(stat = stat)
-        }
-    }
-}
-
-@Composable
-private fun TagStatRow(stat: TagStat) {
-    val tagColor = stat.tag?.let { TagColors.colorCompose(it.color) } ?: colors.neutralGray
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(itemsSpacing_s)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .clip(CircleShape)
-                .background(tagColor)
-        )
-        Text(
-            text = stat.tag?.name ?: stringResource(R.string.session_detail_no_tag),
-            style = typography.bodyMedium,
-            color = colors.neutralGray,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = "${stat.count}x",
-            style = typography.bodyMedium,
-            color = colors.neutralGray
-        )
-        Text(
-            text = "${stat.percentage.roundToInt()}%",
-            style = typography.bodyMedium,
-            color = colors.neutralGray
-        )
     }
 }
 
@@ -503,7 +459,10 @@ private fun CollapsibleSessionList(
                 verticalArrangement = Arrangement.spacedBy(itemsSpacing_xs)
             ) {
                 sessions.forEach { session ->
-                    SessionsListItem(session = session, onClick = { onSessionClick(session.sessionId) })
+                    SessionsListItem(
+                        session = session,
+                        onClick = { onSessionClick(session.sessionId) }
+                    )
                 }
             }
         }
@@ -519,7 +478,7 @@ private fun PeriodSelector(selected: StatisticsPeriod, onSelect: (StatisticsPeri
                 isActive = period == selected,
                 onClick = { onSelect(period) }
             )
-        },
+        }
     )
 }
 
@@ -533,23 +492,41 @@ private fun DateNavigator(
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onPrevious) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = colors.neutralGray)
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = colors.neutralGray
+            )
         }
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = label, style = typography.bodyMedium, color = colors.neutralGray, textAlign = TextAlign.Center)
+            Text(
+                text = label,
+                style = typography.bodyMedium,
+                color = colors.neutralGray,
+                textAlign = TextAlign.Center
+            )
             if (!isAtCurrentPeriod) {
                 IconButton(onClick = onResetToToday, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.Replay, contentDescription = null, tint = colors.neutralGray, modifier = Modifier.size(16.dp))
+                    Icon(
+                        Icons.Filled.Replay,
+                        contentDescription = null,
+                        tint = colors.neutralGray,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
         if (!isAtCurrentPeriod) {
             IconButton(onClick = onNext) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = colors.neutralGray)
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = colors.neutralGray
+                )
             }
         } else {
             Spacer(modifier = Modifier.size(48.dp))

@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import kotlinx.coroutines.flow.map
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.Tag
+import pl.edu.pb.jardinito.ui.utils.formatSessionHour
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -52,6 +53,7 @@ data class SessionStatusStat(
 
 data class FocusTimeEntry(
     val label: String,
+    val legendLabel: String,
     val value: Int
 )
 
@@ -138,7 +140,6 @@ class StatisticsViewModel @Inject constructor(
 
     fun setPeriod(period: StatisticsPeriod) {
         _period.value = period
-        _selectedDateMs.value = todayMs()
         fetchSessions()
     }
 
@@ -327,7 +328,11 @@ private fun computeFocusTimeEntries(
     return when (period) {
         StatisticsPeriod.DAY -> completed
             .sortedBy { it.startedAt }
-            .map { FocusTimeEntry(it.startedAt.substring(11, 16), it.actualDuration ?: 0) }
+            .map { FocusTimeEntry(
+                label = it.startedAt.substring(11, 16),
+                legendLabel = formatSessionHour(it.startedAt.substring(11, 16)),
+                value = it.actualDuration ?: 0
+            )}
 
         StatisticsPeriod.WEEK -> {
             val monday = weekStart(date)
@@ -335,6 +340,7 @@ private fun computeFocusTimeEntries(
                 val day = (monday.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, offset) }
                 FocusTimeEntry(
                     label = SimpleDateFormat("EEE", Locale.getDefault()).format(day.time).take(2),
+                    legendLabel = SimpleDateFormat("EEEE", Locale.getDefault()).format(day.time),
                     value = completed.filter { sessionOnDay(it, day) }.sumOf { it.actualDuration ?: 0 }
                 )
             }
@@ -347,6 +353,7 @@ private fun computeFocusTimeEntries(
                 val dayCalendar = (firstDay.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, offset) }
                 FocusTimeEntry(
                     label = if (day == 1 || day % 5 == 0) day.toString() else "",
+                    legendLabel = SimpleDateFormat("d MMMM", Locale.getDefault()).format(dayCalendar.time),
                     value = completed.filter { sessionOnDay(it, dayCalendar) }.sumOf { it.actualDuration ?: 0 }
                 )
             }
@@ -358,6 +365,8 @@ private fun computeFocusTimeEntries(
             }
             FocusTimeEntry(
                 label = SimpleDateFormat("MMM", Locale.getDefault()).format(month.time).take(3),
+                legendLabel = SimpleDateFormat("LLLL", Locale.getDefault()).format(month.time)
+                    .replaceFirstChar { it.uppercase() },
                 value = completed.filter { sessionOnMonth(it, month) }.sumOf { it.actualDuration ?: 0 }
             )
         }

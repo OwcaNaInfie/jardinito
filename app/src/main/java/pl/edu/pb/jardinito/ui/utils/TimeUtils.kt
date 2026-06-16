@@ -26,3 +26,5 @@ fun formatSessionDate(isoDate: String): String {
         isoDate
     }
 }
+
+fun formatSessionHour(time: String): String = "godz. $time"

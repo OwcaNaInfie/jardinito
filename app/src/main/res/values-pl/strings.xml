@@ -87,9 +87,10 @@
     <string name="statistics_total_focus">Łączny czas skupienia</string>
     <string name="statistics_best_day">Najlepszy dzień</string>
     <string name="statistics_focus_time_title">Czas skupienia</string>
-    <string name="statistics_status_title">Sesje</string>
+    <string name="statistics_status_title">Efektywność</string>
     <string name="statistics_status_completed">Ukończone</string>
-    <string name="statistics_status_uncompleted">Nieukończone</string>
+    <string name="statistics_status_uncompleted">Przerwane</string>
+    <string name="time_hour_abbr">godz.</string>
 
     <!-- Validators -->
     <string name="validator_email_blank">Email jest wymagany.</string>

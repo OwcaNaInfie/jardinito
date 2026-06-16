@@ -2,13 +2,14 @@ package pl.edu.pb.jardinito.data.remote
 
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
 
     // Dom (router WiFi)
-     const val BASE_URL = "http://192.168.0.28:5000/"
+    const val BASE_URL = "http://192.168.0.28:5000/"
 
     // Dołubowo
     // const val BASE_URL = "http://192.168.1.27:5000/"
@@ -18,6 +19,10 @@ object RetrofitInstance {
 
     // Hotspot z telefonu hostname -I
     // const val BASE_URL = "http://10.51.26.240:5000/"
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BASIC
+    }
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor { chain ->
@@ -31,6 +36,7 @@ object RetrofitInstance {
                 response
             }
         }
+        .addInterceptor(loggingInterceptor)
         .build()
 
     private val retrofit: Retrofit by lazy {

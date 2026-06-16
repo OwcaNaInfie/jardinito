@@ -33,6 +33,7 @@ import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.ui.components.SessionsListItem
 import pl.edu.pb.jardinito.ui.screens.garden.GardenGrid
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.topBarHeight
 import pl.edu.pb.jardinito.ui.theme.colors
@@ -128,7 +129,7 @@ private fun GardenScreenContent(
                     contentPadding = PaddingValues(
                         bottom = screenPadding_s
                     ),
-                    verticalArrangement = Arrangement.spacedBy(itemsSpacing_s)
+                    verticalArrangement = Arrangement.spacedBy(itemsSpacing_xs)
                 ) {
                     item {
                         Box(

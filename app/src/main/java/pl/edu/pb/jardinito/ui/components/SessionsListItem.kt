@@ -23,6 +23,7 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Session
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.theme.Dimensions.itemsSpacing_s
+import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_xs
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_s
 import pl.edu.pb.jardinito.ui.theme.Dimensions.screenPadding_xs
 import pl.edu.pb.jardinito.ui.theme.TagColors
@@ -34,19 +35,17 @@ import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 fun SessionsListItem(
     session: Session,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val imageUrl = "${RetrofitInstance.BASE_URL}plants/${
         if (session.status == "failed") session.plant.witheredImages.mediumOutlined
         else session.plant.images.mediumOutlined
     }"
     val request = rememberSvgImageRequest(imageUrl)
-    val shape = RoundedCornerShape(12.dp)
 
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(shape)
+            .clip(RoundedCornerShape(roundedCorner_xs))
             .background(colors.neutralLight)
             .clickable(onClick = onClick)
             .padding(vertical = screenPadding_xs)
@@ -57,7 +56,7 @@ fun SessionsListItem(
         AsyncImage(
             model = request,
             contentDescription = null,
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(40.dp),
             contentScale = ContentScale.Fit,
             filterQuality = FilterQuality.None
         )
