@@ -38,6 +38,9 @@ class SessionRepository @Inject constructor(
         )
     }
 
+    // Używane przez StatisticsViewModel (dowolny zakres dat).
+    // Naprawa N+1: dto.plantId to już pełny PlantDto z populate() — wywołujemy
+    // toModel() bezpośrednio zamiast robić osobny GET /plants/:id dla każdej sesji.
     suspend fun getSessionsByDateRange(
         userId: String,
         from: String? = null,
@@ -45,38 +48,18 @@ class SessionRepository @Inject constructor(
         status: String? = null
     ): List<Session> {
         return api.getSessionsByDateRange(userId, from, to, status).sessions.map { dto ->
-            Session(
-                sessionId = dto._id,
-                userId = dto.userId,
-                plant = plantRepository.getPlant(dto.plantId._id),
-                tag = dto.tag?.let { Tag(tagId = it.tagId, name = it.name, color = it.color) },
-                plannedDuration = dto.plannedDuration,
-                actualDuration = dto.actualDuration,
-                status = dto.status,
-                coinsEarned = dto.coinsEarned,
-                startedAt = dto.startedAt,
-                completedAt = dto.completedAt
-            )
+            dto.toSession()
         }
     }
 
+    // Używane przez GardenViewModel (preset: day/week/month).
+    // Ta sama naprawa N+1 co w getSessionsByDateRange.
     suspend fun getSessionsByPreset(
         userId: String,
         period: String = "day"
     ): List<Session> {
         return api.getSessionsByPreset(userId, period).sessions.map { dto ->
-            Session(
-                sessionId = dto._id,
-                userId = dto.userId,
-                plant = plantRepository.getPlant(dto.plantId._id),
-                tag = dto.tag?.let { Tag(tagId = it.tagId, name = it.name, color = it.color) },
-                plannedDuration = dto.plannedDuration,
-                actualDuration = dto.actualDuration,
-                status = dto.status,
-                coinsEarned = dto.coinsEarned,
-                startedAt = dto.startedAt,
-                completedAt = dto.completedAt
-            )
+            dto.toSession()
         }
     }
 
@@ -86,4 +69,22 @@ class SessionRepository @Inject constructor(
             request = SessionApiService.UpdateSessionTagRequest(tag?.tagId)
         )
     }
+
+    // Prywatna funkcja pomocnicza — mapuje SessionDto → Session korzystając
+    // z internal toModel() z PlantRepository (przez with()) zamiast HTTP request.
+    private fun SessionApiService.SessionDto.toSession(): Session =
+        with(plantRepository) {
+            Session(
+                sessionId = _id,
+                userId = userId,
+                plant = plantId.toModel(),
+                tag = tag?.let { Tag(tagId = it.tagId, name = it.name, color = it.color) },
+                plannedDuration = plannedDuration,
+                actualDuration = actualDuration,
+                status = status,
+                coinsEarned = coinsEarned,
+                startedAt = startedAt,
+                completedAt = completedAt
+            )
+        }
 }

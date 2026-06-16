@@ -87,9 +87,10 @@
     <string name="statistics_total_focus">Total focus time</string>
     <string name="statistics_best_day">Best day</string>
     <string name="statistics_focus_time_title">Focus time</string>
-    <string name="statistics_status_title">Sessions</string>
+    <string name="statistics_status_title">Success rate</string>
     <string name="statistics_status_completed">Completed</string>
-    <string name="statistics_status_uncompleted">Uncompleted</string>
+    <string name="statistics_status_uncompleted">Failed</string>
+    <string name="time_hour_abbr">hr.</string>
 
     <!-- Validators -->
     <string name="validator_email_blank">Email is required.</string>

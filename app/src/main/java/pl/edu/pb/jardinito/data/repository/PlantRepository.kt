@@ -13,15 +13,19 @@ class PlantRepository @Inject constructor() {
 
     private val api = RetrofitInstance.plants
 
+    // In-memory cache — wypełniany przy getPlants() lub pojedynczych getPlant().
+    // Singleton gwarantuje jeden cache na cały czas życia aplikacji.
+    private val cache = mutableMapOf<String, Plant>()
+
     suspend fun getPlants(): List<Plant> {
-        return api.getPlants().plants.map { it.toModel() }
+        return api.getPlants().plants.map { dto ->
+            dto.toModel().also { cache[it.plantId] = it }
+        }
     }
 
-    suspend fun getPlant(plantId: String): Plant {
-        return api.getPlant(plantId).plant.toModel()
-    }
-
-    private fun PlantApiService.PlantDto.toModel() = Plant(
+    // internal — dostępne w całym module (data/repository).
+    // SessionRepository używa tego przez `with(plantRepository) { dto.plantId.toModel() }`.
+    internal fun PlantApiService.PlantDto.toModel() = Plant(
         plantId = _id,
         name = name,
         nameKey = nameKey,

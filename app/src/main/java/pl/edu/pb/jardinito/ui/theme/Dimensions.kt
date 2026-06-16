@@ -14,6 +14,7 @@ object Dimensions {
     val roundedCorner_l = 50.dp
     val roundedCorner_m = 32.dp
     val roundedCorner_s = 16.dp
+    val roundedCorner_xs = 8.dp
     val iconSize_s = 16.dp
 
 }
