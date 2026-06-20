@@ -204,6 +204,8 @@ class FocusViewModel @Inject constructor(
             }
             delay(1000)
             val plant = _selectedPlant.value ?: return@launch
+            sessionManager.run { setTimerRunning(false) }
+            stopFocusService()
             saveSession(userId, plant, status = "completed")
             resetToIdle()
         }
