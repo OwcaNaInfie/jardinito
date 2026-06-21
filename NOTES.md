@@ -182,3 +182,9 @@ czy można połączyć funkcje ze statistics i garden? (SessionRepository)
 
 Dodać: ilość ukończonych i nieukończonych sesji w liczbie, procencie i wykresie, użyte tagi,
 ogólne statystyki - najbardziej aktywny dzień, najdłuższa sesja
+
+testy mateusza - 
+usename is alredy taken kiedy cofnie napisane username do zera, zamiast pole nie moze być puste
+musi kliknąć zaloguj, żeby go automatycznie zalogowało
+informacja o opuszczeniu sesji pokazuje się poza aplikacja nawet jeśli nie mam aktywnej sesji
+po kupieniu kwiatka jego status ulubiony znika?

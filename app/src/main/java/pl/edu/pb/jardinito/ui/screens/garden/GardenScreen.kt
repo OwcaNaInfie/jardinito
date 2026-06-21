@@ -169,6 +169,6 @@ private fun PeriodFilterRow(
                 isActive = period == selected,
                 onClick = { onSelect(period) }
             )
-        },
+        }
     )
 }
