@@ -106,17 +106,17 @@ class GardenViewModel @Inject constructor(
 
         val gridSize = gridSizeFor(sessions.size)
         val totalCells = gridSize * gridSize
+        val currentSessionIds = sessions.map { it.sessionId }.toSet()
 
-        val saved = gardenPositionsManager.getPositions(gridSize)
-            ?.toMutableMap() ?: mutableMapOf()
-
-        // Usuń zapisane pozycje które wychodzą poza aktualny grid
-        saved.entries.removeIf { it.value >= totalCells }
+        val saved = (gardenPositionsManager.getPositions(gridSize) ?: emptyMap())
+            .filter { it.key in currentSessionIds }
+            .toMutableMap()
 
         val unassigned = sessions.filter { it.sessionId !in saved }
 
         if (unassigned.isEmpty()) {
             _positions.value = saved
+            gardenPositionsManager.savePositions(gridSize, saved)
             return
         }
 
@@ -125,7 +125,6 @@ class GardenViewModel @Inject constructor(
             .filter { it !in takenPositions }
             .shuffled()
 
-        // Zabezpieczenie gdyby freePositions było krótsze niż unassigned
         unassigned.forEachIndexed { index, session ->
             if (index < freePositions.size) {
                 saved[session.sessionId] = freePositions[index]
