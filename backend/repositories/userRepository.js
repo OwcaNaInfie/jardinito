@@ -9,4 +9,5 @@ exports.create = (userData) => User.create(userData);
 exports.findByIdAndUpdate = (userId, data) =>
     User.findByIdAndUpdate(userId, data, { new: true });
 exports.findByIdAndDelete = (userId) => User.findByIdAndDelete(userId);
+exports.deleteManyByIds = (ids) => User.deleteMany({ _id: { $in: ids } });
 exports.save = (user) => user.save();

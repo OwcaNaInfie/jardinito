@@ -1,24 +1,23 @@
 const cron = require('node-cron');
-const User = require('../models/User');
-const VerificationToken = require('../models/VerificationToken');
+const userRepository = require('../repositories/userRepository');
+const verificationTokenRepository = require('../repositories/verificationTokenRepository');
 
 const startCronJobs = () => {
-//Raz dziennie
-    cron.schedule('0 2 * * *', async () => {
-//Co minutę
-//cron.schedule('* * * * *', async () => {
-    console.log('[CRON] Running at', new Date().toISOString());
-    try {
-        const expiredTokens = await VerificationToken.find({
-            type: 'email_verification',
-            accountExpiry: { $lt: new Date() }
-        });
-        console.log('[CRON] Found expired tokens:', expiredTokens.length);
+    // Raz dziennie
+//    cron.schedule('0 2 * * *', async () => {
+    // Co minutę (dev)
+     cron.schedule('* * * * *', async () => {
+        console.log('[CRON] Running at', new Date().toISOString());
+        try {
+            const expiredTokens = await verificationTokenRepository.findExpiredEmailVerification();
+            console.log('[CRON] Found expired tokens:', expiredTokens.length);
+
             if (expiredTokens.length > 0) {
                 const userIds = expiredTokens.map(t => t.userId);
+                const tokenIds = expiredTokens.map(t => t._id);
 
-                await User.deleteMany({ _id: { $in: userIds } });
-                await VerificationToken.deleteMany({ _id: { $in: expiredTokens.map(t => t._id) } });
+                await userRepository.deleteManyByIds(userIds);
+                await verificationTokenRepository.deleteManyByIds(tokenIds);
 
                 console.log(`[CRON] Deleted ${expiredTokens.length} unverified accounts`);
             }

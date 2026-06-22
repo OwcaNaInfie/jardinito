@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const bodyParser = require('body-parser');
 const { startCronJobs } = require('./utils/cronService');
 
 // Load .env
@@ -12,7 +11,6 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
 app.use(express.json());
 
 app.use('/avatars', express.static('public/avatars'));
