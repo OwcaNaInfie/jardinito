@@ -1,7 +1,9 @@
 package pl.edu.pb.jardinito.ui.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import pl.edu.pb.jardinito.ui.components.ConfirmDialog
@@ -16,6 +19,7 @@ import pl.edu.pb.jardinito.ui.components.DialogConfig
 import pl.edu.pb.jardinito.ui.components.DialogVariant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +36,7 @@ import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.delay
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.ui.components.FormTextField
+import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
@@ -67,7 +72,8 @@ fun EditFieldDialog(
     errorRes: Int? = null,
     onValueChange: (String) -> Unit,
     onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isLoading: Boolean = false,
 ) {
     var value by remember { mutableStateOf(currentValue) }
 
@@ -87,17 +93,24 @@ fun EditFieldDialog(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
-            FormTextField(
-                label = label,
-                value = value,
-                onValueChange = {
-                    value = it
-                    onValueChange(it)
-                },
-                required = true,
-                errorRes = errorRes,
-                isValid = isValid && value.isNotBlank()
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = colors.primary300,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }else {
+                FormTextField(
+                    label = label,
+                    value = value,
+                    onValueChange = {
+                        value = it
+                        onValueChange(it)
+                    },
+                    required = true,
+                    errorRes = errorRes,
+                    isValid = isValid && value.isNotBlank()
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -123,6 +136,8 @@ fun EditFieldDialog(
 
 @Composable
 fun EmailVerificationDialog(
+    codeError: Int? = null,
+    isLoading: Boolean = false,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -148,51 +163,62 @@ fun EmailVerificationDialog(
             decorFitsSystemWindows = false
         )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
                 .clip(RoundedCornerShape(roundedCorner_s))
                 .background(colors.primary50)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(R.string.verification_title),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = timerText,
-                style = MaterialTheme.typography.headlineSmall,
-                color = timerColor
-            )
-            FormTextField(
-                label = stringResource(R.string.verification_code_hint),
-                value = code,
-                onValueChange = {
-                    if (validateVerificationCode(it)) code = it
-                },
-                required = true,
-                keyboardType = KeyboardType.Number
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AppButton(
-                    text = stringResource(R.string.cancel),
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Primary,
-                    onClick = onDismiss
+                Text(
+                    text = stringResource(R.string.verification_title),
+                    style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                AppButton(
-                    text = stringResource(R.string.verify),
-                    size = ButtonSize.Small,
-                    variant = ButtonVariant.Secondary,
-                    enabled = code.length == 6 && timeLeft > 0,
-                    onClick = { onConfirm(code) }
+                Text(
+                    text = timerText,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = timerColor
                 )
+                FormTextField(
+                    label = stringResource(R.string.verification_code_hint),
+                    value = code,
+                    onValueChange = {
+                        if (validateVerificationCode(it)) code = it
+                    },
+                    required = true,
+                    keyboardType = KeyboardType.Number,
+                    errorRes = codeError
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(color = colors.primary500)
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        AppButton(
+                            text = stringResource(R.string.cancel),
+                            size = ButtonSize.Small,
+                            variant = ButtonVariant.Primary,
+                            onClick = onDismiss
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        AppButton(
+                            text = stringResource(R.string.verify),
+                            size = ButtonSize.Small,
+                            variant = ButtonVariant.Secondary,
+                            enabled = code.length == 6 && timeLeft > 0,
+                            onClick = { onConfirm(code) }
+                        )
+                    }
+                }
+            }
+            SideEffect {
+                Log.d("EmailDialog", "recomposed: isLoading=$isLoading")
             }
         }
     }

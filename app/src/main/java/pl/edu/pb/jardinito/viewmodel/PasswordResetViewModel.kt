@@ -107,9 +107,9 @@ class PasswordResetViewModel @Inject constructor(
                 sessionManager.setUiState(AuthState.PasswordResetRequired)
             } catch (e: HttpException) {
                 sessionManager.setUiState(when (e.code()) {
-                    403 -> AuthState.Error(R.string.error_email_not_verified)
-                    400 -> AuthState.Error(R.string.error_google_account)
-                    422 -> AuthState.Error(R.string.validator_blank)
+                    403  -> AuthState.Error(R.string.error_email_not_verified)
+                    400  -> AuthState.Error(R.string.error_google_account)
+                    422  -> AuthState.Error(R.string.validator_blank)
                     else -> AuthState.Error(R.string.error_server)
                 })
             } catch (e: Exception) {
@@ -119,10 +119,13 @@ class PasswordResetViewModel @Inject constructor(
     }
 
     fun resetPassword(code: String, newPassword: String) {
-        val userId = _pendingResetPasswordUserId.value ?: return
-
         viewModelScope.launch {
             sessionManager.setUiState(AuthState.Loading)
+            val userId = _pendingResetPasswordUserId.value
+            if (userId == null) {
+                sessionManager.setUiState(AuthState.Error(R.string.error_invalid_code))
+                return@launch
+            }
             try {
                 repository.resetPassword(userId, code, newPassword)
                 _pendingResetPasswordUserId.value = null
@@ -130,8 +133,8 @@ class PasswordResetViewModel @Inject constructor(
             } catch (e: HttpException) {
                 sessionManager.setUiState(when (e.code()) {
                     400, 404 -> AuthState.Error(R.string.error_invalid_code)
-                    410 -> AuthState.Error(R.string.error_code_expired)
-                    else -> AuthState.Error(R.string.error_server)
+                    410      -> AuthState.Error(R.string.error_code_expired)
+                    else     -> AuthState.Error(R.string.error_server)
                 })
             } catch (e: Exception) {
                 sessionManager.setUiState(AuthState.Error(R.string.error_server))

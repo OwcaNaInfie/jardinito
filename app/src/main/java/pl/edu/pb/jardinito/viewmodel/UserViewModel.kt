@@ -2,6 +2,7 @@ package pl.edu.pb.jardinito.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.profile.Avatar
 import pl.edu.pb.jardinito.data.model.profile.ProfileFormState
@@ -35,16 +37,11 @@ class UserViewModel @Inject constructor(
     private val _userState = MutableStateFlow<UserState>(UserState.Idle)
     val userState: StateFlow<UserState> = _userState
 
-    // =====================
-    // PENDING STATE
-    // =====================
+    private val _emailCodeError = MutableStateFlow<Int?>(null)
+    val emailCodeError: StateFlow<Int?> = _emailCodeError
 
     private val _pendingEmailChangeUserId = MutableStateFlow<String?>(null)
     val pendingEmailChangeUserId: StateFlow<String?> = _pendingEmailChangeUserId
-
-    // =====================
-    // FORM STATE
-    // =====================
 
     private val _profileFormState = MutableStateFlow(ProfileFormState())
     val profileFormState: StateFlow<ProfileFormState> = _profileFormState
@@ -203,16 +200,24 @@ class UserViewModel @Inject constructor(
 
     fun confirmEmailChange(code: String, onSuccess: (String) -> Unit) {
         val userId = _pendingEmailChangeUserId.value ?: return
-
         viewModelScope.launch {
             _userState.value = UserState.Loading
+            _emailCodeError.value = null
             try {
                 val response = repository.confirmEmailChange(userId, code)
                 _pendingEmailChangeUserId.value = null
                 onSuccess(response.email)
                 _userState.value = UserState.Success
+            } catch (e: HttpException) {
+                _emailCodeError.value = when (e.code()) {
+                    400, 404 -> R.string.error_invalid_code
+                    410      -> R.string.error_code_expired
+                    else     -> R.string.error_server
+                }
+                _userState.value = UserState.Idle
             } catch (e: Exception) {
-                _userState.value = UserState.Error(e.message ?: "Confirm email change failed")
+                _emailCodeError.value = R.string.error_server
+                _userState.value = UserState.Idle
             }
         }
     }
