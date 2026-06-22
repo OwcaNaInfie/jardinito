@@ -1,6 +1,5 @@
 package pl.edu.pb.jardinito.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import pl.edu.pb.jardinito.ui.theme.Dimensions.roundedCorner_s
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -334,7 +332,7 @@ fun TagDialog(
 
             TextField(
                 value = name,
-                onValueChange = { if (it.length <= 30) name = it },
+                onValueChange = { if (it.length <= 15) name = it },
                 placeholder = { Text(stringResource(R.string.tag_name_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth()

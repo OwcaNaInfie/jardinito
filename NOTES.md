@@ -188,3 +188,14 @@ usename is alredy taken kiedy cofnie napisane username do zera, zamiast pole nie
 musi kliknąć zaloguj, żeby go automatycznie zalogowało
 informacja o opuszczeniu sesji pokazuje się poza aplikacja nawet jeśli nie mam aktywnej sesji
 po kupieniu kwiatka jego status ulubiony znika?
+
+input w zmianie emaila ma od prawej za duży padding i nie widać częśći tekstu
+przy wykasowaniu całego username w edycji error mówi że wartość jest zajęta zamiast że pole nie może być puste.
+Przy zmianie emaila nie dostaję errora z frontendu jeśli kod weryfiacyjny jest zły ale z backendu działa
+
+
+Po resecie hasła nie mam dialogu że zostało pomyślnie zmienione
+
+Wpisując niepoprawny kod przy zmianie emaila input nie podświetla się na czerwono że kod jest niepoprawny
+
+drontend validacja inputów - wpiszę coś zle, input czerwony, kiedy kontynuuje pisanie stan error sie nie resetuje
