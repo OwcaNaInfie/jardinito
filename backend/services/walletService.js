@@ -29,9 +29,10 @@ exports.buyPlant = async (userId, plantId) => {
     await walletRepository.save(wallet);
 
     return {
-        coins: wallet.coins,
-        unlockedPlantIds: wallet.unlockedPlantIds.map(id => id.toString())
-    };
+            coins: wallet.coins,
+            unlockedPlantIds: wallet.unlockedPlantIds.map(id => id.toString()),
+            favouritePlantIds: wallet.favouritePlantIds.map(id => id.toString()) // ← dodaj
+        };
 };
 
 exports.toggleFavourite = async (userId, plantId) => {

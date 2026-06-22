@@ -4,9 +4,9 @@ const verificationTokenRepository = require('../repositories/verificationTokenRe
 
 const startCronJobs = () => {
     // Raz dziennie
-//    cron.schedule('0 2 * * *', async () => {
+    cron.schedule('0 2 * * *', async () => {
     // Co minutę (dev)
-     cron.schedule('* * * * *', async () => {
+//     cron.schedule('* * * * *', async () => {
         console.log('[CRON] Running at', new Date().toISOString());
         try {
             const expiredTokens = await verificationTokenRepository.findExpiredEmailVerification();

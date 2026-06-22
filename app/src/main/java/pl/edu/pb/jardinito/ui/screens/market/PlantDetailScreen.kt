@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ import pl.edu.pb.jardinito.data.remote.RetrofitInstance
 import pl.edu.pb.jardinito.ui.components.AppChip
 import pl.edu.pb.jardinito.ui.components.AppChipVariant
 import pl.edu.pb.jardinito.ui.components.DetailLayout
+import pl.edu.pb.jardinito.ui.components.FavouriteButton
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonVariant
@@ -62,12 +64,14 @@ import pl.edu.pb.jardinito.viewmodel.MarketViewModel
 
 data class PlantDetailData(
     val plant: Plant,
-    val isUnlocked: Boolean
+    val isUnlocked: Boolean,
+    val isFavourite: Boolean
 )
 
 data class PlantDetailActions(
     val onBack: () -> Unit,
     val onBuy: (Plant) -> Unit,
+    val onToggleFavourite: () -> Unit,
     val onErrorDismissed: () -> Unit,
     val onBuySuccessDismissed: () -> Unit
 )
@@ -84,6 +88,7 @@ fun PlantDetailScreen(
 ) {
     val plants by marketViewModel.plants.collectAsState()
     val unlockedPlantIds by marketViewModel.unlockedPlantIds.collectAsState()
+    val favouritePlantIds by marketViewModel.favouritePlantIds.collectAsState()
     val error by marketViewModel.error.collectAsState()
     val buySuccess by marketViewModel.buySuccess.collectAsState()
 
@@ -97,18 +102,18 @@ fun PlantDetailScreen(
 
     PlantDetailContent(
         data = PlantDetailData(
-            plant = plant,
-            isUnlocked = unlockedPlantIds.contains(plantId)
+            plant      = plant,
+            isUnlocked = unlockedPlantIds.contains(plantId),
+            isFavourite = favouritePlantIds.contains(plantId)
         ),
         actions = PlantDetailActions(
-            onBack = onBack,
-            onBuy = { marketViewModel.buyPlant(it) },
-            onErrorDismissed = { marketViewModel.clearError() },
-            onBuySuccessDismissed = {
-                marketViewModel.clearBuySuccess()
-            }
+            onBack             = onBack,
+            onBuy              = { marketViewModel.buyPlant(it) },
+            onToggleFavourite  = { marketViewModel.toggleFavourite(plantId) },
+            onErrorDismissed   = { marketViewModel.clearError() },
+            onBuySuccessDismissed = { marketViewModel.clearBuySuccess() }
         ),
-        error = error,
+        error      = error,
         buySuccess = buySuccess
     )
 }
@@ -129,11 +134,23 @@ fun PlantDetailContent(
         imageContentDescription = data.plant.name,
         onClose = actions.onBack
     ) {
-        Text(
-            text = rememberPlantName(data.plant),
-            style = MaterialTheme.typography.headlineLarge,
-            color = colors.neutralBlack
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = rememberPlantName(data.plant),
+                style = MaterialTheme.typography.headlineLarge,
+                color = colors.neutralBlack,
+                modifier = Modifier.weight(1f)
+            )
+            FavouriteButton(
+                isFavourite  = data.isFavourite,
+                onToggle     = actions.onToggleFavourite,
+                inactiveTint = colors.neutralLightGray
+            )
+        }
         PlantPriceChip(price = data.plant.price)
         PlantTagsRow(plant = data.plant)
         Column(verticalArrangement = Arrangement.spacedBy(itemsSpacing_xs)) {
@@ -233,8 +250,6 @@ private fun PlantTagsRow(plant: Plant) {
             text = "${plant.minDuration} min",
             variant = AppChipVariant.Outlined,
         )
-
-        // Color tags
         plant.colors.forEach { colorKey ->
             val plantColor = PlantColor.fromKey(colorKey)
             plantColor?.let {
@@ -259,7 +274,6 @@ private fun PlantDetailBackground(modifier: Modifier = Modifier) {
     }
 
     Box(modifier = modifier) {
-        // Warstwa 1 — niebo (przesuwa się wolniej)
         Image(
             painter = painterResource(R.drawable.bg_sky),
             contentDescription = null,
@@ -269,7 +283,6 @@ private fun PlantDetailBackground(modifier: Modifier = Modifier) {
                 .scale(1.2f)
                 .offset(y = (offsetAnim.value * 0.5f).dp)
         )
-        // Warstwa 2 — trawa (przesuwa się szybciej)
         Image(
             painter = painterResource(R.drawable.bg_grass),
             contentDescription = null,
