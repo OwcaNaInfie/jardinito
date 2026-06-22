@@ -45,16 +45,33 @@ fun ForgotPasswordScreen(
     onPasswordResetSuccess: () -> Unit
 ) {
     val state by passwordResetViewModel.uiState.collectAsState()
-    val pendingUserId by passwordResetViewModel.pendingResetPasswordUserId.collectAsState()
     var lastIdentifier by remember { mutableStateOf("") }
+    var sentCode by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(state) {
-        if (state is AuthState.PasswordResetSuccess) {
-            onPasswordResetSuccess()
+        when (state) {
+            is AuthState.PasswordResetRequired -> sentCode = true
+            is AuthState.PasswordResetSuccess  -> showSuccessDialog = true
+            else -> Unit
         }
     }
 
-    if (pendingUserId == null) {
+    if (showSuccessDialog) {
+        ConfirmDialog(
+            config = DialogConfig(
+                title       = stringResource(R.string.reset_password),
+                message     = stringResource(R.string.password_reset_success),
+                confirmText = "OK",
+                singleButton = true,
+                variant     = DialogVariant.Success
+            ),
+            onConfirm = { showSuccessDialog = false; onPasswordResetSuccess() },
+            onDismiss = { showSuccessDialog = false; onPasswordResetSuccess() }
+        )
+    }
+
+    if (!sentCode) {
         ForgotPasswordRequestContent(
             state = state,
             onSendCode = { identifier ->
@@ -116,7 +133,6 @@ fun ForgotPasswordRequestContent(
             )
         }
     }
-
 }
 
 @Composable
@@ -129,7 +145,6 @@ fun ForgotPasswordResetContent(
 ) {
     val form by passwordResetViewModel.resetPasswordFormState.collectAsState()
     var timeLeft by remember { mutableIntStateOf(120) }
-    var showCodeSentDialog by remember { mutableStateOf(false) }
     val serverError = if (state is AuthState.Error) state.messageRes else null
 
     LaunchedEffect(timeLeft) {
@@ -221,20 +236,6 @@ fun ForgotPasswordResetContent(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-        }
-
-        if (showCodeSentDialog) {
-            ConfirmDialog(
-                config = DialogConfig(
-                title = stringResource(R.string.reset_password),
-                message = stringResource(R.string.verification_code_sent, identifier),
-                confirmText = "OK",
-                singleButton = true,
-                variant = DialogVariant.Success,
-                ),
-                onConfirm = { showCodeSentDialog = false },
-                onDismiss = { showCodeSentDialog = false }
-            )
         }
     }
 }

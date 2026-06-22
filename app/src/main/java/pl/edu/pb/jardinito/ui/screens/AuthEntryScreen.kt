@@ -38,7 +38,6 @@ fun AuthEntryScreen(
     val pendingEmail by verificationViewModel.pendingEmail.collectAsState()
     var showUnverifiedDialog by remember { mutableStateOf(false) }
     var showCodeSentDialog by remember { mutableStateOf(false) }
-    var showResetCodeSentDialog by remember { mutableStateOf(false) }
 
     fun switchSheet(target: AuthSheetState) {
         scope.launch {
@@ -51,11 +50,9 @@ fun AuthEntryScreen(
 
     LaunchedEffect(uiState) {
         when (uiState) {
-            is AuthState.SessionRestored -> onLoginSuccess()
+            is AuthState.SessionRestored      -> onLoginSuccess()
             is AuthState.VerificationRequired -> switchSheet(AuthSheetState.AccountVerification)
-            is AuthState.UnverifiedAccount -> showUnverifiedDialog = true
-            is AuthState.PasswordResetRequired -> showResetCodeSentDialog = true
-            is AuthState.PasswordResetSuccess -> switchSheet(AuthSheetState.Login)
+            is AuthState.UnverifiedAccount    -> showUnverifiedDialog = true
             else -> Unit
         }
     }
@@ -93,7 +90,6 @@ fun AuthEntryScreen(
         AuthDialogs(
             showUnverifiedDialog = showUnverifiedDialog,
             showCodeSentDialog = showCodeSentDialog,
-            showResetCodeSentDialog = showResetCodeSentDialog,
             pendingEmail = pendingEmail,
             onUnverifiedConfirm = {
                 showUnverifiedDialog = false
@@ -108,8 +104,7 @@ fun AuthEntryScreen(
             onCodeSentDismiss = {
                 showCodeSentDialog = false
                 scope.launch { switchSheet(AuthSheetState.AccountVerification) }
-            },
-            onResetCodeSentDismiss = { showResetCodeSentDialog = false }
+            }
         )
 
         if (uiState is AuthState.Loading) {
@@ -160,21 +155,19 @@ private fun AuthSheetContent(
 private fun AuthDialogs(
     showUnverifiedDialog: Boolean,
     showCodeSentDialog: Boolean,
-    showResetCodeSentDialog: Boolean,
     pendingEmail: String?,
     onUnverifiedConfirm: () -> Unit,
     onUnverifiedDismiss: () -> Unit,
     onCodeSentConfirm: () -> Unit,
-    onCodeSentDismiss: () -> Unit,
-    onResetCodeSentDismiss: () -> Unit
+    onCodeSentDismiss: () -> Unit
 ) {
     if (showUnverifiedDialog) {
         ConfirmDialog(
             config = DialogConfig(
-            title = stringResource(R.string.verification_title),
-            message = stringResource(R.string.verification_resend_prompt),
-            confirmText = stringResource(R.string.resend_code),
-            dismissText = stringResource(R.string.cancel),
+                title = stringResource(R.string.verification_title),
+                message = stringResource(R.string.verification_resend_prompt),
+                confirmText = stringResource(R.string.resend_code),
+                dismissText = stringResource(R.string.cancel),
             ),
             onConfirm = onUnverifiedConfirm,
             onDismiss = onUnverifiedDismiss
@@ -184,28 +177,14 @@ private fun AuthDialogs(
     if (showCodeSentDialog) {
         ConfirmDialog(
             config = DialogConfig(
-            title = stringResource(R.string.verification_title),
-            message = stringResource(R.string.verification_code_sent, pendingEmail ?: ""),
-            confirmText = "OK",
-            singleButton = true,
-            variant = DialogVariant.Success,
+                title = stringResource(R.string.verification_title),
+                message = stringResource(R.string.verification_code_sent, pendingEmail ?: ""),
+                confirmText = "OK",
+                singleButton = true,
+                variant = DialogVariant.Success,
             ),
             onConfirm = onCodeSentConfirm,
             onDismiss = onCodeSentDismiss
-        )
-    }
-
-    if (showResetCodeSentDialog) {
-        ConfirmDialog(
-            config = DialogConfig(
-            title = stringResource(R.string.reset_password),
-            message = stringResource(R.string.reset_code_sent),
-            confirmText = "OK",
-            singleButton = true,
-            variant = DialogVariant.Success,
-            ),
-            onConfirm = onResetCodeSentDismiss,
-            onDismiss = onResetCodeSentDismiss
         )
     }
 }

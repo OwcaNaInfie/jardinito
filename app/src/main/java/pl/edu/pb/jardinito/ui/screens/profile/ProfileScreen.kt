@@ -59,6 +59,7 @@ import pl.edu.pb.jardinito.R
 import pl.edu.pb.jardinito.data.model.Plant
 import pl.edu.pb.jardinito.data.model.profile.User
 import pl.edu.pb.jardinito.data.remote.RetrofitInstance
+import pl.edu.pb.jardinito.ui.components.LoadingOverlay
 import pl.edu.pb.jardinito.ui.components.UserAvatar
 import pl.edu.pb.jardinito.ui.components.appButton.AppButton
 import pl.edu.pb.jardinito.ui.components.appButton.ButtonSize
@@ -73,6 +74,7 @@ import pl.edu.pb.jardinito.ui.utils.rememberSvgImageRequest
 import pl.edu.pb.jardinito.viewmodel.AuthViewModel
 import pl.edu.pb.jardinito.viewmodel.ProfileViewModel
 import pl.edu.pb.jardinito.viewmodel.UserViewModel
+import pl.edu.pb.jardinito.viewmodel.state.UserState
 import java.io.File
 
 // =====================
@@ -93,6 +95,8 @@ fun ProfileScreen(
     var showUsernameDialog by remember { mutableStateOf(false) }
     var showEmailDialog by remember { mutableStateOf(false) }
     var showEmailVerificationDialog by remember { mutableStateOf(false) }
+    val emailCodeError by userViewModel.emailCodeError.collectAsState()
+    val userState by userViewModel.userState.collectAsState()
 
     val coins by profileViewModel.coins.collectAsState()
     val favouritePlants by profileViewModel.favouritePlants.collectAsState()
@@ -176,6 +180,7 @@ fun ProfileScreen(
         EditFieldDialog(
             title = stringResource(R.string.edit_email),
             currentValue = user.email,
+            isLoading = userState is UserState.Loading,
             label = stringResource(R.string.email),
             confirmText = stringResource(R.string.send_reset_code),
             errorRes = form.emailError,
@@ -199,6 +204,8 @@ fun ProfileScreen(
 
     if (showEmailVerificationDialog) {
         EmailVerificationDialog(
+            codeError = emailCodeError,
+            isLoading = userState is UserState.Loading,
             onConfirm = { code ->
                 userViewModel.confirmEmailChange(code) { newEmail ->
                     authViewModel.updateEmail(newEmail)
