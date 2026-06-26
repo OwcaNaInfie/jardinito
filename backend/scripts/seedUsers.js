@@ -257,6 +257,65 @@ const seed = async () => {
             console.log(`Created: ${u.username} — tags: ${tags.length}, unlocked: ${unlockedPlants.length}, sessions: ${sessionDates.length}`);
         }
 
+        // ============================================================
+        // Dedykowany użytkownik dla automatycznego zestawu testów API
+        //
+        // Logika monet (na podstawie seedPlants.js):
+        //   Darmowe:  tulip (0), poppy (0), sunflower (0)  -- odblokowane
+        //   Płatne:   daffodil (200), rose (260), bloodroot (320),
+        //             gerbera (440), pansy (500), lavender (560),
+        //             lily (680), orchid (780)              -- NIE odblokowane
+        //
+        //   250 monet startowych + 25 z T11 = 275 monet łącznie
+        //   T21: kupuje daffodil (200)  →  275 - 200 = 75 monet
+        //   T22: próbuje kupić orchid (780)  →  75 < 780  →  FAIL ✓
+        // ============================================================
+        const apiTestEmail = 'apitest@jardinito.com';
+        const apiTestExisting = await User.findOne({ email: apiTestEmail });
+
+        if (apiTestExisting) {
+            console.log('Skipping ApiTest — already exists');
+        } else {
+            const apiTestUser = new User({
+                username: 'ApiTest',
+                email: apiTestEmail,
+                password: await bcrypt.hash('TestHaslo123!', 10),
+                provider: 'local',
+                avatar: {
+                    default: getRandomDefaultAvatar(),
+                    custom: null,
+                    google: null,
+                },
+                isVerified: true,
+            });
+
+            await apiTestUser.save();
+
+            // Tylko dwa domyślne tagi -- czysty stan do testowania T15-T19
+            await UserTags.create({
+                userId: apiTestUser._id,
+                tags: [
+                    { name: 'Study', color: 'twitterBlue' },
+                    { name: 'Work',  color: 'harvestOrange' },
+                ],
+            });
+
+            // 250 monet, odblokowane TYLKO darmowe rośliny (bez żadnej płatnej)
+            // -- dzięki temu T21 zawsze ma co kupić przy pierwszym uruchomieniu
+            await UserWallet.create({
+                userId: apiTestUser._id,
+                coins: 250,
+                unlockedPlantIds: freePlants.map(p => p._id),
+            });
+
+            // Brak sesji -- czysty stan; T11/T12 dodadzą pierwsze sesje
+            console.log(
+                'Created: ApiTest — 250 monet, ' +
+                `odblokowane: ${freePlants.length} darmowe rośliny (${freePlants.map(p => p.name).join(', ')}), ` +
+                'brak sesji'
+            );
+        }
+
         console.log('Done!');
         process.exit(0);
     } catch (err) {

@@ -1,0 +1,668 @@
+{
+  "metadata": {
+    "tool": "Jardinito API Test Runner v1.0",
+    "baseUrl": "http://localhost:5000",
+    "startedAt": "2026-06-26T13:29:40.610Z",
+    "finishedAt": "2026-06-26T13:29:49.287Z",
+    "totalDurationMs": 8666
+  },
+  "summary": {
+    "total": 28,
+    "passed": 28,
+    "failed": 0,
+    "skipped": 0
+  },
+  "tests": [
+    {
+      "id": "T01",
+      "group": "G1",
+      "description": "Rejestracja -- prawidłowe dane",
+      "result": "PASS",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "checks": [
+        {
+          "name": "Status HTTP = 201",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Body odpowiedzi nie jest puste",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 1903
+    },
+    {
+      "id": "T02",
+      "group": "G1",
+      "description": "Rejestracja -- duplikat adresu e-mail",
+      "result": "PASS",
+      "expectedStatus": 409,
+      "actualStatus": 400,
+      "checks": [
+        {
+          "name": "Status HTTP w [409, 400]",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat błędu w body",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 54
+    },
+    {
+      "id": "T03",
+      "group": "G1",
+      "description": "Rejestracja -- brak pola password",
+      "result": "PASS",
+      "expectedStatus": 400,
+      "actualStatus": 400,
+      "checks": [
+        {
+          "name": "Status HTTP = 400",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat walidacyjny",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 2
+    },
+    {
+      "id": "T04",
+      "group": "G1",
+      "description": "Logowanie -- prawidłowe dane",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Dane użytkownika w odpowiedzi",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 134
+    },
+    {
+      "id": "T05",
+      "group": "G1",
+      "description": "Logowanie -- błędne hasło",
+      "result": "PASS",
+      "expectedStatus": 401,
+      "actualStatus": 401,
+      "checks": [
+        {
+          "name": "Status HTTP = 401",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Ogólny komunikat (nie ujawnia błędnego pola)",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 223
+    },
+    {
+      "id": "T06",
+      "group": "G1",
+      "description": "Logowanie -- nieistniejące konto",
+      "result": "PASS",
+      "expectedStatus": 401,
+      "actualStatus": 401,
+      "checks": [
+        {
+          "name": "Status HTTP = 401",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat ogólny (taki sam jak T05)",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 65
+    },
+    {
+      "id": "T07",
+      "group": "G1",
+      "description": "Reset hasła -- istniejące konto (zweryfikowane)",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Status 200",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 2456
+    },
+    {
+      "id": "T08",
+      "group": "G1",
+      "description": "Reset hasła -- nieistniejące konto (anti-enumeration)",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Status 200 (identyczny z T07 -- brak informacji o koncie)",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 68
+    },
+    {
+      "id": "T27",
+      "group": "G1",
+      "description": "Logowanie -- konto niezweryfikowane",
+      "result": "PASS",
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "checks": [
+        {
+          "name": "Status HTTP = 403",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Status 403 -- konto wymaga weryfikacji adresu e-mail",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 1938
+    },
+    {
+      "id": "T28",
+      "group": "G1",
+      "description": "Reset hasła -- konto niezweryfikowane",
+      "result": "PASS",
+      "expectedStatus": 403,
+      "actualStatus": 403,
+      "checks": [
+        {
+          "name": "Status HTTP = 403",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Status 403 NOT_VERIFIED_RESET",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 56
+    },
+    {
+      "id": "T09",
+      "group": "G2",
+      "description": "Pobieranie katalogu roślin",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Niepusta tablica plants",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Każda roślina ma _id, name, price, images",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 60
+    },
+    {
+      "id": "T10",
+      "group": "G2",
+      "description": "Pobieranie szczegółów jednej rośliny",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Pola _id, name, price, minDuration, images",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 61
+    },
+    {
+      "id": "T11",
+      "group": "G3",
+      "description": "Zapis sesji ukończonej (25 min)",
+      "result": "PASS",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "checks": [
+        {
+          "name": "Status HTTP = 201",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "coinsEarned > 0",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "populate: plantId jest obiektem",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 178
+    },
+    {
+      "id": "T12",
+      "group": "G3",
+      "description": "Zapis sesji nieudanej (status: failed)",
+      "result": "PASS",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "checks": [
+        {
+          "name": "Status HTTP = 201",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "coinsEarned = 0 dla sesji nieudanej",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 115
+    },
+    {
+      "id": "T13",
+      "group": "G3",
+      "description": "Pobieranie sesji -- bieżący tydzień",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Zwraca tablicę sessions",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Zawiera sesje z T11 i T12 (≥ 2)",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "populate: plantId jest obiektem",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 117
+    },
+    {
+      "id": "T14",
+      "group": "G3",
+      "description": "Pobieranie sesji -- bieżący dzień",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Zwraca tablicę sessions",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 107
+    },
+    {
+      "id": "T15",
+      "group": "G4",
+      "description": "Pobieranie tagów -- domyślne tagi po rejestracji",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "≥ 2 tagi (domyślne Study i Work)",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 56
+    },
+    {
+      "id": "T16",
+      "group": "G4",
+      "description": "Tworzenie tagu",
+      "result": "PASS",
+      "expectedStatus": 201,
+      "actualStatus": 201,
+      "checks": [
+        {
+          "name": "Status HTTP = 201",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Nowy tag ma _id, name = \"Sport\", color = \"RED\"",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 73
+    },
+    {
+      "id": "T17",
+      "group": "G4",
+      "description": "Edycja tagu",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "name zaktualizowane na \"Trening\"",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "color zaktualizowany na \"ORANGE\"",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 134
+    },
+    {
+      "id": "T18",
+      "group": "G4",
+      "description": "Zmiana kolejności tagów",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Odpowiedź zawiera tablicę tags",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Kolejność odzwierciedla żądanie",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 168
+    },
+    {
+      "id": "T19",
+      "group": "G4",
+      "description": "Usunięcie tagu",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat potwierdzający usunięcie",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 58
+    },
+    {
+      "id": "T20",
+      "group": "G5",
+      "description": "Pobieranie portfela",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Pola coins, unlockedPlantIds, favouritePlantIds",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 53
+    },
+    {
+      "id": "T21",
+      "group": "G5",
+      "description": "Zakup rośliny -- wystarczające środki",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Roślina dodana do unlockedPlantIds",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Saldo monet zaktualizowane",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 160
+    },
+    {
+      "id": "T22",
+      "group": "G5",
+      "description": "Zakup rośliny -- niewystarczające środki",
+      "result": "PASS",
+      "expectedStatus": 400,
+      "actualStatus": 400,
+      "checks": [
+        {
+          "name": "Status HTTP = 400",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat błędu (INSUFFICIENT_COINS lub podobny)",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 112
+    },
+    {
+      "id": "T23",
+      "group": "G5",
+      "description": "Przełączenie ulubionej rośliny (toggle)",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Odpowiedź zawiera favouritePlantIds",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 121
+    },
+    {
+      "id": "T24",
+      "group": "G6",
+      "description": "Weryfikacja zajętej nazwy użytkownika",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Odpowiedź zawiera informację o dostępności",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 60
+    },
+    {
+      "id": "T25",
+      "group": "G6",
+      "description": "Zmiana nazwy użytkownika -- prawidłowa (≤ 20 znaków)",
+      "result": "PASS",
+      "expectedStatus": 200,
+      "actualStatus": 200,
+      "checks": [
+        {
+          "name": "Status HTTP = 200",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "username = \"Zmieniona17824805806\"",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 129
+    },
+    {
+      "id": "T26",
+      "group": "G6",
+      "description": "Zmiana nazwy -- przekroczenie limitu 20 znaków",
+      "result": "PASS",
+      "expectedStatus": 422,
+      "actualStatus": 422,
+      "checks": [
+        {
+          "name": "Status HTTP = 422",
+          "pass": true,
+          "error": null
+        },
+        {
+          "name": "Komunikat walidacyjny",
+          "pass": true,
+          "error": null
+        }
+      ],
+      "note": "",
+      "durationMs": 5
+    }
+  ]
+}
